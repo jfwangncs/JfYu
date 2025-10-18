@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net481;net8.0;net9.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings> 
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject> 
+		<GenerateDocumentationFile>false</GenerateDocumentationFile>
+	</PropertyGroup>
+	
+	<ItemGroup> 
+		<PackageReference Include="Bogus" />
+		<PackageReference Include="coverlet.collector"/>
+		<PackageReference Include="coverlet.msbuild"/>
+		<PackageReference Include="EntityFramework"/>
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions"/>
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json"/>
+		<PackageReference Include="Microsoft.Extensions.Logging"/>
+		<PackageReference Include="Microsoft.Extensions.Logging.Console"/>
+		<PackageReference Include="Microsoft.NET.Test.Sdk"/>
+		<PackageReference Include="Moq"/> 
+		<PackageReference Include="SharpZipLib"/>
+		<PackageReference Include="xunit"/>
+		<PackageReference Include="xunit.runner.visualstudio"/> 
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\JfYu.Data\JfYu.Data.csproj" Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'" />
+		<ProjectReference Include="..\JfYu.RabbitMQ\JfYu.RabbitMQ.csproj" />
+		<ProjectReference Include="..\JfYu.Request\JfYu.Request.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="appsettings.Local.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="Static\badssl.com-client.p12">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="Static\example1.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="Static\example.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="Static\template.docx">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>

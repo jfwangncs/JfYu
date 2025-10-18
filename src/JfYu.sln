@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11111.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JfYu.Data", "JfYu.Data\JfYu.Data.csproj", "{F11114BA-EBE8-4BED-8619-B2CFFC9781E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JfYu.Request", "JfYu.Request\JfYu.Request.csproj", "{B2DE9A89-5D4C-4315-8646-87F1EAE40528}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JfYu.UnitTests", "JfYu.UnitTests\JfYu.UnitTests.csproj", "{A647B8CF-D13C-4A37-A908-05B04955AC7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JfYu.RabbitMQ", "JfYu.RabbitMQ\JfYu.RabbitMQ.csproj", "{7B10331B-3E2C-4A6F-8A59-C4A7383D33FF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPM", "CPM", "{DB6ED697-AD06-4D24-AED4-2CB2442A6CC1}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub Action", "GitHub Action", "{65B8E602-85D5-46EA-98E6-5DCC11CB19C8}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\codeql.yml = ..\.github\workflows\codeql.yml
+		..\.github\copilot-instructions.md = ..\.github\copilot-instructions.md
+		..\.github\workflows\deploy.yml = ..\.github\workflows\deploy.yml
+		..\.github\workflows\devskim.yml = ..\.github\workflows\devskim.yml
+		..\.github\workflows\gate.yml = ..\.github\workflows\gate.yml
+		..\.github\workflows\gitleak.yml = ..\.github\workflows\gitleak.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F11114BA-EBE8-4BED-8619-B2CFFC9781E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F11114BA-EBE8-4BED-8619-B2CFFC9781E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F11114BA-EBE8-4BED-8619-B2CFFC9781E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F11114BA-EBE8-4BED-8619-B2CFFC9781E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2DE9A89-5D4C-4315-8646-87F1EAE40528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2DE9A89-5D4C-4315-8646-87F1EAE40528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2DE9A89-5D4C-4315-8646-87F1EAE40528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2DE9A89-5D4C-4315-8646-87F1EAE40528}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A647B8CF-D13C-4A37-A908-05B04955AC7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A647B8CF-D13C-4A37-A908-05B04955AC7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A647B8CF-D13C-4A37-A908-05B04955AC7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A647B8CF-D13C-4A37-A908-05B04955AC7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B10331B-3E2C-4A6F-8A59-C4A7383D33FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B10331B-3E2C-4A6F-8A59-C4A7383D33FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B10331B-3E2C-4A6F-8A59-C4A7383D33FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B10331B-3E2C-4A6F-8A59-C4A7383D33FF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {992B2FC8-747A-4801-AFC9-A127A56E2B20}
+	EndGlobalSection
+EndGlobal
