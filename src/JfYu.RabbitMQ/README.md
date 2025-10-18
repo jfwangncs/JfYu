@@ -1,54 +1,108 @@
+## JfYu.RabbitMQ
 
-### RabbitMQ
+Lightweight RabbitMQ client wrapper with async publishing/consuming, retry with dead-letter support, and DI integration.
 
+Features
+- Async publish with publisher confirms and throttling
+- Batch publishing
+- Async consumer with prefetch control
+- Automatic retry via message headers; overflow to DLQ when configured
+- Queue/Exchange declare and bind helpers
+- DI via Microsoft.Extensions.DependencyInjection
+
+Install
 ```
-Install-Package jfYu.Core.RabbitMQ
-``` 
-
-config
-
+Install-Package JfYu.RabbitMQ
 ```
- "RabbitMQ": {
+
+Configuration (appsettings.json)
+```
+{
+  "RabbitMQ": {
     "HostName": "127.0.0.1",
-    "UserName": "xxx",
-    "Password": "123456",
+    "Port": 5672,
+    "UserName": "guest",
+    "Password": "guest",
     "VirtualHost": "/",
-    "HeartBeat": "60",
-    "Port": "9808",
-    "DispatchConsumersAsync":true //if you want to use async consumer
+    "MessageOption": {
+      "MaxRetryCount": 3,
+      "RetryDelayMilliseconds": 5000,
+      "MaxOutstandingConfirms": 1000,
+      "BatchSize": 20
+    }
   }
+}
 ```
 
-injection
-
+Dependency Injection
 ```
- services.AddRabbitMQService(config);
-```
+// using JfYu.RabbitMQ;
+// using Microsoft.Extensions.Configuration;
+// using Microsoft.Extensions.DependencyInjection;
 
-send
-
-```
-
-mq.Send("test", "xxxxxx");
-mq.Send("test", "test");
-mq.Send("test", new TestModel() { Id = 122, Name = "name" });
-
-mq.QueueBind("q12", "ex12", ExchangeType.Topic);
-mq.Send("ex12", ExchangeType.Fanout, "Fanout", "123");
-```
-
-Receive
-```
-mq.Receive("topic", q =>
+services.AddRabbitMQ((factory, options) =>
 {
-    Assert.NotEmpty(q);
-    Thread.Sleep(1000);
-});
-
-mq.ReceiveAsync("topic", async q =>
-{
-
-    Assert.NotEmpty(q);
-    await Task.Delay(5000);
+    configuration.GetSection("RabbitMQ").Bind(factory);
+    configuration.GetSection("RabbitMQ:MessageOption").Bind(options);
 });
 ```
+
+Declare and Bind
+```
+// using RabbitMQ.Client;
+var mq = serviceProvider.GetRequiredService<IRabbitMQService>();
+
+// Optional: configure DLQ for the queue via arguments
+var args = new Dictionary<string, object?>
+{
+    ["x-dead-letter-exchange"] = "dlx",
+    ["x-dead-letter-routing-key"] = "orders.dlq"
+};
+
+await mq.QueueDeclareAsync(
+    queueName: "q.orders",
+    exchangeName: "ex.orders",
+    exchangeType: ExchangeType.Direct,
+    routingKey: "orders",
+    headers: args);
+
+// Bind a DLX queue
+await mq.QueueDeclareAsync("q.orders.dlq");
+```
+
+Publish
+```
+// Single
+await mq.SendAsync("ex.orders", new { Id = 1, Name = "test" }, routingKey: "orders");
+
+// Batch
+await mq.SendBatchAsync("ex.orders", new[]
+{
+    new { Id = 2 },
+    new { Id = 3 }
+}, routingKey: "orders");
+```
+
+Consume (async)
+```
+using var cts = new CancellationTokenSource();
+var channel = await mq.ReceiveAsync<string>(
+    queueName: "q.orders",
+    func: async msg =>
+    {
+        // return true to ACK; false to trigger retry/DLQ
+        Console.WriteLine($"received: {msg}");
+        return true;
+    },
+    prefetchCount: 10,
+    cancellationToken: cts.Token);
+
+// later: cts.Cancel(); // gracefully cancels consumer and disposes channel
+```
+
+Retry and Dead Letter
+- On failure (handler returns false or throws), the library increments header `x-retry-count` and republishes to the original exchange/routing key until `MaxRetryCount` is reached.
+- When retries exceed `MaxRetryCount`, the message is rejected without requeue. Configure your queue with `x-dead-letter-exchange` and `x-dead-letter-routing-key` to route to a DLQ.
+
+Targets
+- netstandard2.0, net8.0
