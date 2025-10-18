@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>net8.0</TargetFrameworks>	
-		<Version>8.2.0</Version>
+		<Version>8.3.0</Version>
 		<Description>EF Core read-write separation with multi-database support (SqlServer, MySql, Sqlite, InMemory)</Description>
 	</PropertyGroup>
 	
