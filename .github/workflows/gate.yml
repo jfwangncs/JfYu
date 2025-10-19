@@ -1,0 +1,265 @@
+﻿name: Build
+on:
+  pull_request:
+    branches: [ master ]
+jobs:
+  ubuntu: 
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+    defaults:
+      run:
+        working-directory: src
+    services:
+      httpbin:
+        image: kennethreitz/httpbin:latest
+        ports:
+          - 8080:80
+      rabbitmq:
+        image: rabbitmq:3.13
+        env: { RABBITMQ_DEFAULT_USER: guest, RABBITMQ_DEFAULT_PASS: guest }
+        ports: 
+          - 5672:5672
+    steps:
+      - uses: actions/checkout@v4      
+      - name: Install fonts
+        run: |
+          sudo apt-get update && sudo apt-get install -y fonts-noto fonts-dejavu-core 
+          if [ ! -f "/usr/lib/x86_64-linux-gnu/libdl.so" ]; then
+            sudo ln -s /usr/lib/x86_64-linux-gnu/libdl.so.2 /usr/lib/x86_64-linux-gnu/libdl.so
+          fi
+          export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+          echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test (8.0)
+        run: dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover --logger "trx;LogFileName=results8.trx"
+      - name: Upload test results (8.0)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-linux8
+          path: src/JfYu.UnitTests/TestResults/results8.trx
+
+      - name: Upload coverage results (8.0)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-coverage8
+          path: src/JfYu.UnitTests/TestResults/coverage.net8.0.opencover.xml
+
+      - name: Test (9.0)
+        run: dotnet test --no-restore --verbosity normal -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results9.trx"
+      - name: Upload test results (9.0)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-linux9
+          path: src/JfYu.UnitTests/TestResults/results9.trx
+
+  win:  
+    runs-on: windows-latest
+    permissions:
+      checks: write
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Setup services
+        shell: cmd
+        run: |
+          choco install redis-64 rabbitmq python -y
+          python -m pip install httpbin uvicorn asgiref
+
+      - name: Start httpbin and test
+        id: start-httpbin
+        shell: pwsh
+        run: |
+          $pyFile = "asgi_httpbin.py"
+          @"
+          from httpbin import app as wsgi_app
+          from asgiref.wsgi import WsgiToAsgi
+          app = WsgiToAsgi(wsgi_app)
+          "@ | Set-Content -Encoding UTF8 $pyFile
+          Write-Host "Created $pyFile"
+
+          $proc = Start-Process -FilePath "python" -ArgumentList @("-m","uvicorn","asgi_httpbin:app","--host","127.0.0.1","--port","8080") -NoNewWindow -PassThru
+          echo "HTTPBIN_PID=$($proc.Id)" >> $env:GITHUB_ENV
+          Write-Host "uvicorn httpbin  started, PID: $($proc.Id)"  
+
+          dotnet test --no-restore --verbosity normal -f net481 --logger "trx;LogFileName=results4.trx"
+          dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results8.trx"
+          dotnet test --no-restore --verbosity normal -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results9.trx"
+
+      - name: Upload test results (4.81)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-win48
+          path: src/JfYu.UnitTests/TestResults/results4.trx
+
+      - name: Upload test results (8.0)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-win8
+          path: src/JfYu.UnitTests/TestResults/results8.trx
+
+      - name: Upload test results (9.0)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-win9
+          path: src/JfYu.UnitTests/TestResults/results9.trx
+
+      - name: Upload coverage results (9.0)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-coverage9
+          path: src/JfYu.UnitTests/TestResults/coverage.net9.0.info
+
+      - name: Publish coverage report to coveralls.io (9.0)
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: src/JfYu.UnitTests/TestResults/coverage.net9.0.info
+          flag-name: win9
+          parallel: true
+
+  mac:
+    runs-on: macos-latest
+    permissions:
+      checks: write
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - uses: actions/checkout@v4       
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Setup services
+        shell: bash
+        run: |
+          brew update
+          brew install redis rabbitmq
+          brew services start redis
+          brew services start rabbitmq
+          python3 -m venv venv
+          source venv/bin/activate
+          python3 -m pip install --upgrade pip
+          python3 -m pip install httpbin uvicorn asgiref
+ 
+          cat << 'EOF' > asgi_httpbin.py
+          from httpbin import app as wsgi_app
+          from asgiref.wsgi import WsgiToAsgi
+          app = WsgiToAsgi(wsgi_app)
+          EOF
+          echo "Created asgi_httpbin.py"
+          
+          python -m uvicorn asgi_httpbin:app --host 127.0.0.1 --port 8080 &
+          HTTPBIN_PID=$!
+          echo "HTTPBIN_PID=$HTTPBIN_PID" >> $GITHUB_ENV
+          echo "uvicorn httpbin started, PID=$HTTPBIN_PID"
+
+          dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results8.trx"
+          dotnet test --no-restore --verbosity normal -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results9.trx"
+
+      - name: Upload test results (8.0)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-mac8
+          path: src/JfYu.UnitTests/TestResults/results8.trx
+
+      - name: Upload test results (9.0)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-mac9
+          path: src/JfYu.UnitTests/TestResults/results9.trx
+
+  coverage:
+    needs: [win, ubuntu, mac]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
+
+  sonarcloud:
+    needs: [win, ubuntu, mac]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download test results (win48)
+        uses: dawidd6/action-download-artifact@v9
+        with:
+          name: test-results-win48
+          path: TestResults 
+          run_id: ${{ github.run_id }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Download test results (win9)
+        uses: dawidd6/action-download-artifact@v9
+        with:
+          name: test-results-win9
+          path: TestResults 
+          run_id: ${{ github.run_id }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download test results (coverage8)
+        uses: dawidd6/action-download-artifact@v9
+        with:
+          name: test-results-coverage8
+          path: TestResults
+          run_id: ${{ github.run_id }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install --global dotnet-sonarscanner
+      - name: SonarCloud Begin
+        run: |
+          dotnet sonarscanner begin \
+            /k:"jfwangncs_JfYu" \
+            /o:"jfwang" \
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.cs.vstest.reportsPaths=../TestResults/*.trx \
+            /d:sonar.cs.opencover.reportsPaths=../TestResults/coverage.net8.0.opencover.xml
+      - name: Build
+        run: dotnet build --no-incremental
+      - name: SonarCloud End
+        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
