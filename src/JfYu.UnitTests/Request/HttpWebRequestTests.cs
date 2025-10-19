@@ -466,7 +466,7 @@ namespace JfYu.UnitTests.Request
         }
 
         [Fact]
-        public async Task Test_InvalidPorxy()
+        public async Task Test_InvalidProxy()
         {
             var client = new JfYuHttpRequest
             {
@@ -773,7 +773,7 @@ namespace JfYu.UnitTests.Request
         }
 
         [Fact]
-        public async Task Test_InvalidPorxy_Logger()
+        public async Task Test_InvalidProxy_Logger()
         {
             var logger = new Mock<ILogger<JfYuHttpRequest>>();
             var client = new JfYuHttpRequest(null, logger.Object)

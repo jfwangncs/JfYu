@@ -598,7 +598,7 @@ namespace JfYu.UnitTests.Request
         }
 
         [Fact]
-        public async Task Test_Porxy()
+        public async Task Test_Proxy()
         {
             using var handler = new HttpClientHandler()
             {

@@ -73,8 +73,8 @@ namespace JfYu.Request.Logs
         {
             logger.LogResponse(
                 requestId,
-                status: (loggingFields & JfYuLoggingFields.ResponseStatus) != 0 ? $" Path={status}" : "",
-                result: (loggingFields & JfYuLoggingFields.Response) != 0 ? $" Method={result}" : "");
+                status: (loggingFields & JfYuLoggingFields.ResponseStatus) != 0 ? $" Status={status}" : "",
+                result: (loggingFields & JfYuLoggingFields.Response) != 0 ? $" Result={result}" : "");
         }
     }
 }
