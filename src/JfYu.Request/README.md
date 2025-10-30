@@ -1,55 +1,228 @@
+# JfYu.Request
 
+HTTP request abstraction with `HttpClient`, rich headers, logging filters, cookies, proxy, SSL, file download, and multipart upload. The README reflects unit-test proven usage.
 
-Injection
-``` 
-//Register default HTTP request service
+## Dependency Injection
+
+```csharp
+// Default registration (uses HttpClientFactory and CookieContainer)
 services.AddJfYuHttpRequest();
-//Register with logging disabled
-services.AddJfYuHttpRequest(q=>q.LoggingFields= JfYu.Request.Enum.JfYuLoggingFields.None); 
-//Register with logging enabled and identity filters
-services.AddJfYuHttpRequest(q=>{ q.LoggingFields = JfYu.Request.Enum.JfYuLoggingFields.All;q.RequestFilter = x => x; q.ResponseFilter = x => x; });
-//Register custom HttpClient with cookie handling disabled
-services.AddJfYuHttpClient(() => { return new HttpClientHandler() { UseCookies = false }; }, q => { q.LoggingFields = JfYu.Request.Enum.JfYuLoggingFields.All; q.RequestFilter = x => x; q.ResponseFilter = x => x; });
 
+// With filters and logging fields
+services.AddJfYuHttpClient(null, o =>
+{
+ o.LoggingFields = JfYu.Request.Enum.JfYuLoggingFields.All;
+ o.RequestFilter = z => z; // sanitize before logging
+ o.ResponseFilter = z => z; // sanitize before logging
+});
+
+// Provide a custom HttpClientHandler
+services.AddJfYuHttpClient(() => new HttpClientHandler
+{
+ UseCookies = true,
+ // ServerCertificateCustomValidationCallback = (m, c, ch, e) => true // e.g., disable validation for test
+});
 ```
 
-Usage
+## Basic Send
 
+```csharp
+var client = provider.GetRequiredService<IJfYuRequest>();
+
+// GET
+client.Url = $"{baseUrl}/get?username=testUser&age=30";
+client.Method = HttpMethod.Get;
+var text = await client.SendAsync();
+Assert.Equal(HttpStatusCode.OK, client.StatusCode);
+
+// POST (empty JSON body)
+client.Url = $"{baseUrl}/post";
+client.Method = HttpMethod.Post;
+client.ContentType = RequestContentType.Json;
+var resp = await client.SendAsync();
 ```
-//master
-var req = provider.GetRequiredService<IJfYuRequest>(); 
 
-//Get
-_jfYuRequest.Url = $"https://xxx.com?id={t.Tid}&page={page}";
-_jfYuRequest.RequestEncoding = Encoding.GetEncoding("GB18030");
-_jfYuRequest.RequestCookies.Add(new Cookie() { Name = "c1", Value = "v1", Domain = ".xxx.com", Path = "/" }); 
-_jfYuRequest.Timeout = 60;
-var html = await _jfYuRequest.SendAsync(); 
+## Content types
 
-//Post 
-_jfYuRequest.Url = "https://xxx.com";
-_jfYuRequest.Method = HttpMethod.Post;
-_jfYuRequest.RequestEncoding = Encoding.GetEncoding("GB18030");
-_jfYuRequest.Timeout = 30;
-_jfYuRequest.ContentType = RequestContentType.FormData; //RequestContentType.FormUrlEncoded
-_jfYuRequest.Files = new Dictionary<string, string> { { "file", "code.png" } };
-_jfYuRequest.RequestData = $"name=xiaoyu&password=123456&rid={randomString}";
+```csharp
+// text/plain
+client.Url = $"{baseUrl}/post";
+client.Method = HttpMethod.Post;
+client.ContentType = RequestContentType.Plain;
+client.RequestEncoding = Encoding.UTF8;
+client.RequestData = "username=testUser&age=30";
+await client.SendAsync();
 
-_jfYuRequest.ContentType = RequestContentType.Json; 
-_jfYuRequest.RequestData = $"{\"username\":\"testUser\"}";
+// application/xml
+client.ContentType = RequestContentType.Xml;
+client.RequestData = "<user><username>testUser</username><age>30</age></user>";
+await client.SendAsync();
 
-_jfYuRequest.ContentType = RequestContentType.Xml; 
-_jfYuRequest.RequestData = $"<user><username>testUser</username></user>";
+// application/x-www-form-urlencoded
+client.ContentType = RequestContentType.FormUrlEncoded;
+client.RequestData = "username=testUser&age=30";
+await client.SendAsync();
 
-_jfYuRequest.RequestCookies.Add(new Cookie() { Name ="c1", Value = "v1", Domain = ".xxx.com", Path = "/" });
-var html = await _jfYuRequest.SendAsync();
- 
-//download file
-_jfYuRequest.Url = "https://www.xxx.com/1.jpg"
-var jpg = await jfYu.DownloadFileAsync("path/2.jpg"); 
+// application/json
+client.ContentType = RequestContentType.Json;
+client.RequestData = "{\"username\":\"testUser\",\"age\":30}";
+await client.SendAsync();
 
-//donwload file with stream
-var stream = await jfYu.DownloadFileAsync();
-using FileStream fs = File.Create("path/3.jpg");
-await fs.WriteAsync(stream?.ToArray()); 
+// multipart/form-data (files + fields)
+client.ContentType = RequestContentType.FormData;
+client.RequestData = "username=testUser&age=30";
+client.Files = new Dictionary<string,string>
+{
+ {"test.txt", "path/to/file1.txt"},
+ {"test1.txt", "path/to/file2.txt"}
+};
+await client.SendAsync();
 ```
+
+## Methods
+
+```csharp
+// PUT
+client.Url = $"{baseUrl}/put";
+client.Method = HttpMethod.Put;
+client.RequestData = "{\"username\":\"testUser\",\"age\":30}";
+await client.SendAsync();
+
+// DELETE
+client.Url = $"{baseUrl}/delete?username=testUser&age=30";
+client.Method = HttpMethod.Delete;
+await client.SendAsync();
+
+// PATCH
+client.Url = $"{baseUrl}/patch?username=testUser&age=30";
+client.Method = HttpMethod.Patch;
+await client.SendAsync();
+
+// OPTIONS
+client.Url = $"{baseUrl}/anything";
+client.Method = HttpMethod.Options;
+await client.SendAsync();
+```
+
+## Headers and auth
+
+```csharp
+// Strongly-typed headers
+client.RequestHeader = new RequestHeaders
+{
+ UserAgent = "JfYuHttpClient/1.0",
+ Host = "httpbin.org",
+ Referer = "http://httpbin.org",
+ Accept = "text/html",
+ AcceptLanguage = "zh-en",
+ CacheControl = "cache",
+ Connection = "keep-alive",
+ Pragma = "Pragma",
+ AcceptEncoding = "gzip" // or deflate, br
+};
+
+// Custom headers and Authorization
+client.RequestCustomHeaders.Add("X-Custom-Header", "test-value");
+client.AuthorizationScheme = "Bearer";
+client.Authorization = "test-token"; // sends: Authorization: Bearer test-token
+```
+
+## Cookies
+
+```csharp
+// No cookies
+client.RequestCookies = null!;
+
+// Set cookies
+var jar = new CookieContainer();
+jar.Add(new Cookie("c1", "v1", "/", new Uri(baseUrl).Host));
+jar.Add(new Cookie("c2", "v2", "/", new Uri(baseUrl).Host));
+client.RequestCookies = jar;
+var html = await client.SendAsync();
+var set = client.ResponseCookies; // read response cookies
+```
+
+## Custom initialization
+
+```csharp
+client.CustomInit = o =>
+{
+ var http = (HttpClient)o;
+ http.DefaultRequestHeaders.Add("X-Custom-Init", "test-value");
+};
+```
+
+## Proxy
+
+```csharp
+using var handler = new HttpClientHandler
+{
+ UseProxy = true,
+ Proxy = new WebProxy("http://example.cn1")
+};
+services.AddJfYuHttpClient(() => handler);
+```
+
+## SSL / Certificates
+
+```csharp
+// Server validation error (set CertificateValidation = true to enforce server validation)
+client.Url = errorSslUrl;
+client.CertificateValidation = true; // throws HttpRequestException
+
+// Accept all server certs (test only)
+services.AddJfYuHttpClient(() => new HttpClientHandler
+{
+ ServerCertificateCustomValidationCallback = (a,b,c,d) => true
+});
+
+// Client certificate
+var cert = new X509Certificate2("Static/badssl.com-client.p12", "badssl.com");
+using var handler = new HttpClientHandler();
+handler.ClientCertificates.Add(cert);
+services.AddJfYuHttpClient(() => handler);
+client.Certificate = cert; // optional
+```
+
+## Timeouts and errors
+
+```csharp
+client.Url = $"{baseUrl}/delay/50";
+client.Timeout =1; // seconds; will throw
+await Assert.ThrowsAsync<Exception>(() => client.SendAsync());
+```
+
+## Downloading files
+
+```csharp
+// To stream
+client.Url = $"{baseUrl}/bytes/1024";
+using var stream = await client.DownloadFileAsync((p, s, r) =>
+{
+ // p: percentage, s: KB/s, r: seconds remaining
+});
+
+// To path (auto creates directory)
+var ok = await client.DownloadFileAsync("download/file.bin", (p, s, r) => { /* progress */ });
+
+// Empty path throws
+await Assert.ThrowsAsync<ArgumentNullException>(() => client.DownloadFileAsync(""));
+
+// Non-success status returns null/false
+client.Url = $"{baseUrl}/status/500";
+var mem = await client.DownloadFileAsync(); // null
+var flag = await client.DownloadFileAsync("file.bin"); // false
+```
+
+## Logging
+
+```csharp
+// Configure logging fields
+services.AddJfYuHttpClient(null, o => o.LoggingFields = JfYuLoggingFields.All);
+
+// Filters are applied around logging
+services.AddJfYuHttpClient(null, o =>
+{
+ o.RequestFilter = z => z; // can throw; logged as error
+ o.ResponseFilter = z => z;
+});
