@@ -12,8 +12,8 @@ namespace JfYu.Office.Excel.Extensions
         /// </summary>
         /// <typeparam name="T">The class type to convert the data to.</typeparam>
         /// <param name="wb">The workbook to read from.</param>
-        /// <param name="firstRow">The first row to start reading from.</param>
-        /// <param name="sheetIndex">The index of the sheet to read from.</param>
+        /// <param name="firstRow">The first row to start reading from (default is 1).</param>
+        /// <param name="sheetIndex">The index of the sheet to read from (default is 0).</param>
         /// <returns>A List of T populated from the sheet.</returns>
         public static List<T> Read<T>(this IWorkbook wb, int firstRow = 1, int sheetIndex = 0) where T : class
         {
@@ -63,22 +63,90 @@ namespace JfYu.Office.Excel.Extensions
             return list;
         }
 
-
+        /// <summary>
+        /// Reads data from the workbook and converts it to two Lists of the specified class types.
+        /// </summary>
+        /// <typeparam name="T1">The first class type to convert the data to.</typeparam>
+        /// <typeparam name="T2">The second class type to convert the data to.</typeparam>
+        /// <param name="wb">The workbook to read from.</param>
+        /// <param name="firstRow">The first row to start reading from (default is 1).</param>
+        /// <param name="sheetIndex">The index of the sheet to read from (default is 0).</param>
+        /// <returns>A tuple containing two Lists populated from the sheet.</returns>
         public static (List<T1>, List<T2>) Read<T1, T2>(this IWorkbook wb, int firstRow = 1, int sheetIndex = 0) where T1 : class where T2 : class
             => (wb.Read<T1>(firstRow, sheetIndex), wb.Read<T2>(firstRow, sheetIndex));
 
+        /// <summary>
+        /// Reads data from the workbook and converts it to three Lists of the specified class types.
+        /// </summary>
+        /// <typeparam name="T1">The first class type to convert the data to.</typeparam>
+        /// <typeparam name="T2">The second class type to convert the data to.</typeparam>
+        /// <typeparam name="T3">The third class type to convert the data to.</typeparam>
+        /// <param name="wb">The workbook to read from.</param>
+        /// <param name="firstRow">The first row to start reading from (default is 1).</param>
+        /// <param name="sheetIndex">The index of the sheet to read from (default is 0).</param>
+        /// <returns>A tuple containing three Lists populated from the sheet.</returns>
         public static (List<T1>, List<T2>, List<T3>) Read<T1, T2, T3>(this IWorkbook wb, int firstRow = 1, int sheetIndex = 0) where T1 : class where T2 : class where T3 : class
             => (wb.Read<T1>(firstRow, sheetIndex), wb.Read<T2>(firstRow, sheetIndex), wb.Read<T3>(firstRow, sheetIndex));
 
+        /// <summary>
+        /// Reads data from the workbook and converts it to four Lists of the specified class types.
+        /// </summary>
+        /// <typeparam name="T1">The first class type to convert the data to.</typeparam>
+        /// <typeparam name="T2">The second class type to convert the data to.</typeparam>
+        /// <typeparam name="T3">The third class type to convert the data to.</typeparam>
+        /// <typeparam name="T4">The fourth class type to convert the data to.</typeparam>
+        /// <param name="wb">The workbook to read from.</param>
+        /// <param name="firstRow">The first row to start reading from (default is 1).</param>
+        /// <param name="sheetIndex">The index of the sheet to read from (default is 0).</param>
+        /// <returns>A tuple containing four Lists populated from the sheet.</returns>
         public static (List<T1>, List<T2>, List<T3>, List<T4>) Read<T1, T2, T3, T4>(this IWorkbook wb, int firstRow = 1, int sheetIndex = 0) where T1 : class where T2 : class where T3 : class where T4 : class
             => (wb.Read<T1>(firstRow, sheetIndex), wb.Read<T2>(firstRow, sheetIndex), wb.Read<T3>(firstRow, sheetIndex), wb.Read<T4>(firstRow, sheetIndex));
 
+        /// <summary>
+        /// Reads data from the workbook and converts it to five Lists of the specified class types.
+        /// </summary>
+        /// <typeparam name="T1">The first class type to convert the data to.</typeparam>
+        /// <typeparam name="T2">The second class type to convert the data to.</typeparam>
+        /// <typeparam name="T3">The third class type to convert the data to.</typeparam>
+        /// <typeparam name="T4">The fourth class type to convert the data to.</typeparam>
+        /// <typeparam name="T5">The fifth class type to convert the data to.</typeparam>
+        /// <param name="wb">The workbook to read from.</param>
+        /// <param name="firstRow">The first row to start reading from (default is 1).</param>
+        /// <param name="sheetIndex">The index of the sheet to read from (default is 0).</param>
+        /// <returns>A tuple containing five Lists populated from the sheet.</returns>
         public static (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>) Read<T1, T2, T3, T4, T5>(this IWorkbook wb, int firstRow = 1, int sheetIndex = 0) where T1 : class where T2 : class where T3 : class where T4 : class where T5 : class
             => (wb.Read<T1>(firstRow, sheetIndex), wb.Read<T2>(firstRow, sheetIndex), wb.Read<T3>(firstRow, sheetIndex), wb.Read<T4>(firstRow, sheetIndex), wb.Read<T5>(firstRow, sheetIndex));
 
+        /// <summary>
+        /// Reads data from the workbook and converts it to six Lists of the specified class types.
+        /// </summary>
+        /// <typeparam name="T1">The first class type to convert the data to.</typeparam>
+        /// <typeparam name="T2">The second class type to convert the data to.</typeparam>
+        /// <typeparam name="T3">The third class type to convert the data to.</typeparam>
+        /// <typeparam name="T4">The fourth class type to convert the data to.</typeparam>
+        /// <typeparam name="T5">The fifth class type to convert the data to.</typeparam>
+        /// <typeparam name="T6">The sixth class type to convert the data to.</typeparam>
+        /// <param name="wb">The workbook to read from.</param>
+        /// <param name="firstRow">The first row to start reading from (default is 1).</param>
+        /// <param name="sheetIndex">The index of the sheet to read from (default is 0).</param>
+        /// <returns>A tuple containing six Lists populated from the sheet.</returns>
         public static (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>) Read<T1, T2, T3, T4, T5, T6>(this IWorkbook wb, int firstRow = 1, int sheetIndex = 0) where T1 : class where T2 : class where T3 : class where T4 : class where T5 : class where T6 : class
             => (wb.Read<T1>(firstRow, sheetIndex), wb.Read<T2>(firstRow, sheetIndex), wb.Read<T3>(firstRow, sheetIndex), wb.Read<T4>(firstRow, sheetIndex), wb.Read<T5>(firstRow, sheetIndex), wb.Read<T6>(firstRow, sheetIndex));
 
+        /// <summary>
+        /// Reads data from the workbook and converts it to seven Lists of the specified class types.
+        /// </summary>
+        /// <typeparam name="T1">The first class type to convert the data to.</typeparam>
+        /// <typeparam name="T2">The second class type to convert the data to.</typeparam>
+        /// <typeparam name="T3">The third class type to convert the data to.</typeparam>
+        /// <typeparam name="T4">The fourth class type to convert the data to.</typeparam>
+        /// <typeparam name="T5">The fifth class type to convert the data to.</typeparam>
+        /// <typeparam name="T6">The sixth class type to convert the data to.</typeparam>
+        /// <typeparam name="T7">The seventh class type to convert the data to.</typeparam>
+        /// <param name="wb">The workbook to read from.</param>
+        /// <param name="firstRow">The first row to start reading from (default is 1).</param>
+        /// <param name="sheetIndex">The index of the sheet to read from (default is 0).</param>
+        /// <returns>A tuple containing seven Lists populated from the sheet.</returns>
         public static (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>) Read<T1, T2, T3, T4, T5, T6, T7>(this IWorkbook wb, int firstRow = 1, int sheetIndex = 0) where T1 : class where T2 : class where T3 : class where T4 : class where T5 : class where T6 : class where T7 : class
             => (wb.Read<T1>(firstRow, sheetIndex), wb.Read<T2>(firstRow, sheetIndex), wb.Read<T3>(firstRow, sheetIndex), wb.Read<T4>(firstRow, sheetIndex), wb.Read<T5>(firstRow, sheetIndex), wb.Read<T6>(firstRow, sheetIndex), wb.Read<T7>(firstRow, sheetIndex));
 

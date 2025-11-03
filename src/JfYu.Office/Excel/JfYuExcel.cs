@@ -42,25 +42,6 @@ namespace JfYu.Office.Excel
             var currentOptions = _configuration.CurrentValue;
             updateAction(currentOptions);
         }
-
-        /// <inheritdoc/>
-        public List<T> Read<T>(Stream stream, int firstRow = 1, int sheetIndex = 0) where T : class
-        {
-            ArgumentNullException.ThrowIfNull(stream);
-            using var wb = WorkbookFactory.Create(stream);
-            return JfYuExcelExtension.Read<T>(wb, firstRow, sheetIndex);
-        }
-
-        /// <inheritdoc/>
-        public List<T> Read<T>(string filePath, int firstRow = 1, int sheetIndex = 0) where T : class
-        {
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException(nameof(filePath));
-            using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            using IWorkbook wb = WorkbookFactory.Create(file);
-            return JfYuExcelExtension.Read<T>(wb, firstRow, sheetIndex);
-        }
-
         /// <inheritdoc/>
         public void WriteCSV<T>(List<T> source, string filePath, Dictionary<string, string>? titles = null, Action<int>? callback = null)
         {
@@ -202,5 +183,188 @@ namespace JfYu.Office.Excel
                 return [.. fields];
             }
         }
+
+        #region ReadExcel
+
+        /// <inheritdoc/>
+        public List<T> Read<T>(Stream stream, int firstRow = 1, int sheetIndex = 0) where T : class
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+            using var wb = WorkbookFactory.Create(stream);
+            return JfYuExcelExtension.Read<T>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public List<T> Read<T>(string filePath, int firstRow = 1, int sheetIndex = 0) where T : class
+        {
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(nameof(filePath));
+            using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using IWorkbook wb = WorkbookFactory.Create(file);
+            return JfYuExcelExtension.Read<T>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>) Read<T1, T2>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+            using var wb = WorkbookFactory.Create(stream);
+            return JfYuExcelExtension.Read<T1,T2>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>) Read<T1, T2>(string filePath, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+        {
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(nameof(filePath));
+            using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using IWorkbook wb = WorkbookFactory.Create(file);
+            return JfYuExcelExtension.Read<T1,T2>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>) Read<T1, T2, T3>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+            using var wb = WorkbookFactory.Create(stream);
+            return JfYuExcelExtension.Read<T1, T2,T3>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>) Read<T1, T2, T3>(string filePath, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+        {
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(nameof(filePath));
+            using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using IWorkbook wb = WorkbookFactory.Create(file);
+            return JfYuExcelExtension.Read<T1, T2,T3>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>, List<T4>) Read<T1, T2, T3, T4>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+            where T4 : class
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+            using var wb = WorkbookFactory.Create(stream);
+            return JfYuExcelExtension.Read<T1, T2, T3,T4>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>, List<T4>) Read<T1, T2, T3, T4>(string filePath, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+            where T4 : class
+        {
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(nameof(filePath));
+            using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using IWorkbook wb = WorkbookFactory.Create(file);
+            return JfYuExcelExtension.Read<T1, T2, T3,T4>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>) Read<T1, T2, T3, T4, T5>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+            where T4 : class
+            where T5 : class
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+            using var wb = WorkbookFactory.Create(stream);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4,T5>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>) Read<T1, T2, T3, T4, T5>(string filePath, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+            where T4 : class
+            where T5 : class
+        {
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(nameof(filePath));
+            using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using IWorkbook wb = WorkbookFactory.Create(file);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4,T5>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>) Read<T1, T2, T3, T4, T5, T6>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+            where T4 : class
+            where T5 : class
+            where T6 : class
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+            using var wb = WorkbookFactory.Create(stream);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5,T6>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>) Read<T1, T2, T3, T4, T5, T6>(string filePath, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+            where T4 : class
+            where T5 : class
+            where T6 : class
+        {
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(nameof(filePath));
+            using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using IWorkbook wb = WorkbookFactory.Create(file);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5,T6>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>) Read<T1, T2, T3, T4, T5, T6, T7>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+            where T4 : class
+            where T5 : class
+            where T6 : class
+            where T7 : class
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+            using var wb = WorkbookFactory.Create(stream);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5, T6,T7>(wb, firstRow, sheetIndex);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>) Read<T1, T2, T3, T4, T5, T6, T7>(string filePath, int firstRow = 1, int sheetIndex = 0)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+            where T4 : class
+            where T5 : class
+            where T6 : class
+            where T7 : class
+        {
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(nameof(filePath));
+            using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using IWorkbook wb = WorkbookFactory.Create(file);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5, T6,T7>(wb, firstRow, sheetIndex);
+        }
+        #endregion
     }
 }
