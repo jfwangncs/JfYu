@@ -26,7 +26,7 @@ namespace JfYu.Office.Excel
         /// <param name="firstRow">The first row to start reading from (default is 1).</param>
         /// <param name="sheetIndex">The index of the sheet to read from (default is 0).</param>
         /// <returns>The data read from the Excel file.</returns>
-        T Read<T>(Stream stream, int firstRow = 1, int sheetIndex = 0);
+        List<T> Read<T>(Stream stream, int firstRow = 1, int sheetIndex = 0) where T : class;
 
         /// <summary>
         /// Reads data from an Excel file.
@@ -37,7 +37,7 @@ namespace JfYu.Office.Excel
         /// <param name="sheetIndex">The index of the sheet to read from (default is 0).</param>
         /// <returns>The data read from the Excel file.</returns>
         /// <exception cref="FileNotFoundException">Thrown when the file is not found.</exception>
-        T Read<T>(string filePath, int firstRow = 1, int sheetIndex = 0);
+        List<T> Read<T>(string filePath, int firstRow = 1, int sheetIndex = 0) where T : class;
 
         /// <summary>
         /// Updates the options for the Excel operations.

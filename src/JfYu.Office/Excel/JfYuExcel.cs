@@ -44,7 +44,7 @@ namespace JfYu.Office.Excel
         }
 
         /// <inheritdoc/>
-        public T Read<T>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+        public List<T> Read<T>(Stream stream, int firstRow = 1, int sheetIndex = 0) where T : class
         {
             ArgumentNullException.ThrowIfNull(stream);
             using var wb = WorkbookFactory.Create(stream);
@@ -52,7 +52,7 @@ namespace JfYu.Office.Excel
         }
 
         /// <inheritdoc/>
-        public T Read<T>(string filePath, int firstRow = 1, int sheetIndex = 0)
+        public List<T> Read<T>(string filePath, int firstRow = 1, int sheetIndex = 0) where T : class
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException(nameof(filePath));

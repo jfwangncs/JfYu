@@ -17,7 +17,7 @@ namespace JfYu.Office.Excel.Extensions
     /// <summary>
     /// The extension methods for Excel operations.
     /// </summary>
-    public static class JfYuExcelExtension
+    public static partial class JfYuExcelExtension
     {
         /// <summary>
         /// Creates an Excel workbook.
@@ -117,43 +117,6 @@ namespace JfYu.Office.Excel.Extensions
             return sheet;
         }
 
-        /// <summary>
-        /// Reads data from the workbook and converts it to the specified type.
-        /// </summary>
-        /// <typeparam name="T">The type to convert the data to.</typeparam>
-        /// <param name="wb">The workbook to read from.</param>
-        /// <param name="firstRow">The first row to start reading from.</param>
-        /// <param name="sheetIndex">The index of the sheet to read from.</param>
-        /// <returns>The data converted to the specified type.</returns>
-        public static T Read<T>(this IWorkbook wb, int firstRow = 1, int sheetIndex = 0)
-        {
-            var mainType = typeof(T);
-            ISheet sheet = wb.GetSheetAt(sheetIndex);
-            if (mainType.IsTypeDefinition)
-                throw new InvalidOperationException($"Unsupported data type {typeof(T)}.");
-            if (mainType.GetGenericTypeDefinition() == typeof(List<>) || typeof(T).GetGenericTypeDefinition() == typeof(IList<>))
-                return (T)sheet.GetList(mainType.GetGenericArguments()[0], firstRow);
-            else if (mainType.GetGenericTypeDefinition().Name.StartsWith("Tuple"))
-            {
-                var tupleType = mainType.GetGenericArguments();
-                Type tuple = CreateTupleType(tupleType);
-                List<object> elements = [];
-
-                for (var i = 0; i < tupleType.Length; i++)
-                {
-                    var item = tupleType[i];
-
-                    if (item.GetGenericTypeDefinition() == typeof(List<>) || item.GetGenericTypeDefinition() == typeof(IList<>))
-                    {
-                        var sheetData = wb.GetSheetAt(i);
-                        elements.Add(sheetData.GetList(item.GetGenericArguments()[0], firstRow));
-                    }
-                }
-                return (T)CreateTupleInstance(tuple, [.. elements]);
-            }
-            else
-                throw new InvalidOperationException($"Unsupported data type {typeof(T)}.");
-        }
 
         /// <summary>
         /// Gets a list of data from the sheet and converts it to the specified type.
