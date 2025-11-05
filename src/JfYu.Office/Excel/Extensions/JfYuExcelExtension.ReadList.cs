@@ -96,7 +96,7 @@ namespace JfYu.Office.Excel.Extensions
 
             bool isDynamic = type == typeof(object) || type == typeof(System.Dynamic.ExpandoObject);
 
-            Dictionary<int, PropertyInfo?> cellNums = new();
+            Dictionary<int, PropertyInfo?> cellNums = [];
             var titles = isDynamic ? [] : GetTitles(type);
             for (int i = headerRow.FirstCellNum; i < headerRow.LastCellNum; i++)
             {
@@ -149,6 +149,7 @@ namespace JfYu.Office.Excel.Extensions
                 list.Add((T)item);
             }
             return list;
+
             static string NormalizeKey(string? key)
             {
                 if (string.IsNullOrWhiteSpace(key)) return "_";

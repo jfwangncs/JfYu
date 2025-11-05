@@ -73,7 +73,7 @@ namespace JfYu.Office.Excel
             //start write
             foreach (var item in source)
             {
-                StringBuilder rowStr = new StringBuilder();
+                StringBuilder rowStr = new();
                 var columnIndex = 0;
                 foreach (var key in titles.Select(q => q.Key))
                 {
@@ -113,7 +113,7 @@ namespace JfYu.Office.Excel
                 string[] fields = ParseCsvLine(line);
 
                 if (rowIndex == firstRow)
-                    headerNames = ReplaceEmptyStrings(new List<string>(fields));
+                    headerNames = ReplaceEmptyStrings([.. fields]);
                 else
                 {
                     dynamic record = new ExpandoObject();

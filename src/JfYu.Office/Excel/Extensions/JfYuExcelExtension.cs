@@ -30,8 +30,8 @@ namespace JfYu.Office.Excel.Extensions
                 return new HSSFWorkbook();
             else if (excelVersion == JfYuExcelVersion.Xlsx)
             {
-                using (var xssfWorkbook = new XSSFWorkbook())
-                    return new SXSSFWorkbook(xssfWorkbook, rowAccessSize);
+                using var xssfWorkbook = new XSSFWorkbook();
+                return new SXSSFWorkbook(xssfWorkbook, rowAccessSize);
             }
             else
                 throw new ArgumentException("not support create CSV file");
