@@ -37,11 +37,9 @@ namespace JfYu.Office.Excel.Extensions
                     CellType.Numeric => cell.NumericCellValue,
                     CellType.String => cell.StringCellValue,
                     CellType.Boolean => cell.BooleanCellValue,
-                    _ => null
+                    _ => throw new InvalidOperationException("Formula resulted in an error.")
                 },
-
                 CellType.Blank => null,
-
                 _ => throw new ArgumentException($"Unknown cell type: {cell.CellType}")
             };
 
@@ -87,6 +85,17 @@ namespace JfYu.Office.Excel.Extensions
         public static List<T> Read<T>(this IWorkbook wb, int firstRow = 1, int sheetIndex = 0) where T : class
         {
             var type = typeof(T);
+
+            if (type.IsPrimitive || type == typeof(string))
+                throw new NotSupportedException($"Type '{type.Name}' is not supported. Use a class type only.");
+
+            if (typeof(System.Collections.IEnumerable).IsAssignableFrom(type) && type != typeof(string))
+                throw new NotSupportedException($"Type '{type.Name}' is a collection. Only single class types are supported.");
+
+            if (type.IsValueType)
+                throw new NotSupportedException($"Type '{type.Name}' is a value type. Only reference class types are supported.");
+
+
             ISheet sheet = wb.GetSheetAt(sheetIndex);
             var list = new List<T>();
 

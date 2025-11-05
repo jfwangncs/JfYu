@@ -29,10 +29,7 @@ namespace JfYu.Office.Excel.Extensions
             if (excelVersion == JfYuExcelVersion.Xls)
                 return new HSSFWorkbook();
             else if (excelVersion == JfYuExcelVersion.Xlsx)
-            {
-                using var xssfWorkbook = new XSSFWorkbook();
-                return new SXSSFWorkbook(xssfWorkbook, rowAccessSize);
-            }
+                return new SXSSFWorkbook(new XSSFWorkbook(), rowAccessSize);
             else
                 throw new ArgumentException("not support create CSV file");
         }
@@ -189,7 +186,7 @@ namespace JfYu.Office.Excel.Extensions
                 list.Add(item);
             }
             return list;
-        }      
+        }
 
 
         /// <summary>

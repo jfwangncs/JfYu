@@ -1,18 +1,28 @@
 ﻿#if NET8_0_OR_GREATER
+using JfYu.Office;
 using JfYu.Office.Excel;
 using JfYu.Office.Excel.Extensions;
 using JfYu.UnitTests.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic;
 using Moq;
 using NPOI.SS.UserModel;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
+using System.Globalization;
 
 namespace JfYu.UnitTests.Office.Excel
 {
     [Collection("Excel")]
-    public class JfYuExcelReadTests(IJfYuExcel jfYuExcel)
+    public class JfYuExcelReadTests
     {
-        private readonly IJfYuExcel _jfYuExcel = jfYuExcel;
+        private readonly IJfYuExcel _jfYuExcel;
+
+        public JfYuExcelReadTests()
+        {
+            var services = new ServiceCollection();
+            var serviceProvider = services.AddJfYuExcel().BuildServiceProvider();
+            _jfYuExcel = serviceProvider.GetRequiredService<IJfYuExcel>();
+        }
 
         #region Read
 
@@ -21,26 +31,9 @@ namespace JfYu.UnitTests.Office.Excel
         {
             var filePath = $"{nameof(Read_FileNotExist_ThrowException)}.xlsx";
 
-            var ex = Record.Exception(() => _jfYuExcel.Read<List<AllTypeTestModel>>(filePath));
-            Assert.IsAssignableFrom<FileNotFoundException>(ex);
-        }
-
-        [Fact]
-        public void Read_WrongT_ThrowException()
-        {
-            var filePath = $"{nameof(Read_WrongT_ThrowException)}.xlsx";
-
-            // Arrange
-            if (File.Exists(filePath))
-                File.Delete(filePath);
-            var source = new List<AllTypeTestModel>();
-            // Act
-            var workbook = _jfYuExcel.Write(source.AsQueryable(), filePath);
-
             var ex = Record.Exception(() => _jfYuExcel.Read<AllTypeTestModel>(filePath));
-            Assert.IsAssignableFrom<InvalidOperationException>(ex);
-            File.Delete(filePath);
-        }
+            Assert.IsType<FileNotFoundException>(ex, exactMatch: false);
+        }       
 
         [Fact]
         public void Read_WrongGenericTypeDefinition_ThrowException()
@@ -52,9 +45,9 @@ namespace JfYu.UnitTests.Office.Excel
                 File.Delete(filePath);
             var source = new List<AllTypeTestModel>();
             // Act
-            var workbook = _jfYuExcel.Write(source.AsQueryable(), filePath);
+            _jfYuExcel.Write(source.AsQueryable(), filePath);
             var ex = Record.Exception(() => _jfYuExcel.Read<Dictionary<string, AllTypeTestModel>>(filePath));
-            Assert.IsAssignableFrom<InvalidOperationException>(ex);
+            Assert.IsType<NotSupportedException>(ex, exactMatch: false);
             File.Delete(filePath);
         }
 
@@ -73,9 +66,9 @@ namespace JfYu.UnitTests.Office.Excel
                 wb.Write(savefs);
             wb.Close();
             // Assert
-            var data = _jfYuExcel.Read<List<AllTypeTestModel>>(filePath);
+            var data = _jfYuExcel.Read<AllTypeTestModel>(filePath);
 
-            Assert.True(data.Count == 0);
+            Assert.Empty(data);
             File.Delete(filePath);
         }
 
@@ -88,11 +81,11 @@ namespace JfYu.UnitTests.Office.Excel
                 File.Delete(filePath);
             var source = new List<AllTypeTestModel>();
             // Act
-            var workbook = _jfYuExcel.Write(source.AsQueryable(), filePath);
+            _jfYuExcel.Write(source.AsQueryable(), filePath);
             // Assert
-            var data = _jfYuExcel.Read<List<AllTypeTestModel>>(filePath);
+            var data = _jfYuExcel.Read<AllTypeTestModel>(filePath);
 
-            Assert.True(data.Count == 0);
+            Assert.Empty(data);
 
             File.Delete(filePath);
         }
@@ -106,71 +99,14 @@ namespace JfYu.UnitTests.Office.Excel
                 File.Delete(filePath);
             var source = new List<string>() { "2", "1Xa1", "3" };
             // Act
-            var workbook = _jfYuExcel.Write(source.AsQueryable(), filePath);
+            _jfYuExcel.Write(source.AsQueryable(), filePath);
 
             // Assert
-            var ex = Record.Exception(() => _jfYuExcel.Read<List<int>>(filePath));
-            Assert.IsAssignableFrom<FormatException>(ex);
+            var ex = Record.Exception(() => _jfYuExcel.Read<SimpleModel<int>>(filePath));
+            Assert.IsType<FormatException>(ex, exactMatch: false);
 
             File.Delete(filePath);
-        }
-
-        [Fact]
-        public void Read_WithTypeTupleMoreThan8_ThrowException()
-        {
-            var filePath = $"{nameof(Read_WithTypeTupleMoreThan8_ThrowException)}.xlsx";
-            // Arrange
-            if (File.Exists(filePath))
-                File.Delete(filePath);
-            var list = AllTypeTestModel.GenerateTestList();
-            _jfYuExcel.UpdateOption(q => q.SheetMaxRecord = 100);
-            var d1 = list;
-            var d2 = new TestModelFaker().Generate(60).ToList();
-            var source = new Tuple<List<AllTypeTestModel>, List<TestModel>, List<TestModel>, List<TestModel>, List<TestModel>, List<TestModel>, List<TestModel>, Tuple<List<TestModel>, List<TestModel>>>(d1, d2, d2, d2, d2, d2, d2, new Tuple<List<TestModel>, List<TestModel>>(d2, d2));
-            // Act
-            _jfYuExcel.Write(source, filePath);
-
-            var ex = Record.Exception(() => _jfYuExcel.Read<Tuple<List<AllTypeTestModel>, List<TestModel>, List<TestModel>, List<TestModel>, List<TestModel>, List<TestModel>, List<TestModel>, Tuple<List<TestModel>, List<TestModel>>>>(filePath));
-
-            Assert.IsAssignableFrom<InvalidOperationException>(ex);
-            File.Delete(filePath);
-        }
-
-        [Fact]
-        public void Read_WithInvalidCast_ThrowException()
-        {
-            var filePath = $"{nameof(Read_WithInvalidCast_ThrowException)}.xlsx";
-            // Arrange
-            if (File.Exists(filePath))
-                File.Delete(filePath);
-
-            var source = new List<string>() { null!, "xxx" };
-            // Act
-            var workbook = _jfYuExcel.Write(source, filePath, new Dictionary<string, string>() { { "Capacity", "Capacity" } });
-            // Assert
-            var ex = Record.Exception(() => _jfYuExcel.Read<List<List<int>>>(filePath));
-            Assert.IsAssignableFrom<InvalidCastException>(ex);
-
-            File.Delete(filePath);
-        }
-
-        [Fact]
-        public void Read_WithUnsupportSimpleType_ThrowException()
-        {
-            var filePath = $"{nameof(Read_WithUnsupportSimpleType_ThrowException)}.xlsx";
-            // Arrange
-            if (File.Exists(filePath))
-                File.Delete(filePath);
-
-            var source = new List<string>() { null!, "xxx" };
-            // Act
-            var workbook = _jfYuExcel.Write(source, filePath, new Dictionary<string, string>() { { "Capacity", "Capacity" } });
-            // Assert
-            var ex = Record.Exception(() => _jfYuExcel.Read<List<List<int>>>(filePath));
-            Assert.IsAssignableFrom<InvalidCastException>(ex);
-
-            File.Delete(filePath);
-        }
+        }   
 
         [Fact]
         public void Read_WithUnknownCellType_ThrowException()
@@ -182,7 +118,7 @@ namespace JfYu.UnitTests.Office.Excel
 
             // Act
 
-            var wb = JfYuExcelExtension.CreateExcel();
+            using var wb = JfYuExcelExtension.CreateExcel();
             var sheet = wb.CreateSheet();
             var row = sheet.CreateRow(0);
             var cell = row.CreateCell(0);
@@ -196,7 +132,7 @@ namespace JfYu.UnitTests.Office.Excel
 
             // Assert
             var ex = Record.Exception(() => _jfYuExcel.Read<List<string>>(filePath));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<Exception>(ex, exactMatch: false);
 
             File.Delete(filePath);
         }
@@ -204,10 +140,7 @@ namespace JfYu.UnitTests.Office.Excel
         [Fact]
         public void Read_WithWrongFormulaCellType_ThrowException()
         {
-            // Arrange
-            var mockWorkbook = new Mock<IWorkbook>();
-            var mockSheet = new Mock<ISheet>();
-            var mockRow = new Mock<IRow>();
+            // Arrange 
             var mockCell = new Mock<ICell>();
             // Act
             mockCell.SetupGet(c => c.CellType).Returns(CellType.Formula);
@@ -229,7 +162,7 @@ namespace JfYu.UnitTests.Office.Excel
 
             // Act
 
-            var wb = JfYuExcelExtension.CreateExcel();
+            using var wb = JfYuExcelExtension.CreateExcel();
             var sheet = wb.CreateSheet();
             var row = sheet.CreateRow(0);
             var cell = row.CreateCell(0);
@@ -244,22 +177,19 @@ namespace JfYu.UnitTests.Office.Excel
             wb.Close();
 
             // Assert
-            var data = _jfYuExcel.Read<List<int>>(filePath);
-            Assert.Equal(12121 + 2131, data.First());
+            var data = _jfYuExcel.Read<SimpleModel<int>>(filePath);
+            Assert.Equal(12121 + 2131, data.FirstOrDefault()?.Value);
             File.Delete(filePath);
         }
 
         [Fact]
         public void Read_WithStringFormulaCellType_ThrowException()
         {
-            // Arrange
-            var mockWorkbook = new Mock<IWorkbook>();
-            var mockSheet = new Mock<ISheet>();
-            var mockRow = new Mock<IRow>();
+            // Arrange 
             var mockCell = new Mock<ICell>();
             // Act
             mockCell.SetupGet(c => c.CellType).Returns(CellType.Formula);
-            mockCell.SetupGet(c => c.CachedFormulaResultType).Returns(CellType.String); ;
+            mockCell.SetupGet(c => c.CachedFormulaResultType).Returns(CellType.String);
             mockCell.SetupGet(c => c.StringCellValue).Returns("Hello World");
 
             // Assert
@@ -270,10 +200,7 @@ namespace JfYu.UnitTests.Office.Excel
         [Fact]
         public void Read_NullDateFormats_ReturnCorrectly()
         {
-            // Arrange
-            var mockWorkbook = new Mock<IWorkbook>();
-            var mockSheet = new Mock<ISheet>();
-            var mockRow = new Mock<IRow>();
+            // Arrange 
             var mockCell = new Mock<ICell>();
             var mockCellStyle = new Mock<ICellStyle>();
             DateTime? dateTime = null;
@@ -303,12 +230,12 @@ namespace JfYu.UnitTests.Office.Excel
         public void Read_DifferentDateFormats_ReturnCorrectly(string dateString, string formatString)
         {
             // Arrange
-            DateTime expectedDate = DateTime.ParseExact(dateString, formatString, null);
+            DateTime expectedDate = DateTime.ParseExact(dateString, formatString, CultureInfo.InvariantCulture);
             var filePath = $"{nameof(Read_DifferentDateFormats_ReturnCorrectly)}.xlsx";
             // Arrange
             if (File.Exists(filePath))
                 File.Delete(filePath);
-            var wb = JfYuExcelExtension.CreateExcel();
+            using var wb = JfYuExcelExtension.CreateExcel();
             var sheet = wb.CreateSheet();
             var row = sheet.CreateRow(0);
             var cell = row.CreateCell(0);
@@ -324,10 +251,10 @@ namespace JfYu.UnitTests.Office.Excel
                 wb.Write(savefs);
             wb.Close();
             // Act
-            var data = _jfYuExcel.Read<List<DateTime>>(filePath);
+            var data = _jfYuExcel.Read<SimpleModel<DateTime>>(filePath);
 
             // Assert
-            Assert.Equal(expectedDate.Date, data[0].Date);
+            Assert.Equal(expectedDate.Date, data[0].Value);
             File.Delete(filePath);
         }
 
@@ -341,28 +268,8 @@ namespace JfYu.UnitTests.Office.Excel
             MemoryStream ms = null!;
 
             var ex = Record.Exception(() => _jfYuExcel.Read<List<AllTypeTestModel>>(ms!));
-            Assert.IsAssignableFrom<ArgumentNullException>(ex);
-        }
-
-        [Fact]
-        public void ReadStream_WrongT_ThrowException()
-        {
-            var filePath = $"{nameof(ReadStream_WrongT_ThrowException)}.xlsx";
-
-            // Arrange
-            if (File.Exists(filePath))
-                File.Delete(filePath);
-            var source = new List<AllTypeTestModel>();
-            // Act
-            var workbook = _jfYuExcel.Write(source.AsQueryable(), filePath);
-
-            var ms = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-
-            var ex = Record.Exception(() => _jfYuExcel.Read<AllTypeTestModel>(ms));
-            Assert.IsAssignableFrom<InvalidOperationException>(ex);
-            ms.Dispose();
-            File.Delete(filePath);
-        }
+            Assert.IsType<ArgumentNullException>(ex, exactMatch: false);
+        }        
 
         [Fact]
         public void ReadStream_WrongGenericTypeDefinition_ThrowException()
@@ -375,12 +282,12 @@ namespace JfYu.UnitTests.Office.Excel
             var source = new List<AllTypeTestModel>();
 
             // Act
-            var workbook = _jfYuExcel.Write(source.AsQueryable(), filePath);
+            _jfYuExcel.Write(source.AsQueryable(), filePath);
 
             var ms = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
             var ex = Record.Exception(() => _jfYuExcel.Read<Dictionary<string, AllTypeTestModel>>(ms));
-            Assert.IsAssignableFrom<InvalidOperationException>(ex);
+            Assert.IsType<NotSupportedException>(ex, exactMatch: false);
             ms.Dispose();
             File.Delete(filePath);
         }
@@ -401,9 +308,9 @@ namespace JfYu.UnitTests.Office.Excel
             wb.Close();
             var ms = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             // Assert
-            var data = _jfYuExcel.Read<List<AllTypeTestModel>>(ms);
+            var data = _jfYuExcel.Read<AllTypeTestModel>(ms);
 
-            Assert.True(data.Count == 0);
+            Assert.Empty(data);
             File.Delete(filePath);
             ms.Dispose();
         }
@@ -417,12 +324,12 @@ namespace JfYu.UnitTests.Office.Excel
                 File.Delete(filePath);
             var source = new List<AllTypeTestModel>();
             // Act
-            var workbook = _jfYuExcel.Write(source.AsQueryable(), filePath);
+            _jfYuExcel.Write(source.AsQueryable(), filePath);
             var ms = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             // Assert
-            var data = _jfYuExcel.Read<List<AllTypeTestModel>>(ms);
+            var data = _jfYuExcel.Read<AllTypeTestModel>(ms);
 
-            Assert.True(data.Count == 0);
+            Assert.Empty(data);
 
             File.Delete(filePath);
             ms.Dispose();
