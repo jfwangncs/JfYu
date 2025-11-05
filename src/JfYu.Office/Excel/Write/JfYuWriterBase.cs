@@ -12,7 +12,7 @@ namespace JfYu.Office.Excel.Write
     /// Abstract base class for writing data to an Excel workbook.
     /// </summary>
     /// <typeparam name="T">The type of data to be written to Excel.</typeparam>
-    public abstract class JfYuWriterBase<T> : IJfYuExcelWrite<T>
+    public abstract class JfYuWriterBase<T> : IJfYuExcelWrite<T> where T : notnull
     {
         /// <inheritdoc/>
         protected abstract void WriteDataToWorkbook(IWorkbook workbook, T source, Dictionary<string, string>? titles = null, Action<int>? callback = null);

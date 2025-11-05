@@ -8,7 +8,7 @@ namespace JfYu.Office.Excel.Write.Interface
     /// <summary>
     /// Interface for writing excel
     /// </summary>
-    public interface IJfYuExcelWrite<T>
+    public interface IJfYuExcelWrite<T> where T : notnull
     {
         /// <summary>
         /// Writes the provided data to an Excel file.

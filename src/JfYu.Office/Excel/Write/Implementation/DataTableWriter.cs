@@ -12,9 +12,9 @@ namespace JfYu.Office.Excel.Write.Implementation
     /// The DataTable writer.
     /// </summary>
     /// <param name="configuration">The JfYuExcel configuration </param>
-    public class DataTableWriter(IOptionsMonitor<JfYuExcelOption> configuration) : JfYuWriterBase<DataTable>
+    public class DataTableWriter(IOptions<JfYuExcelOption> configuration) : JfYuWriterBase<DataTable>
     {
-        private readonly JfYuExcelOption _configuration = configuration.CurrentValue;
+        private readonly JfYuExcelOption _configuration = configuration.Value;
 
         /// <inheritdoc/>
         protected override void WriteDataToWorkbook(IWorkbook workbook, DataTable source, Dictionary<string, string>? titles = null, Action<int>? callback = null)

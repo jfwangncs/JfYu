@@ -12,9 +12,9 @@ namespace JfYu.Office.Excel.Write.Implementation
     /// The DbDataReader writer.
     /// </summary>
     /// <param name="configuration">The JfYuExcel configuration </param>
-    public class DbDataReaderWriter(IOptionsMonitor<JfYuExcelOption> configuration) : JfYuWriterBase<DbDataReader>
+    public class DbDataReaderWriter(IOptions<JfYuExcelOption> configuration) : JfYuWriterBase<DbDataReader>
     {
-        private readonly JfYuExcelOption _configuration = configuration.CurrentValue;
+        private readonly JfYuExcelOption _configuration = configuration.Value;
 
         /// <inheritdoc/>
         protected override void WriteDataToWorkbook(IWorkbook workbook, DbDataReader source, Dictionary<string, string>? titles = null, Action<int>? callback = null)

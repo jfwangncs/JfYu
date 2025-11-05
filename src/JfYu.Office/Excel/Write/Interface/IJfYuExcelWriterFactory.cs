@@ -10,6 +10,6 @@
         /// </summary>
         /// <typeparam name="T">The type of data to be written to Excel.</typeparam>
         /// <returns>An instance of <see cref="IJfYuExcelWrite{T}"/>.</returns>
-        IJfYuExcelWrite<T> GetWriter<T>();
+        IJfYuExcelWrite<T> GetWriter<T>() where T : notnull;
     }
 }

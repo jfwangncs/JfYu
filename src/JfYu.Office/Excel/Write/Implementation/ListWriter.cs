@@ -13,9 +13,9 @@ namespace JfYu.Office.Excel.Write.Implementation
     /// Class for writing a list of data to an Excel workbook.
     /// </summary>
     /// <typeparam name="T">The type of data to be written to Excel.</typeparam>
-    public class ListWriter<T>(IOptionsMonitor<JfYuExcelOption> configuration) : JfYuWriterBase<T> where T : notnull
+    public class ListWriter<T>(IOptions<JfYuExcelOption>? configuration = null) : JfYuWriterBase<T> where T : notnull
     {
-        private readonly JfYuExcelOption _configuration = configuration.CurrentValue;
+        private readonly JfYuExcelOption _configuration = configuration?.Value ?? new JfYuExcelOption();
 
         /// <inheritdoc/>
         protected override void WriteDataToWorkbook(IWorkbook workbook, T source, Dictionary<string, string>? titles = null, Action<int>? callback = null)
@@ -28,8 +28,8 @@ namespace JfYu.Office.Excel.Write.Implementation
                 data = (IQueryable)source;
             else if (typeof(T).GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 data = ((IEnumerable)source).AsQueryable();
-            else if (typeof(T).GetGenericTypeDefinition() == typeof(IList<>)|| typeof(T).GetGenericTypeDefinition() == typeof(List<>))
-                data = ((IList)source).AsQueryable();  
+            else if (typeof(T).GetGenericTypeDefinition() == typeof(IList<>) || typeof(T).GetGenericTypeDefinition() == typeof(List<>))
+                data = ((IList)source).AsQueryable();
             else if (source.GetType().GetGenericTypeDefinition().Name.StartsWith("Tuple"))
             {
                 var newData = (ITuple)source;
@@ -77,7 +77,7 @@ namespace JfYu.Office.Excel.Write.Implementation
             {
                 var dataRow = sheet.CreateRow(sheetWriteRowIndex);
                 var columnIndex = 0;
-                foreach (var key in titles.Select(q=>q.Key))
+                foreach (var key in titles.Select(q => q.Key))
                 {
                     var cell = dataRow.CreateCell(columnIndex);
                     var valueType = tType.GetProperty(key);

@@ -7,7 +7,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -190,131 +189,8 @@ namespace JfYu.Office.Excel.Extensions
                 list.Add(item);
             }
             return list;
-        }
+        }      
 
-        /// <summary>
-        /// Converts the value of a cell to the specified target type.
-        /// </summary>
-        /// <param name="target">The target type to convert the cell value to.</param>
-        /// <param name="cell">The cell to get the value from.</param>
-        /// <returns>The converted value.</returns>
-
-        public static object? ConvertCellValue(Type target, ICell cell)
-        {
-            string? result;
-
-            if (cell == null)
-                return default;
-
-            switch (cell.CellType)
-            {
-                case CellType.Numeric:
-                    if (DateUtil.IsCellDateFormatted(cell))
-                        result = cell.DateCellValue?.ToString("yyyy-MM-dd HH:mm:ss");
-                    else
-                        result = cell.NumericCellValue.ToString();
-                    break;
-
-                case CellType.String:
-                    result = cell.StringCellValue;
-                    break;
-
-                case CellType.Blank:
-                    result = null;
-                    break;
-
-                case CellType.Boolean:
-                    result = cell.BooleanCellValue.ToString();
-                    break;
-
-                case CellType.Formula:
-                    if (cell.CachedFormulaResultType == CellType.Numeric)
-                        result = cell.NumericCellValue.ToString();
-                    else if (cell.CachedFormulaResultType == CellType.String)
-                        result = cell.StringCellValue;
-                    else
-                        throw new InvalidOperationException("Formula resulted in an error.");
-                    break;
-
-                default:
-                    throw new ArgumentException("unknown cell type,{CellType}", cell.CellType.ToString());
-            }
-
-            if (result == null)
-                return default;
-
-            if (target.IsGenericType && target.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                target = target.GetGenericArguments()[0];
-            }
-            if (target.IsInstanceOfType(result))
-                return result;
-            // enums
-            if (target.IsEnum)
-            {
-                if (result is string s)
-                    return Enum.Parse(target, s, ignoreCase: true);
-                // convert underlying numeric and then to enum
-                var underlying = Enum.GetUnderlyingType(target);
-                var val = Convert.ChangeType(result, underlying, CultureInfo.InvariantCulture);
-                return Enum.ToObject(target, val);
-            }
-
-            // some special types
-            if (target == typeof(Guid))
-                return Guid.Parse(result.ToString());
-
-            return Type.GetTypeCode(target) switch
-            {
-                TypeCode.Int16 => Convert.ToInt16(result, CultureInfo.InvariantCulture),
-                TypeCode.Int32 => Convert.ToInt32(result, CultureInfo.InvariantCulture),
-                TypeCode.Int64 => Convert.ToInt64(result, CultureInfo.InvariantCulture),
-                TypeCode.UInt16 => Convert.ToUInt16(result, CultureInfo.InvariantCulture),
-                TypeCode.UInt32 => Convert.ToUInt32(result, CultureInfo.InvariantCulture),
-                TypeCode.UInt64 => Convert.ToUInt64(result, CultureInfo.InvariantCulture),
-                TypeCode.Double => Convert.ToDouble(result, CultureInfo.InvariantCulture),
-                TypeCode.Single => Convert.ToSingle(result, CultureInfo.InvariantCulture),
-                TypeCode.Decimal => Convert.ToDecimal(result, CultureInfo.InvariantCulture),
-                TypeCode.Boolean => Convert.ToBoolean(result, CultureInfo.InvariantCulture),
-                TypeCode.DateTime => Convert.ToDateTime(result, CultureInfo.InvariantCulture),
-                TypeCode.SByte => Convert.ToSByte(result, CultureInfo.InvariantCulture),
-                TypeCode.Byte => Convert.ToByte(result, CultureInfo.InvariantCulture),
-                _ => result,
-            };
-
-        }
-
-        /// <summary>
-        /// Creates an instance of a tuple type with the specified arguments.
-        /// </summary>
-        /// <param name="tupleType">The type of the tuple to create.</param>
-        /// <param name="args">The arguments to pass to the tuple constructor.</param>
-        /// <returns>The created tuple instance.</returns>
-        internal static object CreateTupleInstance(Type tupleType, object[] args)
-        {
-            ConstructorInfo? constructor = tupleType.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, CallingConventions.HasThis, Array.ConvertAll(args, arg => arg.GetType()), null);
-            return constructor!.Invoke(args);
-        }
-
-        /// <summary>
-        /// Creates a tuple type with the specified generic type arguments.
-        /// </summary>
-        /// <param name="types">An array of types to be used as generic type arguments for the tuple.</param>
-        /// <returns>A Type object representing the constructed tuple type.</returns>
-        internal static Type CreateTupleType(Type[] types)
-        {
-            return types.Length switch
-            {
-                1 => typeof(Tuple<>).MakeGenericType(types[0]),
-                2 => typeof(Tuple<,>).MakeGenericType(types[0], types[1]),
-                3 => typeof(Tuple<,,>).MakeGenericType(types[0], types[1], types[2]),
-                4 => typeof(Tuple<,,,>).MakeGenericType(types[0], types[1], types[2], types[3]),
-                5 => typeof(Tuple<,,,,>).MakeGenericType(types[0], types[1], types[2], types[3], types[4]),
-                6 => typeof(Tuple<,,,,,>).MakeGenericType(types[0], types[1], types[2], types[3], types[4], types[5]),
-                7 => typeof(Tuple<,,,,,,>).MakeGenericType(types[0], types[1], types[2], types[3], types[4], types[5], types[6]),
-                _ => throw new InvalidOperationException("Only Support up to 7 elements."),
-            };
-        }
 
         /// <summary>
         /// Determines if the given type is a simple type.

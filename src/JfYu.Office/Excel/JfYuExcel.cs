@@ -1,5 +1,6 @@
 ﻿using JfYu.Office.Excel.Constant;
 using JfYu.Office.Excel.Extensions;
+using JfYu.Office.Excel.Write.Implementation;
 using JfYu.Office.Excel.Write.Interface;
 using Microsoft.Extensions.Options;
 using NPOI.SS.UserModel;
@@ -13,34 +14,36 @@ using System.Text;
 
 namespace JfYu.Office.Excel
 {
+
     /// <summary>
-    /// Class for handling Excel operations such as creating, reading, and writing Excel files.
+    /// Provides functionality for reading and writing Excel and CSV files, including support for multiple sheet types
+    /// and custom configuration options.
     /// </summary>
-    public class JfYuExcel(IOptionsMonitor<JfYuExcelOption> configuration, IJfYuExcelWriterFactory excelWriterFactory) : IJfYuExcel
+    /// <remarks>This class supports reading and writing Excel files in various formats, as well as CSV files.
+    /// It allows customization through configuration and writer factories, making it suitable for a wide range of data
+    /// import and export scenarios. Thread safety depends on the underlying writer factory and configuration;
+    /// concurrent operations may require separate instances.</remarks>
+    /// <param name="excelWriterFactory">The factory used to create Excel writer instances for handling different data types and write operations.</param>
+    /// <param name="configuration">The configuration options for Excel operations. If not specified, default options are used.</param>
+    public class JfYuExcel(IJfYuExcelWriterFactory? excelWriterFactory = null, IOptions<JfYuExcelOption>? configuration = null) : IJfYuExcel
     {
-        private readonly IOptionsMonitor<JfYuExcelOption> _configuration = configuration;
-        private readonly IJfYuExcelWriterFactory _excelWriterFactory = excelWriterFactory;
+        private readonly JfYuExcelOption _configuration = configuration?.Value ?? new JfYuExcelOption();
+        private readonly IJfYuExcelWriterFactory _excelWriterFactory = excelWriterFactory ?? new DefaultExcelWriterFactory();
+
 
         /// <inheritdoc/>
         public IWorkbook CreateExcel(JfYuExcelVersion excelVersion = JfYuExcelVersion.Xlsx)
         {
-            return JfYuExcelExtension.CreateExcel(excelVersion, _configuration.CurrentValue.RowAccessSize);
+            return JfYuExcelExtension.CreateExcel(excelVersion, _configuration.RowAccessSize);
         }
 
         /// <inheritdoc/>
-        public IWorkbook Write<T>(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelWriteOperation writeOperation = JfYuExcelWriteOperation.None, Action<int>? callback = null)
+        public IWorkbook Write<T>(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelWriteOperation writeOperation = JfYuExcelWriteOperation.None, Action<int>? callback = null) where T : notnull
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentException.ThrowIfNullOrEmpty(filePath);
             var writer = _excelWriterFactory.GetWriter<T>();
             return writer.Write(source, filePath, titles, writeOperation, callback);
-        }
-
-        /// <inheritdoc/>
-        public void UpdateOption(Action<JfYuExcelOption> updateAction)
-        {
-            var currentOptions = _configuration.CurrentValue;
-            updateAction(currentOptions);
         }
         /// <inheritdoc/>
         public void WriteCSV<T>(List<T> source, string filePath, Dictionary<string, string>? titles = null, Action<int>? callback = null)
@@ -205,17 +208,17 @@ namespace JfYu.Office.Excel
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>) Read<T1, T2>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>) Read<T1, T2>(Stream stream, int firstRow = 1)
             where T1 : class
             where T2 : class
         {
             ArgumentNullException.ThrowIfNull(stream);
             using var wb = WorkbookFactory.Create(stream);
-            return JfYuExcelExtension.Read<T1,T2>(wb, firstRow, sheetIndex);
+            return JfYuExcelExtension.Read<T1, T2>(wb, firstRow);
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>) Read<T1, T2>(string filePath, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>) Read<T1, T2>(string filePath, int firstRow = 1)
             where T1 : class
             where T2 : class
         {
@@ -223,22 +226,22 @@ namespace JfYu.Office.Excel
                 throw new FileNotFoundException(nameof(filePath));
             using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using IWorkbook wb = WorkbookFactory.Create(file);
-            return JfYuExcelExtension.Read<T1,T2>(wb, firstRow, sheetIndex);
+            return JfYuExcelExtension.Read<T1, T2>(wb, firstRow);
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>, List<T3>) Read<T1, T2, T3>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>, List<T3>) Read<T1, T2, T3>(Stream stream, int firstRow = 1)
             where T1 : class
             where T2 : class
             where T3 : class
         {
             ArgumentNullException.ThrowIfNull(stream);
             using var wb = WorkbookFactory.Create(stream);
-            return JfYuExcelExtension.Read<T1, T2,T3>(wb, firstRow, sheetIndex);
+            return JfYuExcelExtension.Read<T1, T2, T3>(wb, firstRow);
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>, List<T3>) Read<T1, T2, T3>(string filePath, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>, List<T3>) Read<T1, T2, T3>(string filePath, int firstRow = 1)
             where T1 : class
             where T2 : class
             where T3 : class
@@ -247,11 +250,11 @@ namespace JfYu.Office.Excel
                 throw new FileNotFoundException(nameof(filePath));
             using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using IWorkbook wb = WorkbookFactory.Create(file);
-            return JfYuExcelExtension.Read<T1, T2,T3>(wb, firstRow, sheetIndex);
+            return JfYuExcelExtension.Read<T1, T2, T3>(wb, firstRow);
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>, List<T3>, List<T4>) Read<T1, T2, T3, T4>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>, List<T3>, List<T4>) Read<T1, T2, T3, T4>(Stream stream, int firstRow = 1)
             where T1 : class
             where T2 : class
             where T3 : class
@@ -259,11 +262,11 @@ namespace JfYu.Office.Excel
         {
             ArgumentNullException.ThrowIfNull(stream);
             using var wb = WorkbookFactory.Create(stream);
-            return JfYuExcelExtension.Read<T1, T2, T3,T4>(wb, firstRow, sheetIndex);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4>(wb, firstRow);
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>, List<T3>, List<T4>) Read<T1, T2, T3, T4>(string filePath, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>, List<T3>, List<T4>) Read<T1, T2, T3, T4>(string filePath, int firstRow = 1)
             where T1 : class
             where T2 : class
             where T3 : class
@@ -273,11 +276,11 @@ namespace JfYu.Office.Excel
                 throw new FileNotFoundException(nameof(filePath));
             using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using IWorkbook wb = WorkbookFactory.Create(file);
-            return JfYuExcelExtension.Read<T1, T2, T3,T4>(wb, firstRow, sheetIndex);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4>(wb, firstRow);
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>) Read<T1, T2, T3, T4, T5>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>) Read<T1, T2, T3, T4, T5>(Stream stream, int firstRow = 1)
             where T1 : class
             where T2 : class
             where T3 : class
@@ -286,11 +289,11 @@ namespace JfYu.Office.Excel
         {
             ArgumentNullException.ThrowIfNull(stream);
             using var wb = WorkbookFactory.Create(stream);
-            return JfYuExcelExtension.Read<T1, T2, T3, T4,T5>(wb, firstRow, sheetIndex);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5>(wb, firstRow);
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>) Read<T1, T2, T3, T4, T5>(string filePath, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>) Read<T1, T2, T3, T4, T5>(string filePath, int firstRow = 1)
             where T1 : class
             where T2 : class
             where T3 : class
@@ -301,25 +304,11 @@ namespace JfYu.Office.Excel
                 throw new FileNotFoundException(nameof(filePath));
             using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using IWorkbook wb = WorkbookFactory.Create(file);
-            return JfYuExcelExtension.Read<T1, T2, T3, T4,T5>(wb, firstRow, sheetIndex);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5>(wb, firstRow);
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>) Read<T1, T2, T3, T4, T5, T6>(Stream stream, int firstRow = 1, int sheetIndex = 0)
-            where T1 : class
-            where T2 : class
-            where T3 : class
-            where T4 : class
-            where T5 : class
-            where T6 : class
-        {
-            ArgumentNullException.ThrowIfNull(stream);
-            using var wb = WorkbookFactory.Create(stream);
-            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5,T6>(wb, firstRow, sheetIndex);
-        }
-
-        /// <inheritdoc/>
-        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>) Read<T1, T2, T3, T4, T5, T6>(string filePath, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>) Read<T1, T2, T3, T4, T5, T6>(Stream stream, int firstRow = 1)
             where T1 : class
             where T2 : class
             where T3 : class
@@ -327,30 +316,29 @@ namespace JfYu.Office.Excel
             where T5 : class
             where T6 : class
         {
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException(nameof(filePath));
-            using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            using IWorkbook wb = WorkbookFactory.Create(file);
-            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5,T6>(wb, firstRow, sheetIndex);
+            ArgumentNullException.ThrowIfNull(stream);
+            using var wb = WorkbookFactory.Create(stream);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5, T6>(wb, firstRow);
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>) Read<T1, T2, T3, T4, T5, T6, T7>(Stream stream, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>) Read<T1, T2, T3, T4, T5, T6>(string filePath, int firstRow = 1)
             where T1 : class
             where T2 : class
             where T3 : class
             where T4 : class
             where T5 : class
             where T6 : class
-            where T7 : class
         {
-            ArgumentNullException.ThrowIfNull(stream);
-            using var wb = WorkbookFactory.Create(stream);
-            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5, T6,T7>(wb, firstRow, sheetIndex);
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(nameof(filePath));
+            using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using IWorkbook wb = WorkbookFactory.Create(file);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5, T6>(wb, firstRow);
         }
 
         /// <inheritdoc/>
-        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>) Read<T1, T2, T3, T4, T5, T6, T7>(string filePath, int firstRow = 1, int sheetIndex = 0)
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>) Read<T1, T2, T3, T4, T5, T6, T7>(Stream stream, int firstRow = 1)
             where T1 : class
             where T2 : class
             where T3 : class
@@ -359,11 +347,26 @@ namespace JfYu.Office.Excel
             where T6 : class
             where T7 : class
         {
+            ArgumentNullException.ThrowIfNull(stream);
+            using var wb = WorkbookFactory.Create(stream);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5, T6, T7>(wb, firstRow);
+        }
+
+        /// <inheritdoc/>
+        public (List<T1>, List<T2>, List<T3>, List<T4>, List<T5>, List<T6>, List<T7>) Read<T1, T2, T3, T4, T5, T6, T7>(string filePath, int firstRow = 1)
+            where T1 : class
+            where T2 : class
+            where T3 : class
+            where T4 : class
+            where T5 : class
+            where T6 : class
+            where T7 : class
+        {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException(nameof(filePath));
             using FileStream file = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using IWorkbook wb = WorkbookFactory.Create(file);
-            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5, T6,T7>(wb, firstRow, sheetIndex);
+            return JfYuExcelExtension.Read<T1, T2, T3, T4, T5, T6, T7>(wb, firstRow);
         }
         #endregion
     }
