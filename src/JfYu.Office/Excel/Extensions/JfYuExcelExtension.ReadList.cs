@@ -112,8 +112,8 @@ namespace JfYu.Office.Excel.Extensions
                 var headerValue = headerRow.GetCell(i)?.StringCellValue?.Trim();
                 if (isDynamic)
                 {
-                    cellNums[i] = null;
-                    titles[NormalizeKey(headerValue)] = NormalizeKey(headerValue);
+                    cellNums[i] = typeof(string).GetProperties()[0];
+                    titles[i.ToString()] = NormalizeKey(headerValue);
                 }
                 else if (!string.IsNullOrEmpty(headerValue) && titles.ContainsValue(headerValue))
                     cellNums[i] = type.GetProperty(headerValue) ?? type.GetProperty(titles.FirstOrDefault(q => q.Value == headerValue).Key);
@@ -141,7 +141,7 @@ namespace JfYu.Office.Excel.Extensions
                     {
                         var result = ConvertCellValue(isDynamic ? typeof(object) : p.PropertyType, cell);
                         if (isDynamic)
-                            dict![titles[NormalizeKey(cell.StringCellValue?.Trim())]] = result;
+                            dict![titles[col.Key.ToString()]] = result;
                         else
                         {
                             if (result != null)
