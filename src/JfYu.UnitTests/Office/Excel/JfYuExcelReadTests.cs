@@ -51,6 +51,37 @@ namespace JfYu.UnitTests.Office.Excel
         }
 
         [Fact]
+        public void Read_WrongTypeString_ThrowException()
+        {
+            var filePath = $"{nameof(Read_WrongGenericTypeDefinition_ThrowException)}.xlsx";
+
+            // Arrange
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+            var source = new List<AllTypeTestModel>();
+            // Act
+            _jfYuExcel.Write(source.AsQueryable(), filePath);
+            var ex = Record.Exception(() => _jfYuExcel.Read<string>(filePath));
+            Assert.IsType<NotSupportedException>(ex, exactMatch: false);
+            File.Delete(filePath);
+        }
+        [Fact]
+        public void Read_WrongTypeEnum_ThrowException()
+        {
+            var filePath = $"{nameof(Read_WrongGenericTypeDefinition_ThrowException)}.xlsx";
+
+            // Arrange
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+            var source = new List<AllTypeTestModel>();
+            // Act
+            _jfYuExcel.Write(source.AsQueryable(), filePath);
+            var ex = Record.Exception(() => _jfYuExcel.Read<Enum>(filePath));
+            Assert.IsType<NotSupportedException>(ex, exactMatch: false);
+            File.Delete(filePath);
+        }
+
+        [Fact]
         public void Read_EmptyFile_ReturnEmptyCollection()
         {
             var filePath = $"{nameof(Read_EmptyFile_ReturnEmptyCollection)}.xlsx";

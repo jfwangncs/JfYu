@@ -86,15 +86,11 @@ namespace JfYu.Office.Excel.Extensions
         {
             var type = typeof(T);
 
-            if (type.IsPrimitive || type == typeof(string))
+            if (type == typeof(string) || type == typeof(Enum))
                 throw new NotSupportedException($"Type '{type.Name}' is not supported. Use a class type only.");
 
             if (typeof(System.Collections.IEnumerable).IsAssignableFrom(type) && type != typeof(string))
                 throw new NotSupportedException($"Type '{type.Name}' is a collection. Only single class types are supported.");
-
-            if (type.IsValueType)
-                throw new NotSupportedException($"Type '{type.Name}' is a value type. Only reference class types are supported.");
-
 
             ISheet sheet = wb.GetSheetAt(sheetIndex);
             var list = new List<T>();
@@ -107,13 +103,20 @@ namespace JfYu.Office.Excel.Extensions
 
             Dictionary<int, PropertyInfo?> cellNums = [];
             var titles = isDynamic ? [] : GetTitles(type);
+            int x = 1;
             for (int i = headerRow.FirstCellNum; i < headerRow.LastCellNum; i++)
             {
-                var headerValue = headerRow.GetCell(i)?.StringCellValue?.Trim();
+                var headerValue = headerRow.GetCell(i).StringCellValue.Trim();
                 if (isDynamic)
                 {
                     cellNums[i] = typeof(string).GetProperties()[0];
-                    titles[i.ToString()] = NormalizeKey(headerValue);
+                    var key = NormalizeKey(headerValue);
+                    if (titles.ContainsValue(key))
+                    {
+                        key += x.ToString();
+                        x++;
+                    }
+                    titles[i.ToString()] = key;
                 }
                 else if (!string.IsNullOrEmpty(headerValue) && titles.ContainsValue(headerValue))
                     cellNums[i] = type.GetProperty(headerValue) ?? type.GetProperty(titles.FirstOrDefault(q => q.Value == headerValue).Key);

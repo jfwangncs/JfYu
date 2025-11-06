@@ -338,7 +338,53 @@ namespace JfYu.UnitTests.Office.Excel
         }
 
         #endregion
+        #region Special headers tests
+        [Fact]
+        public void ReadDynamic_SpecialHeaders_ReturnCorrectly()
+        {
+            // Arrange
+            var filePath = $"{nameof(ReadDynamic_SpecialHeaders_ReturnCorrectly)}.xlsx";
+            if (File.Exists(filePath)) File.Delete(filePath);
 
+            var wb = _jfYuExcel.CreateExcel();
+            var sheet = wb.CreateSheet("Sheet1");
+
+            // Chinese headers
+            var headerRow = sheet.CreateRow(0);
+            headerRow.CreateCell(0).SetCellValue("1234");
+            headerRow.CreateCell(1).SetCellValue(" ");
+            headerRow.CreateCell(2).SetCellValue("2dada");
+            headerRow.CreateCell(3).SetCellValue("!@#$%^&*(){}\\;'.,/~:\"<>?|");
+            headerRow.CreateCell(4).SetCellValue(" ");
+
+            var dataRow = sheet.CreateRow(1);
+            dataRow.CreateCell(0).SetCellValue("王小明");
+            dataRow.CreateCell(1).SetCellValue("研发部1");
+            dataRow.CreateCell(2).SetCellValue("研发部2");
+            dataRow.CreateCell(3).SetCellValue(15000.50);
+            dataRow.CreateCell(4).SetCellValue("研发部3");
+
+            using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
+            wb.Close();
+
+            // Act
+            var result = _jfYuExcel.Read<dynamic>(filePath);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result);
+
+            var record = result[0] as IDictionary<string, object>;
+            Assert.NotNull(record);
+            Assert.Equal("王小明", record["_1234"]);
+            Assert.Equal("研发部1", record["_"]);
+            Assert.Equal("研发部2", record["_2dada"]);
+            Assert.Equal(15000.50, record["_1"]);
+            Assert.Equal("研发部3", record["_2"]);
+
+            File.Delete(filePath);
+        }
+        #endregion
         #region Special characters and Chinese headers tests
 
         [Fact]
