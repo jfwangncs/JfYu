@@ -1,4 +1,5 @@
-﻿using JfYu.Office.Excel.Extensions;
+﻿using JfYu.Office.Excel.Constant;
+using JfYu.Office.Excel.Extensions;
 using Microsoft.Extensions.Options;
 using NPOI.SS.UserModel;
 using System;
@@ -12,12 +13,12 @@ namespace JfYu.Office.Excel.Write.Implementation
     /// The DataTable writer.
     /// </summary>
     /// <param name="configuration">The JfYuExcel configuration </param>
-    public class DataTableWriter(IOptions<JfYuExcelOption> configuration) : JfYuWriterBase<DataTable>
+    public class DataTableWriter(IOptions<JfYuExcelOptions> configuration) : JfYuWriterBase<DataTable>
     {
-        private readonly JfYuExcelOption _configuration = configuration.Value;
+        private readonly JfYuExcelOptions _configuration = configuration.Value;
 
         /// <inheritdoc/>
-        protected override void WriteDataToWorkbook(IWorkbook workbook, DataTable source, Dictionary<string, string>? titles = null, Action<int>? callback = null)
+        protected override void WriteDataToWorkbook(IWorkbook workbook, DataTable source, Dictionary<string, string>? titles = null, JfYuExcelOptions? writeOperation = null, Action<int>? callback = null)
         {
             if (titles == null)
             {
@@ -40,14 +41,14 @@ namespace JfYu.Office.Excel.Write.Implementation
             {
                 var dataRow = sheet.CreateRow(sheetWriteRowIndex);
                 var columnIndex = 0;
-                foreach (var key in titles.Select(q=>q.Key))
+                foreach (var key in titles.Select(q => q.Key))
                 {
                     var cell = dataRow.CreateCell(columnIndex);
                     SetValue(item[key].GetType(), item[key], cell);
                     columnIndex++;
                 }
                 sheetWriteRowIndex++;
-                if (sheetWriteRowIndex > _configuration.SheetMaxRecord)
+                if (sheetWriteRowIndex > (writeOperation?.SheetMaxRecord ?? _configuration.SheetMaxRecord))
                 {
                     sheetName = $"sheet{workbook.NumberOfSheets}";
                     sheet = workbook.CreateSheet(sheetName);

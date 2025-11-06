@@ -1,6 +1,7 @@
 ﻿#if NET8_0_OR_GREATER
 using JfYu.Office;
 using JfYu.Office.Excel;
+using JfYu.Office.Excel.Constant;
 using JfYu.Office.Excel.Extensions;
 using JfYu.Office.Excel.Write.Interface;
 using JfYu.UnitTests.Models;
@@ -40,7 +41,7 @@ namespace JfYu.UnitTests.Office.Excel
 
             var jfYuExcel = serviceProvider.GetService<IJfYuExcel>();
             var dataWrite = serviceProvider.GetService<IJfYuExcelWrite<DataTable>>();
-            var options = serviceProvider.GetRequiredService<IOptions<JfYuExcelOption>>();
+            var options = serviceProvider.GetRequiredService<IOptions<JfYuExcelOptions>>();
             Assert.NotNull(jfYuExcel);
             Assert.NotNull(dataWrite);
             Assert.Equal(22, options.Value.RowAccessSize);

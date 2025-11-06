@@ -6,8 +6,7 @@ using JfYu.UnitTests.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic;
 using Moq;
-using NPOI.SS.UserModel;
-using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
+using NPOI.SS.UserModel; 
 using System.Globalization;
 
 namespace JfYu.UnitTests.Office.Excel

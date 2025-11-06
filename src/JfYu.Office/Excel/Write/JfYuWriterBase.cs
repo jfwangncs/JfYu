@@ -15,15 +15,17 @@ namespace JfYu.Office.Excel.Write
     public abstract class JfYuWriterBase<T> : IJfYuExcelWrite<T> where T : notnull
     {
         /// <inheritdoc/>
-        protected abstract void WriteDataToWorkbook(IWorkbook workbook, T source, Dictionary<string, string>? titles = null, Action<int>? callback = null);
+        protected abstract void WriteDataToWorkbook(IWorkbook workbook, T source, Dictionary<string, string>? titles = null, JfYuExcelOptions? writeOperation = null, Action<int>? callback = null);
 
         /// <inheritdoc/>
-        public void Write(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelWriteOperation writeOperation = JfYuExcelWriteOperation.None, Action<int>? callback = null)
+        public void Write(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelOptions? writeOperation = null, Action<int>? callback = null)
         {
+            if (writeOperation is null)
+                writeOperation = new JfYuExcelOptions();
             IWorkbook wb;
             if (File.Exists(filePath))
             {
-                if (writeOperation == JfYuExcelWriteOperation.None)
+                if (writeOperation.AllowAppend == WriteOperation.None)
                     throw new FileNotFoundException(nameof(filePath));
                 using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
                 wb = WorkbookFactory.Create(fs);
@@ -37,12 +39,12 @@ namespace JfYu.Office.Excel.Write
                 else
                     throw new InvalidOperationException("Unsupported file format.");
             }
-            WriteDataToWorkbook(wb, source, titles, callback);
+            WriteDataToWorkbook(wb, source, titles, writeOperation, callback);
             var dir = Path.GetDirectoryName(filePath);
             if (!Directory.Exists(dir) && !string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                wb.Write(savefs); 
+                wb.Write(savefs);
             wb.Dispose();
         }
 

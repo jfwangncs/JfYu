@@ -1,10 +1,7 @@
 #if NET8_0_OR_GREATER
 using JfYu.Office;
-using JfYu.Office.Excel;
-using JfYu.Office.Excel.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using NPOI.SS.UserModel;
-using System.Dynamic;
+using JfYu.Office.Excel; 
+using Microsoft.Extensions.DependencyInjection; 
 
 namespace JfYu.UnitTests.Office.Excel
 {

@@ -3,7 +3,7 @@
     /// <summary>
     /// Enum representing the different write operations for Excel.
     /// </summary>
-    public enum JfYuExcelWriteOperation
+    public enum WriteOperation
     {
         /// <summary>
         /// No operation.If file exist throw error.

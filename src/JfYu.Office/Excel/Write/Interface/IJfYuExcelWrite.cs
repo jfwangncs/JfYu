@@ -19,6 +19,6 @@ namespace JfYu.Office.Excel.Write.Interface
         /// <param name="writeOperation">Specifies the write operation to perform (e.g., None, Append).</param>
         /// <param name="callback">Optional callback action to report progress.</param>
         /// <returns>Returns the created or modified IWorkbook instance.</returns>
-        void Write(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelWriteOperation writeOperation = JfYuExcelWriteOperation.None, Action<int>? callback = null);
+        void Write(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelOptions? writeOperation =null, Action<int>? callback = null);
     }
 }

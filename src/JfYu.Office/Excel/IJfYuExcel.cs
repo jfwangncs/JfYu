@@ -25,9 +25,9 @@ namespace JfYu.Office.Excel
         /// <param name="source">The data source.</param>
         /// <param name="filePath">The file path where the Excel file will be saved.</param>
         /// <param name="titles">Optional dictionary of column titles.</param>
-        /// <param name="writeOperation">Specifies the write operation to perform (e.g., None, Append).</param>
+        /// <param name="excelOption">Specifies the write operation to perform (e.g., None, Append).</param>
         /// <param name="callback">Optional callback action to report progress.</param> 
-        void Write<T>(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelWriteOperation writeOperation = JfYuExcelWriteOperation.None, Action<int>? callback = null) where T : notnull;
+        void Write<T>(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelOptions? excelOption = null, Action<int>? callback = null) where T : notnull;
 
         /// <summary>
         /// Writes data to a CSV file.

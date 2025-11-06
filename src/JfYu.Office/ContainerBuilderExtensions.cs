@@ -1,4 +1,5 @@
 ﻿using JfYu.Office.Excel;
+using JfYu.Office.Excel.Constant;
 using JfYu.Office.Excel.Write.Implementation;
 using JfYu.Office.Excel.Write.Interface;
 using JfYu.Office.Word;
@@ -20,15 +21,9 @@ namespace JfYu.Office
         /// <param name="services">The IServiceCollection to add services to.</param>
         /// <param name="setupAction">An optional action to configure JfYuExcelOption.</param>
         /// <returns>The IServiceCollection with the added services.</returns>
-        public static IServiceCollection AddJfYuExcel(this IServiceCollection services, Action<JfYuExcelOption>? setupAction = null)
+        public static IServiceCollection AddJfYuExcel(this IServiceCollection services, Action<JfYuExcelOptions>? setupAction = null)
         {
-            var options = new JfYuExcelOption();
-            services.Configure<JfYuExcelOption>(opts =>
-            {
-                opts.RowAccessSize = options.RowAccessSize;
-                opts.SheetMaxRecord = options.SheetMaxRecord;
-                setupAction?.Invoke(opts);
-            });
+            services.Configure<JfYuExcelOptions>(opts => setupAction?.Invoke(opts));
             services.AddScoped<IJfYuExcel, JfYuExcel>();
             services.AddScoped<IJfYuExcelWriterFactory, JfYuExcelWriterFactory>();
             services.AddScoped<IJfYuExcelWrite<DataTable>, DataTableWriter>();

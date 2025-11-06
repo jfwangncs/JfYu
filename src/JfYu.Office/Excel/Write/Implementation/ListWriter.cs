@@ -1,10 +1,12 @@
-﻿using JfYu.Office.Excel.Extensions;
+﻿using JfYu.Office.Excel.Constant;
+using JfYu.Office.Excel.Extensions;
 using Microsoft.Extensions.Options;
 using NPOI.SS.UserModel;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace JfYu.Office.Excel.Write.Implementation
@@ -13,12 +15,12 @@ namespace JfYu.Office.Excel.Write.Implementation
     /// Class for writing a list of data to an Excel workbook.
     /// </summary>
     /// <typeparam name="T">The type of data to be written to Excel.</typeparam>
-    public class ListWriter<T>(IOptions<JfYuExcelOption>? configuration = null) : JfYuWriterBase<T> where T : notnull
+    public class ListWriter<T>(IOptions<JfYuExcelOptions>? configuration = null) : JfYuWriterBase<T> where T : notnull
     {
-        private readonly JfYuExcelOption _configuration = configuration?.Value ?? new JfYuExcelOption();
+        private readonly JfYuExcelOptions _configuration = configuration?.Value ?? new JfYuExcelOptions();
 
         /// <inheritdoc/>
-        protected override void WriteDataToWorkbook(IWorkbook workbook, T source, Dictionary<string, string>? titles = null, Action<int>? callback = null)
+        protected override void WriteDataToWorkbook(IWorkbook workbook, T source, Dictionary<string, string>? titles = null, JfYuExcelOptions? writeOperation = null, Action<int>? callback = null)
         {
             if (!source.GetType().IsConstructedGenericType)
                 throw new InvalidOperationException($"Unsupported data type {typeof(T)}.");
@@ -37,10 +39,10 @@ namespace JfYu.Office.Excel.Write.Implementation
                 {
                     if (newData[i] is IList newItemData)
                     {
-                        if (newItemData.Count > _configuration.SheetMaxRecord)
-                            throw new NotSupportedException($"For write multiple sheets each sheet count need less than SheetMaxRecord:{_configuration.SheetMaxRecord}");
+                        if (newItemData.Count > (writeOperation?.SheetMaxRecord ?? _configuration.SheetMaxRecord))
+                            throw new NotSupportedException($"For write multiple sheets each sheet count need less than SheetMaxRecord:{writeOperation?.SheetMaxRecord ?? _configuration.SheetMaxRecord}");
                         tType = newItemData.GetType().GetGenericArguments()[0];
-                        Write(newItemData.AsQueryable(), workbook, tType, titles, callback);
+                        Write(newItemData.AsQueryable(), workbook, tType, titles, writeOperation ?? _configuration, callback);
                     }
                 }
                 return;
@@ -48,7 +50,7 @@ namespace JfYu.Office.Excel.Write.Implementation
             else
                 throw new InvalidOperationException($"Unsupported data type {typeof(T)}.");
 
-            Write(data, workbook, tType, titles, callback);
+            Write(data, workbook, tType, titles, writeOperation ?? _configuration, callback);
         }
 
         /// <summary>
@@ -61,7 +63,7 @@ namespace JfYu.Office.Excel.Write.Implementation
         /// <param name="callback">Optional callback action to report progress.</param>
         /// <param name="needAutoCreateSheet">Indicates whether to automatically create new sheets when the row limit is reached.</param>
         /// <exception cref="InvalidOperationException">Thrown when a title's value cannot be found.</exception>
-        protected void Write(IQueryable data, IWorkbook workbook, Type tType, Dictionary<string, string>? titles, Action<int>? callback = null, bool needAutoCreateSheet = true)
+        protected void Write(IQueryable data, IWorkbook workbook, Type tType, Dictionary<string, string>? titles, JfYuExcelOptions? writeOperation = null, Action<int>? callback = null, bool needAutoCreateSheet = true)
         {
             if (tType.IsSimpleType())
                 titles ??= new Dictionary<string, string>() { { "A", "A" } };
@@ -73,6 +75,7 @@ namespace JfYu.Office.Excel.Write.Implementation
             int sheetWriteRowIndex = 1;
             int writedCount = 0;
             var enumerator = data.GetEnumerator();
+            var properties = tType.GetProperties().ToDictionary(k => k.Name, k => k);
             while (enumerator.MoveNext())
             {
                 var dataRow = sheet.CreateRow(sheetWriteRowIndex);
@@ -80,7 +83,7 @@ namespace JfYu.Office.Excel.Write.Implementation
                 foreach (var key in titles.Select(q => q.Key))
                 {
                     var cell = dataRow.CreateCell(columnIndex);
-                    var valueType = tType.GetProperty(key);
+                    properties.TryGetValue(key, out PropertyInfo? valueType);
                     if (tType.IsSimpleType())
                         SetValue(tType, enumerator.Current, cell);
                     else if (valueType != null)
@@ -90,7 +93,7 @@ namespace JfYu.Office.Excel.Write.Implementation
                     columnIndex++;
                 }
                 sheetWriteRowIndex++;
-                if (needAutoCreateSheet && sheetWriteRowIndex > _configuration.SheetMaxRecord)
+                if (sheetWriteRowIndex > (writeOperation?.SheetMaxRecord ?? _configuration.SheetMaxRecord))
                 {
                     sheetName = $"sheet{workbook.NumberOfSheets}";
                     sheet = workbook.CreateSheet(sheetName);

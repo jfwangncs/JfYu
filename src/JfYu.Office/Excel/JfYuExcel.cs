@@ -25,9 +25,9 @@ namespace JfYu.Office.Excel
     /// concurrent operations may require separate instances.</remarks>
     /// <param name="excelWriterFactory">The factory used to create Excel writer instances for handling different data types and write operations.</param>
     /// <param name="configuration">The configuration options for Excel operations. If not specified, default options are used.</param>
-    public class JfYuExcel(IJfYuExcelWriterFactory? excelWriterFactory = null, IOptions<JfYuExcelOption>? configuration = null) : IJfYuExcel
+    public class JfYuExcel(IJfYuExcelWriterFactory? excelWriterFactory = null, IOptions<JfYuExcelOptions>? configuration = null) : IJfYuExcel
     {
-        private readonly JfYuExcelOption _configuration = configuration?.Value ?? new JfYuExcelOption();
+        private readonly JfYuExcelOptions _configuration = configuration?.Value ?? new JfYuExcelOptions();
         private readonly IJfYuExcelWriterFactory _excelWriterFactory = excelWriterFactory ?? new DefaultExcelWriterFactory();
 
 
@@ -38,12 +38,12 @@ namespace JfYu.Office.Excel
         }
 
         /// <inheritdoc/>
-        public void Write<T>(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelWriteOperation writeOperation = JfYuExcelWriteOperation.None, Action<int>? callback = null) where T : notnull
+        public void Write<T>(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelOptions? excelOption = null, Action<int>? callback = null) where T : notnull
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentException.ThrowIfNullOrEmpty(filePath);
             var writer = _excelWriterFactory.GetWriter<T>();
-            writer.Write(source, filePath, titles, writeOperation, callback);
+            writer.Write(source, filePath, titles, excelOption ?? _configuration, callback);
         }
         /// <inheritdoc/>
         public void WriteCSV<T>(List<T> source, string filePath, Dictionary<string, string>? titles = null, Action<int>? callback = null)
