@@ -38,12 +38,12 @@ namespace JfYu.Office.Excel
         }
 
         /// <inheritdoc/>
-        public IWorkbook Write<T>(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelWriteOperation writeOperation = JfYuExcelWriteOperation.None, Action<int>? callback = null) where T : notnull
+        public void Write<T>(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelWriteOperation writeOperation = JfYuExcelWriteOperation.None, Action<int>? callback = null) where T : notnull
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentException.ThrowIfNullOrEmpty(filePath);
             var writer = _excelWriterFactory.GetWriter<T>();
-            return writer.Write(source, filePath, titles, writeOperation, callback);
+            writer.Write(source, filePath, titles, writeOperation, callback);
         }
         /// <inheritdoc/>
         public void WriteCSV<T>(List<T> source, string filePath, Dictionary<string, string>? titles = null, Action<int>? callback = null)

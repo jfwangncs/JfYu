@@ -18,7 +18,7 @@ namespace JfYu.Office.Excel.Write
         protected abstract void WriteDataToWorkbook(IWorkbook workbook, T source, Dictionary<string, string>? titles = null, Action<int>? callback = null);
 
         /// <inheritdoc/>
-        public IWorkbook Write(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelWriteOperation writeOperation = JfYuExcelWriteOperation.None, Action<int>? callback = null)
+        public void Write(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelWriteOperation writeOperation = JfYuExcelWriteOperation.None, Action<int>? callback = null)
         {
             IWorkbook wb;
             if (File.Exists(filePath))
@@ -42,10 +42,8 @@ namespace JfYu.Office.Excel.Write
             if (!Directory.Exists(dir) && !string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                wb.Write(savefs);
-            wb.Close();
-            return wb;
-
+                wb.Write(savefs); 
+            wb.Dispose();
         }
 
         /// <inheritdoc/>
