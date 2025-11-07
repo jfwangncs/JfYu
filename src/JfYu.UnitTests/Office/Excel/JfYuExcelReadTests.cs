@@ -254,6 +254,48 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.Null(data);
         }
+
+        [Fact]
+        public void Read_ModelTitleIsMoreThanExcel_ReturnCorrectly()
+        {
+            var filePath = nameof(Read_ModelTitleIsMoreThanExcel_ReturnCorrectly) + ".xlsx";
+            if (File.Exists(filePath)) File.Delete(filePath);
+
+            var wb = _jfYuExcel.CreateExcel();
+            var sheet = wb.CreateSheet("Sheet1");
+
+            // header at row 0
+            var header = sheet.CreateRow(0);
+            header.CreateCell(0).SetCellValue("Id");
+            header.CreateCell(1).SetCellValue("ExpiresIn");
+            header.CreateCell(2).SetCellValue("xxxx");
+            var d1 = DateTime.Now.AddDays(10);
+            // data row at 1
+            var data1 = sheet.CreateRow(1);
+            data1.CreateCell(0).SetCellValue("1");
+            data1.CreateCell(1).SetCellValue(d1);
+
+
+            // data row at 3
+            var d2 = DateTime.Now.AddDays(20);
+            var data3 = sheet.CreateRow(3);
+            data3.CreateCell(0).SetCellValue("2");
+            data3.CreateCell(1).SetCellValue(d2);
+
+            using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(fs);
+            wb.Close();
+
+            var result = _jfYuExcel.Read<TestSubModel>(filePath);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
+            Assert.Equal(1, result[0].Id);
+            Assert.Equal($"{d1:G}", $"{result[0].ExpiresIn:G}" );
+            Assert.Equal(2, result[1].Id);
+            Assert.Equal($"{d2:G}", $"{result[1].ExpiresIn:G}");
+
+            File.Delete(filePath);
+        }
+
         [Fact]
         public void Read_SkipsNullRows_WhenEncounteredBetweenFirstAndLastRow()
         {

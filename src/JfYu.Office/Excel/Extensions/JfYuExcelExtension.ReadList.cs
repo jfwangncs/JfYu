@@ -71,6 +71,9 @@ namespace JfYu.Office.Excel.Extensions
             if (targetType == typeof(string))
                 return rawValue.ToString();
 
+            if (targetType == typeof(DateTime)&& cell.DateCellValue.HasValue)
+                rawValue = cell.DateCellValue;
+
             return Convert.ChangeType(rawValue, targetType, CultureInfo.InvariantCulture);
         }
 
@@ -118,7 +121,7 @@ namespace JfYu.Office.Excel.Extensions
                     }
                     titles[i.ToString()] = key;
                 }
-                else if (!string.IsNullOrEmpty(headerValue) && titles.ContainsValue(headerValue))
+                else if (titles.ContainsValue(headerValue))
                     cellNums[i] = type.GetProperty(headerValue) ?? type.GetProperty(titles.FirstOrDefault(q => q.Value == headerValue).Key);
             }
 
