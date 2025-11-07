@@ -254,6 +254,40 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.Null(data);
         }
+        [Fact]
+        public void Read_SkipsNullRows_WhenEncounteredBetweenFirstAndLastRow()
+        {
+            var filePath = nameof(Read_SkipsNullRows_WhenEncounteredBetweenFirstAndLastRow) + ".xlsx";
+            if (File.Exists(filePath)) File.Delete(filePath);
+
+            var wb = _jfYuExcel.CreateExcel();
+            var sheet = wb.CreateSheet("Sheet1");
+
+            // header at row 0
+            var header = sheet.CreateRow(0);
+            header.CreateCell(0).SetCellValue("Value");
+
+            // data row at 1
+            var data1 = sheet.CreateRow(1);
+            data1.CreateCell(0).SetCellValue("A1");
+
+            // do NOT create row 2 -> should be null
+
+            // data row at 3
+            var data3 = sheet.CreateRow(3);
+            data3.CreateCell(0).SetCellValue("A3");
+
+            using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(fs);
+            wb.Close();
+
+            var result = _jfYuExcel.Read<dynamic>(filePath);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
+            Assert.Equal("A1", result[0].Value);
+            Assert.Equal("A3", result[1].Value);
+
+            File.Delete(filePath);
+        }
         [Theory]
         [InlineData("2023-01-01", "yyyy-MM-dd")]
         [InlineData("01/01/2023", "dd/MM/yyyy")]
