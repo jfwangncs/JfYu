@@ -157,7 +157,7 @@ namespace JfYu.Office.Excel.Extensions
                             else if (Type.GetTypeCode(p.PropertyType) == TypeCode.String)
                                 p.SetValue(item, null, null);
                             else
-                                throw new InvalidCastException($"Convert {p.Name} get error,value:{result}，model type:{p.PropertyType.Name},excel type {cell?.CellType}.");
+                                throw new InvalidCastException($"Convert {p.Name} get error,value:{result}，model type:{p.PropertyType.Name},excel type {cell.CellType}.");
                         }
                     }
                 }

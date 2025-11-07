@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System.Data;
 using System.Globalization;
+using System.IO;
 
 namespace JfYu.UnitTests.Office.Excel
 {
@@ -22,6 +23,23 @@ namespace JfYu.UnitTests.Office.Excel
             var serviceProvider = services.BuildServiceProvider();
             _jfYuExcel = serviceProvider.GetRequiredService<IJfYuExcel>();
         }
+        [Fact]
+        public void ListWriter_WithMultipleSheetButMoreThanMax_ThrowException()
+        {
+            var filePath = $"{nameof(ListWriter_WithMultipleSheetButMoreThanMax_ThrowException)}.xlsx";
+            // Arrange
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+ 
+            var d1 = new TestModelFaker().Generate(26);
+            d1.ForEach(q => { q.DateTime = DateTime.Parse(q.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), CultureInfo.InvariantCulture); q.Sub = null; q.Items = []; });
+            // Act 
+            var source = new Tuple<List<TestModel>, List<TestModel>>(d1, d1);            ;
+
+            var ex = Record.Exception(() => _jfYuExcel.Write(source, filePath, excelOption: new JfYuExcelOptions() { SheetMaxRecord = 10 }));
+            Assert.IsAssignableFrom<Exception>(ex);
+        }
+
         [Fact]
         public void ListWriter_WithoutTitles_ReturnCorrectly()
         {

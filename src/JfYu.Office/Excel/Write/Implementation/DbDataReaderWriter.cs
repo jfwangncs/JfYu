@@ -1,6 +1,5 @@
 ﻿using JfYu.Office.Excel.Constant;
 using JfYu.Office.Excel.Extensions;
-using Microsoft.Extensions.Options;
 using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
@@ -12,13 +11,11 @@ namespace JfYu.Office.Excel.Write.Implementation
     /// <summary>
     /// The DbDataReader writer.
     /// </summary>
-    /// <param name="configuration">The JfYuExcel configuration </param>
-    public class DbDataReaderWriter(IOptions<JfYuExcelOptions> configuration) : JfYuWriterBase<DbDataReader>
+    public class DbDataReaderWriter : JfYuWriterBase<DbDataReader>
     {
-        private readonly JfYuExcelOptions _configuration = configuration.Value;
 
         /// <inheritdoc/>
-        protected override void WriteDataToWorkbook(IWorkbook workbook, DbDataReader source, Dictionary<string, string>? titles = null, JfYuExcelOptions? writeOperation = null, Action<int>? callback = null)
+        protected override void WriteDataToWorkbook(IWorkbook workbook, DbDataReader source, JfYuExcelOptions writeOperation, Dictionary<string, string>? titles = null, Action<int>? callback = null)
         {
             if (source.IsClosed)
                 throw new DataException("Data Connection is closed.");
@@ -43,7 +40,7 @@ namespace JfYu.Office.Excel.Write.Implementation
                     columnIndex++;
                 }
                 sheetWriteRowIndex++;
-                if (sheetWriteRowIndex > (writeOperation?.SheetMaxRecord ?? _configuration.SheetMaxRecord))
+                if (sheetWriteRowIndex > writeOperation.SheetMaxRecord)
                 {
                     sheetName = $"sheet{workbook.NumberOfSheets}";
                     sheet = workbook.CreateSheet(sheetName);

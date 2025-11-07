@@ -43,7 +43,7 @@ namespace JfYu.Office.Excel
             ArgumentNullException.ThrowIfNull(source);
             ArgumentException.ThrowIfNullOrEmpty(filePath);
             var writer = _excelWriterFactory.GetWriter<T>();
-            writer.Write(source, filePath, titles, excelOption ?? _configuration, callback);
+            writer.Write(source, filePath, excelOption ?? _configuration, titles, callback);
         }
         /// <inheritdoc/>
         public void WriteCSV<T>(List<T> source, string filePath, Dictionary<string, string>? titles = null, Action<int>? callback = null)

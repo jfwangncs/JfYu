@@ -15,13 +15,11 @@ namespace JfYu.Office.Excel.Write
     public abstract class JfYuWriterBase<T> : IJfYuExcelWrite<T> where T : notnull
     {
         /// <inheritdoc/>
-        protected abstract void WriteDataToWorkbook(IWorkbook workbook, T source, Dictionary<string, string>? titles = null, JfYuExcelOptions? writeOperation = null, Action<int>? callback = null);
+        protected abstract void WriteDataToWorkbook(IWorkbook workbook, T source, JfYuExcelOptions writeOperation, Dictionary<string, string>? titles = null, Action<int>? callback = null);
 
         /// <inheritdoc/>
-        public void Write(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelOptions? writeOperation = null, Action<int>? callback = null)
+        public void Write(T source, string filePath, JfYuExcelOptions writeOperation, Dictionary<string, string>? titles = null, Action<int>? callback = null)
         {
-            if (writeOperation is null)
-                writeOperation = new JfYuExcelOptions();
             IWorkbook wb;
             if (File.Exists(filePath))
             {
@@ -39,7 +37,7 @@ namespace JfYu.Office.Excel.Write
                 else
                     throw new InvalidOperationException("Unsupported file format.");
             }
-            WriteDataToWorkbook(wb, source, titles, writeOperation, callback);
+            WriteDataToWorkbook(wb, source, writeOperation,titles, callback);
             var dir = Path.GetDirectoryName(filePath);
             if (!Directory.Exists(dir) && !string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);

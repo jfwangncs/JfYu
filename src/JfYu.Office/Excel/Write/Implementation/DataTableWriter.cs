@@ -1,6 +1,5 @@
 ﻿using JfYu.Office.Excel.Constant;
 using JfYu.Office.Excel.Extensions;
-using Microsoft.Extensions.Options;
 using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
@@ -12,13 +11,10 @@ namespace JfYu.Office.Excel.Write.Implementation
     /// <summary>
     /// The DataTable writer.
     /// </summary>
-    /// <param name="configuration">The JfYuExcel configuration </param>
-    public class DataTableWriter(IOptions<JfYuExcelOptions> configuration) : JfYuWriterBase<DataTable>
+    public class DataTableWriter : JfYuWriterBase<DataTable>
     {
-        private readonly JfYuExcelOptions _configuration = configuration.Value;
-
         /// <inheritdoc/>
-        protected override void WriteDataToWorkbook(IWorkbook workbook, DataTable source, Dictionary<string, string>? titles = null, JfYuExcelOptions? writeOperation = null, Action<int>? callback = null)
+        protected override void WriteDataToWorkbook(IWorkbook workbook, DataTable source, JfYuExcelOptions writeOperation, Dictionary<string, string>? titles = null, Action<int>? callback = null)
         {
             if (titles == null)
             {
@@ -48,7 +44,7 @@ namespace JfYu.Office.Excel.Write.Implementation
                     columnIndex++;
                 }
                 sheetWriteRowIndex++;
-                if (sheetWriteRowIndex > (writeOperation?.SheetMaxRecord ?? _configuration.SheetMaxRecord))
+                if (sheetWriteRowIndex > (writeOperation.SheetMaxRecord))
                 {
                     sheetName = $"sheet{workbook.NumberOfSheets}";
                     sheet = workbook.CreateSheet(sheetName);
