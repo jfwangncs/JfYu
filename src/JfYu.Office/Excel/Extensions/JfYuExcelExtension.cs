@@ -14,16 +14,20 @@ using System.Text;
 namespace JfYu.Office.Excel.Extensions
 {
     /// <summary>
-    /// The extension methods for Excel operations.
+    /// Provides extension methods for Excel operations including workbook creation, title extraction, and sheet manipulation.
+    /// These methods support both NPOI ISheet and IWorkbook objects.
     /// </summary>
     public static partial class JfYuExcelExtension
     {
         /// <summary>
-        /// Creates an Excel workbook.
+        /// Creates an Excel workbook of the specified version.
+        /// For .xlsx files, creates a streaming workbook (SXSSFWorkbook) for memory-efficient large file operations.
+        /// For .xls files, creates a standard HSSFWorkbook.
         /// </summary>
-        /// <param name="excelVersion">The version of the Excel file to create.</param>
-        /// <param name="rowAccessSize">The row access size for the workbook.</param>
-        /// <returns>The created workbook.</returns>
+        /// <param name="excelVersion">The Excel file format version to create (Xlsx or Xls).</param>
+        /// <param name="rowAccessSize">The number of rows to keep in memory for SXSSF streaming mode. Default is 1000. Smaller values reduce memory usage.</param>
+        /// <returns>An IWorkbook instance of the specified type.</returns>
+        /// <exception cref="ArgumentException">Thrown when attempting to create a CSV file (use WriteCSV method instead).</exception>
         public static IWorkbook CreateExcel(JfYuExcelVersion excelVersion = JfYuExcelVersion.Xlsx, int rowAccessSize = 1000)
         {
             if (excelVersion == JfYuExcelVersion.Xls)
@@ -35,10 +39,11 @@ namespace JfYu.Office.Excel.Extensions
         }
 
         /// <summary>
-        /// Gets the titles of the properties of a given type T.
+        /// Extracts property titles from a type T, using DisplayName attributes when available.
+        /// Only includes simple types (primitives, strings, dates, enums, GUIDs, decimals).
         /// </summary>
-        /// <typeparam name="T">The type to get the property titles from.</typeparam>
-        /// <returns>A dictionary with property names as keys and display names as values.</returns>
+        /// <typeparam name="T">The type to extract property titles from.</typeparam>
+        /// <returns>A dictionary mapping property names to their display names (from DisplayName attribute or property name if not specified).</returns>
         public static Dictionary<string, string> GetTitles<T>()
         {
             var titles = new Dictionary<string, string>();
@@ -59,10 +64,11 @@ namespace JfYu.Office.Excel.Extensions
         }
 
         /// <summary>
-        /// Gets the titles of the properties of a given type.
+        /// Extracts property titles from a runtime Type, using DisplayName attributes when available.
+        /// Only includes simple types (primitives, strings, dates, enums, GUIDs, decimals).
         /// </summary>
-        /// <param name="type">The type to get the property titles from.</param>
-        /// <returns>A dictionary with property names as keys and display names as values.</returns>
+        /// <param name="type">The Type to extract property titles from.</param>
+        /// <returns>A dictionary mapping property names to their display names (from DisplayName attribute or property name if not specified).</returns>
         public static Dictionary<string, string> GetTitles(Type type)
         {
             var titles = new Dictionary<string, string>();
@@ -82,11 +88,13 @@ namespace JfYu.Office.Excel.Extensions
         }
 
         /// <summary>
-        /// Adds a title row to the given sheet.
+        /// Adds a formatted title row to the first row (index 0) of the sheet.
+        /// Applies bold, centered styling and automatically adjusts column widths based on title text length.
         /// </summary>
         /// <param name="sheet">The sheet to add the title row to.</param>
-        /// <param name="titles">A dictionary with column names and their corresponding titles.</param>
-        /// <returns>The sheet with the added title row.</returns>
+        /// <param name="titles">A dictionary mapping column keys to their display titles. The order determines column positions.</param>
+        /// <returns>The same sheet instance with the title row added, for method chaining.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when sheet is null.</exception>
         public static ISheet AddTitle(this ISheet sheet, Dictionary<string, string> titles)
         {
             ArgumentNullException.ThrowIfNull(sheet);

@@ -7,16 +7,23 @@ using System.IO;
 namespace JfYu.Office.Word.Extensions
 {
     /// <summary>
-    /// Provides extension methods for working with Word documents.
+    /// Provides extension methods for Word document manipulation using NPOI.
+    /// Includes methods for inserting images and replacing placeholders in document runs.
     /// </summary>
     public static class JfYuWordExtension
     {
         /// <summary>
-        /// Creates a picture in the specified run, replacing a placeholder with the image.
+        /// Inserts a picture into the specified run, optionally replacing a {key} placeholder.
+        /// If the run's text contains the placeholder {key}, the placeholder is removed and the image is inserted at that position.
+        /// The method intelligently splits text around the placeholder, preserving any text before and after it.
         /// </summary>
-        /// <param name="run">The run where the picture will be inserted.</param>
-        /// <param name="replacement">The replacement containing the key and the picture.</param>
-        /// <exception cref="ArgumentNullException">Thrown when the run or replacement is null.</exception>
+        /// <param name="run">The XWPFRun where the picture will be inserted or that contains the placeholder text.</param>
+        /// <param name="replacement">The replacement object containing the placeholder key and JfYuWordPicture value with image data and dimensions.</param>
+        /// <exception cref="ArgumentNullException">Thrown when run or replacement is null.</exception>
+        /// <remarks>
+        /// The image dimensions (Width and Height) in JfYuWordPicture are converted to EMUs (English Metric Units) before insertion.
+        /// Typical values: 100 for small images, 200 for medium, 400 for larger images.
+        /// </remarks>
         public static void CreatePicture(XWPFRun run, JfYuWordReplacement replacement)
         {
             ArgumentNullException.ThrowIfNull(run);
