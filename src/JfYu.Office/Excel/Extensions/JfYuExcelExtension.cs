@@ -33,7 +33,11 @@ namespace JfYu.Office.Excel.Extensions
             if (excelVersion == JfYuExcelVersion.Xls)
                 return new HSSFWorkbook();
             else if (excelVersion == JfYuExcelVersion.Xlsx)
+            {
+#pragma warning disable CA2000 // SXSSFWorkbook takes ownership of XSSFWorkbook and will dispose it when SXSSFWorkbook is disposed
                 return new SXSSFWorkbook(new XSSFWorkbook(), rowAccessSize);
+#pragma warning restore CA2000
+            }
             else
                 throw new ArgumentException("not support create CSV file");
         }

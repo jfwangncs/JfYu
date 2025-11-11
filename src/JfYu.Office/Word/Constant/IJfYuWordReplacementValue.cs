@@ -17,7 +17,9 @@
         /// <summary>
         /// Gets or sets the image data as a byte array. Supports common formats like PNG, JPG, etc.
         /// </summary>
+#pragma warning disable CA1819 // Properties should not return arrays - byte[] is appropriate for binary image data
         public byte[] Bytes { get; set; } = [];
+#pragma warning restore CA1819
 
         /// <summary>
         /// Gets or sets the width of the inserted image in EMUs (English Metric Units).
