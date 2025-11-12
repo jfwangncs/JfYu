@@ -606,7 +606,10 @@ namespace JfYu.UnitTests.Request
                 Proxy = new WebProxy("http://example.cn1")
             };
             var services = new ServiceCollection();
-            services.AddJfYuHttpClient(() => handler);
+            services.AddJfYuHttpClient(options =>
+            {
+                options.HttpClientHandler = () => handler;
+            });
 
             services.AddSingleton<ILogger<JfYuHttpClient>>(q => { return null!; });
             var serviceProvider = services.BuildServiceProvider();
@@ -641,7 +644,10 @@ namespace JfYu.UnitTests.Request
                 ServerCertificateCustomValidationCallback = (a, b, c, d) => true
             };
             var services = new ServiceCollection();
-            services.AddJfYuHttpClient(() => handler);
+            services.AddJfYuHttpClient(options =>
+            {
+                options.HttpClientHandler = () => handler;
+            });
 
             services.AddSingleton<ILogger<JfYuHttpClient>>(q => { return null!; });
             var serviceProvider = services.BuildServiceProvider();
@@ -713,7 +719,10 @@ namespace JfYu.UnitTests.Request
             using var handler = new HttpClientHandler();
             handler.ClientCertificates.Add(cert);
             var services = new ServiceCollection();
-            services.AddJfYuHttpClient(() => handler);
+            services.AddJfYuHttpClient(options =>
+            {
+                options.HttpClientHandler = () => handler;
+            });
             services.AddSingleton<ILogger<JfYuHttpClient>>(q => { return null!; });
             var serviceProvider = services.BuildServiceProvider();
             var client = serviceProvider.GetRequiredService<IJfYuRequest>();

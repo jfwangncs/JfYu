@@ -48,65 +48,101 @@ namespace JfYu.Request.Extension
 #if NET8_0_OR_GREATER
 
         /// <summary>
-        /// Registers the modern HttpClient-based HTTP service with HttpClientFactory support.
+        /// Registers the modern HttpClient-based HTTP service with HttpClientFactory support and configurable options.
         /// Recommended for .NET 8+ applications due to better connection pooling, handler lifetime management, and testability.
         /// </summary>
         /// <param name="services">The IServiceCollection to add services to.</param>
-        /// <param name="httpClientHandler">Optional factory function to provide a custom HttpClientHandler. If null, uses a default handler with cookie management and automatic decompression.</param>
+        /// <param name="configureOptions">Optional action to configure HttpClient options including client name, handler, and client configuration.</param>
         /// <param name="filter">Optional action to configure logging filters for request/response data sanitization and field selection.</param>
         /// <remarks>
-        /// Default configuration when httpClientHandler is null:
-        /// - Automatic cookie management via CookieContainer (shared singleton)
-        /// - Automatic decompression for GZip, Deflate, and Brotli
-        /// - HttpClientFactory integration for proper handler lifecycle and connection pooling
+        /// This overload allows full customization of HttpClient behavior through JfYuHttpClientOptions.
+        /// You can configure:
+        /// - Custom HttpClient name for multiple client registrations
+        /// - Custom HttpClientHandler for proxy, SSL, compression settings
+        /// - Client-level configuration (timeout, default headers)
+        /// - Cookie container sharing behavior
         /// 
-        /// For proxy or SSL certificates with HttpClient, configure via the HttpClientHandler:
-        /// <code>
-        /// services.AddJfYuHttpClient(() => new HttpClientHandler
-        /// {
-        ///     Proxy = new WebProxy("http://proxy:8080"),
-        ///     UseProxy = true,
-        ///     ClientCertificates = { myCertificate },
-        ///     ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true // for testing only
-        /// });
-        /// </code>
+        /// Default configuration when configureOptions is null:
+        /// - HttpClient name: "JfYuHttpClient"
+        /// - Automatic cookie management via shared CookieContainer singleton
+        /// - Automatic decompression for GZip, Deflate, and Brotli
         /// </remarks>
         /// <example>
         /// <code>
-        /// // Default configuration
+        /// // Simple registration with defaults
         /// services.AddJfYuHttpClient();
         /// 
-        /// // With custom handler and logging
-        /// services.AddJfYuHttpClient(
-        ///     () => new HttpClientHandler { UseCookies = true },
-        ///     filter =>
+        /// // Register multiple named clients with different configurations
+        /// services.AddJfYuHttpClient(options =>
+        /// {
+        ///     options.HttpClientName = "ApiClient";
+        ///     options.HttpClientHandler = () => new HttpClientHandler
         ///     {
-        ///         filter.LoggingFields = JfYuLoggingFields.RequestUrl | JfYuLoggingFields.ResponseStatus;
-        ///         filter.RequestFilter = r => r; // custom sanitization
-        ///     }
-        /// );
+        ///         Proxy = new WebProxy("http://proxy:8080"),
+        ///         UseProxy = true
+        ///     };
+        ///     options.ConfigureClient = client =>
+        ///     {
+        ///         client.Timeout = TimeSpan.FromMinutes(5);
+        ///         client.DefaultRequestHeaders.Add("X-Api-Key", "secret");
+        ///     };
+        /// }, filter =>
+        /// {
+        ///     filter.LoggingFields = JfYuLoggingFields.All;
+        /// });
+        /// 
+        /// // Register another client for a different API
+        /// services.AddJfYuHttpClient(options =>
+        /// {
+        ///     options.HttpClientName = "ExternalApi";
+        ///     options.UseSharedCookieContainer = false;
+        /// });
         /// </code>
         /// </example>
-        public static void AddJfYuHttpClient(this IServiceCollection services, Func<HttpClientHandler>? httpClientHandler = null, Action<LogFilter>? filter = null)
+        public static void AddJfYuHttpClient(this IServiceCollection services, Action<JfYuHttpClientOptions>? configureOptions = null, Action<LogFilter>? filter = null)
         {
-            var build = services.AddHttpClient("httpclient");
-            services.AddSingleton<CookieContainer>();
-            if (httpClientHandler is not null)
-                build.ConfigurePrimaryHttpMessageHandler(httpClientHandler);
+            var options = new JfYuHttpClientOptions();
+            configureOptions?.Invoke(options);
+
+            var build = services.AddHttpClient(options.HttpClientName);
+            
+            if (options.UseSharedCookieContainer)
+                services.AddSingleton<CookieContainer>();
+
+            if (options.HttpClientHandler is not null)
+            {
+                build.ConfigurePrimaryHttpMessageHandler(options.HttpClientHandler);
+            }
             else
             {
                 build.ConfigurePrimaryHttpMessageHandler(sp =>
                 {
-                    var cookieContainer = sp.GetRequiredService<CookieContainer>();
-                    return new HttpClientHandler
+                    var handler = new HttpClientHandler
                     {
-                        CookieContainer = cookieContainer,
                         AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli
                     };
+
+                    if (options.UseSharedCookieContainer)
+                    {
+                        var cookieContainer = sp.GetRequiredService<CookieContainer>();
+                        handler.CookieContainer = cookieContainer;
+                    }
+
+                    return handler;
                 });
             }
 
+            if (options.ConfigureClient is not null)
+            {
+                build.ConfigureHttpClient(options.ConfigureClient);
+            }
+
+            // Store the HttpClient name in DI for JfYuHttpClient to use
+            services.AddSingleton(new JfYuHttpClientConfiguration { HttpClientName = options.HttpClientName });
+
             services.AddScoped<IJfYuRequest, JfYuHttpClient>();
+            services.AddScoped<IJfYuRequestFactory, JfYuRequestFactory>();
+            
             var logFilter = new LogFilter();
             filter?.Invoke(logFilter);
             services.AddSingleton(logFilter);
