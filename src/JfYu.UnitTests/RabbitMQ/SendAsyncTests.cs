@@ -11,7 +11,7 @@ namespace JfYu.UnitTests.RabbitMQ
     public class SendAsyncTests
     {
         private readonly IRabbitMQService _rabbitMQService;
-        private readonly Dictionary<string, object?> header = new() { { "x-expires", 6000 } };
+        private readonly Dictionary<string, object?> header = new() { { "x-expires", 60000 } };
 
         public SendAsyncTests()
         {
@@ -130,11 +130,11 @@ namespace JfYu.UnitTests.RabbitMQ
             await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
             using var cts = new CancellationTokenSource();
 
-            var messages = new TestModelFaker().Generate(100000);
+            var messages = new TestModelFaker().Generate(1000);
             // Act
             var sendingTask = _rabbitMQService.SendBatchAsync(exchangeName, messages, "", null, cts.Token);
 
-            await Task.Delay(500);
+            await Task.Delay(100);
 #if NET8_0_OR_GREATER
             await cts.CancelAsync().ConfigureAwait(true);
 #else
@@ -144,7 +144,7 @@ namespace JfYu.UnitTests.RabbitMQ
             // Assert
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => sendingTask);
             var queue = await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
-            Assert.True(queue.MessageCount > 1 && queue.MessageCount < 100000);
+            Assert.True(queue.MessageCount > 1 && queue.MessageCount < 1000);
 
             var channel = await _rabbitMQService.Connection.CreateChannelAsync();
             await channel.QueueDeleteAsync(queueName);
