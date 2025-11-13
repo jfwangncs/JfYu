@@ -71,9 +71,10 @@ namespace JfYu.Office.Excel
             //writed row count
             int writedCount = 0;
             //start write
+            StringBuilder rowStr = new();
             foreach (var item in source)
             {
-                StringBuilder rowStr = new();
+                rowStr.Clear();
                 var columnIndex = 0;
                 foreach (var key in titles.Select(q => q.Key))
                 {

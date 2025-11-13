@@ -71,7 +71,7 @@ namespace JfYu.Office.Excel.Extensions
             if (targetType == typeof(string))
                 return rawValue.ToString();
 
-            if (targetType == typeof(DateTime)&& cell.DateCellValue.HasValue)
+            if (targetType == typeof(DateTime) && cell.DateCellValue.HasValue)
                 rawValue = cell.DateCellValue;
 
             return Convert.ChangeType(rawValue, targetType, CultureInfo.InvariantCulture);
@@ -116,7 +116,7 @@ namespace JfYu.Office.Excel.Extensions
                     var key = NormalizeKey(headerValue);
                     if (titles.ContainsValue(key))
                     {
-                        key += x.ToString();
+                        key += x;
                         x++;
                     }
                     titles[i.ToString()] = key;
@@ -129,11 +129,7 @@ namespace JfYu.Office.Excel.Extensions
             {
                 IRow row = sheet.GetRow(i);
                 if (row == null) continue;
-                object item;
-                if (isDynamic)
-                    item = new System.Dynamic.ExpandoObject();
-                else
-                    item = Activator.CreateInstance<T>()!;
+                object item = isDynamic ? new System.Dynamic.ExpandoObject() : Activator.CreateInstance<T>()!;
 
                 var dict = isDynamic ? (IDictionary<string, object?>)item : null;
 
