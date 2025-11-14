@@ -137,7 +137,7 @@ namespace JfYu.UnitTests.RabbitMQ
             await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
             using var cts = new CancellationTokenSource();
 
-            var messages = new TestModelFaker().Generate(50000);
+            var messages = new TestModelFaker().Generate(20000);
             // Act
             var sendingTask = _rabbitMQService.SendBatchAsync(exchangeName, messages, "", null, cts.Token);
 
@@ -152,7 +152,7 @@ namespace JfYu.UnitTests.RabbitMQ
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => sendingTask);
             var queue = await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
             Assert.True(queue.MessageCount > 1);
-            Assert.True(queue.MessageCount < 50000);
+            Assert.True(queue.MessageCount < 20000);
 
             var channel = await _rabbitMQService.Connection.CreateChannelAsync();
             await channel.QueueDeleteAsync(queueName);
