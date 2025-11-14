@@ -1,4 +1,4 @@
-﻿using JfYu.RabbitMQ;
+using JfYu.RabbitMQ;
 using JfYu.UnitTests.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -130,11 +130,11 @@ namespace JfYu.UnitTests.RabbitMQ
             await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
             using var cts = new CancellationTokenSource();
 
-            var messages = new TestModelFaker().Generate(1000);
+            var messages = new TestModelFaker().Generate(10000);
             // Act
             var sendingTask = _rabbitMQService.SendBatchAsync(exchangeName, messages, "", null, cts.Token);
 
-            await Task.Delay(100);
+            await Task.Delay(1000);
 #if NET8_0_OR_GREATER
             await cts.CancelAsync().ConfigureAwait(true);
 #else
