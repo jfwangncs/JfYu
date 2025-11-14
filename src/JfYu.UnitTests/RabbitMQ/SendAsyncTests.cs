@@ -130,11 +130,11 @@ namespace JfYu.UnitTests.RabbitMQ
             await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
             using var cts = new CancellationTokenSource();
 
-            var messages = new TestModelFaker().Generate(10000);
+            var messages = new TestModelFaker().Generate(50000);
             // Act
             var sendingTask = _rabbitMQService.SendBatchAsync(exchangeName, messages, "", null, cts.Token);
 
-            await Task.Delay(200);
+            await Task.Delay(100);
 #if NET8_0_OR_GREATER
             await cts.CancelAsync().ConfigureAwait(true);
 #else
