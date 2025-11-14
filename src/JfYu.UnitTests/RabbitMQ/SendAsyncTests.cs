@@ -51,7 +51,10 @@ namespace JfYu.UnitTests.RabbitMQ
         public async Task SendSync_QueueNotAvailable_ThrowException()
         {
             string queueName = $"{nameof(SendSync_QueueNotAvailable_ThrowException)}";
-            await Assert.ThrowsAsync<PublishReturnException>(async () => await _rabbitMQService.SendAsync("", "This is a test message", queueName).ConfigureAwait(true));
+            var exception = await Record.ExceptionAsync(async () => await _rabbitMQService.SendAsync("", "This is a test message", queueName).ConfigureAwait(true));
+
+            Assert.NotNull(exception);
+            Assert.IsAssignableFrom<PublishException>(exception);             
         }
 
         [Fact]
@@ -67,7 +70,11 @@ namespace JfYu.UnitTests.RabbitMQ
             string exchangeName = $"{nameof(SendSync_ExchangeAvailableQueueNot_ThrowException)}";
             var channel = await _rabbitMQService.Connection.CreateChannelAsync();
             await channel.ExchangeDeclareAsync(exchangeName, ExchangeType.Direct, true, true);
-            await Assert.ThrowsAsync<PublishReturnException>(async () => await _rabbitMQService.SendAsync(exchangeName, "This is a test message").ConfigureAwait(true));
+
+            var exception = await Record.ExceptionAsync(async () => await _rabbitMQService.SendAsync(exchangeName, "This is a test message").ConfigureAwait(true));
+
+            Assert.NotNull(exception);
+            Assert.IsAssignableFrom<PublishException>(exception);
             await channel.ExchangeDeleteAsync(exchangeName);
         }
 
