@@ -134,7 +134,7 @@ namespace JfYu.UnitTests.RabbitMQ
             // Act
             var sendingTask = _rabbitMQService.SendBatchAsync(exchangeName, messages, "", null, cts.Token);
 
-            await Task.Delay(1000);
+            await Task.Delay(500);
 #if NET8_0_OR_GREATER
             await cts.CancelAsync().ConfigureAwait(true);
 #else
