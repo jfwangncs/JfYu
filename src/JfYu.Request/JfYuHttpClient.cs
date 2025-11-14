@@ -19,10 +19,11 @@ namespace JfYu.Request
     /// Represents an HTTP request with logging and additional features.(Using HttpClient)
     /// </summary>
     /// <param name="factory"> Initializes a new instance of the <see cref="IHttpClientFactory"/> class.</param>
+    /// <param name="configuration">The HttpClient configuration containing the client name to use.</param>
     /// <param name="cookieContainer">The cookie container</param>
     /// <param name="logFilter">The log filter.</param>
     /// <param name="logger">The logger.</param>
-    public class JfYuHttpClient(IHttpClientFactory factory, CookieContainer cookieContainer, LogFilter logFilter, ILogger<JfYuHttpClient>? logger = null) : JfYuBaseRequest
+    public class JfYuHttpClient(IHttpClientFactory factory, JfYuHttpClientConfiguration configuration, CookieContainer? cookieContainer, LogFilter logFilter, ILogger<JfYuHttpClient>? logger = null) : JfYuBaseRequest
     {
         /// <summary>
         /// The HTTP web request.
@@ -42,14 +43,19 @@ namespace JfYu.Request
         /// <summary>
         /// The cookie container
         /// </summary>
-        private readonly CookieContainer _cookieContainer = cookieContainer;
+        private readonly CookieContainer? _cookieContainer = cookieContainer;
+
+        /// <summary>
+        /// The configuration containing the HttpClient name to use
+        /// </summary>
+        private readonly JfYuHttpClientConfiguration _configuration = configuration;
 
         /// <inheritdoc/>
         private void Initialize()
         {
             try
             {
-                _request = factory.CreateClient("httpclient");
+                _request = factory.CreateClient(_configuration.HttpClientName);
                 _request.Timeout = TimeSpan.FromSeconds(Timeout);
                 if (!string.IsNullOrEmpty(RequestHeader.UserAgent))
                     _request.DefaultRequestHeaders.UserAgent.ParseAdd(RequestHeader.UserAgent);
@@ -72,7 +78,8 @@ namespace JfYu.Request
 
                 if (!string.IsNullOrEmpty(Authorization))
                     _request.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthorizationScheme, Authorization.Replace($"{AuthorizationScheme} ", ""));
-                RequestCookies?.GetCookies(new Uri(Url)).ToList().ForEach(x => _cookieContainer.SetCookies(new Uri(Url), $"{x.Name}={x.Value}"));
+                if (_cookieContainer is not null)
+                    RequestCookies?.GetCookies(new Uri(Url)).ToList().ForEach(x => _cookieContainer.SetCookies(new Uri(Url), $"{x.Name}={x.Value}"));
                 foreach (var item in RequestCustomHeaders)
                 {
                     _request.DefaultRequestHeaders.TryAddWithoutValidation(item.Key, item.Value);
@@ -100,7 +107,8 @@ namespace JfYu.Request
                 var response = await SendHttpRequestAsync(cancellationToken).ConfigureAwait(false);
                 ResponseHeader = response.Headers.ToDictionary(header => header.Key, header => header.Value.ToList());
                 StatusCode = response.StatusCode;
-                _cookieContainer.GetCookies(new Uri(Url)).ToList().ForEach(ResponseCookies.Add);
+                if (_cookieContainer is not null)
+                    _cookieContainer.GetCookies(new Uri(Url)).ToList().ForEach(ResponseCookies.Add);
                 string content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 html = RequestEncoding.GetString(RequestEncoding.GetBytes(content));
                 if (_logFilter.LoggingFields != JfYuLoggingFields.None)

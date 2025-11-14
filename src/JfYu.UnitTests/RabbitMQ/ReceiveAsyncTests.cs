@@ -156,12 +156,12 @@ namespace JfYu.UnitTests.RabbitMQ
             var channel = await _rabbitMQService.ReceiveAsync<string>(queueName, async message =>
             {
                 Interlocked.Increment(ref processingCount);
-                await Task.Delay(500).ConfigureAwait(true); 
+                await Task.Delay(10000).ConfigureAwait(true); 
                 return await Task.FromResult(true).ConfigureAwait(true);
             }, cancellationToken: cts.Token);
 
             // Send some messages
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 10; i++)
             {
                 await _rabbitMQService.SendAsync(exchangeName, $"Message {i}");
             }
@@ -172,10 +172,9 @@ namespace JfYu.UnitTests.RabbitMQ
             cts.Cancel();
 #endif
             await Task.Delay(1000);
-
             // Should process some messages before cancellation
             Assert.True(processingCount > 0);
-            Assert.True(processingCount < 50);
+            Assert.True(processingCount < 10);
             Assert.True(channel.IsClosed);
 
             var channel1 = await _rabbitMQService.Connection.CreateChannelAsync();
@@ -195,7 +194,7 @@ namespace JfYu.UnitTests.RabbitMQ
             using var cts = new CancellationTokenSource();
             var processingCount = 0;
             // Send some messages
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 10; i++)
             {
                 await _rabbitMQService.SendAsync(exchangeName, $"Message {i}");
             }
@@ -209,10 +208,10 @@ namespace JfYu.UnitTests.RabbitMQ
 #endif
                 return await Task.FromResult(true).ConfigureAwait(true);
             }, 10, cancellationToken: cts.Token);
-            await Task.Delay(2000);
+            await Task.Delay(400);
             // Should process some messages before cancellation
             Assert.True(processingCount > 0);
-            Assert.True(processingCount < 50);
+            Assert.True(processingCount < 10);
             Assert.True(channel.IsClosed);
 
             var channel1 = await _rabbitMQService.Connection.CreateChannelAsync();

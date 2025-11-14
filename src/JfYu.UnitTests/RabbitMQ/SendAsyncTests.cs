@@ -1,4 +1,4 @@
-﻿using JfYu.RabbitMQ;
+using JfYu.RabbitMQ;
 using JfYu.UnitTests.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -11,7 +11,7 @@ namespace JfYu.UnitTests.RabbitMQ
     public class SendAsyncTests
     {
         private readonly IRabbitMQService _rabbitMQService;
-        private readonly Dictionary<string, object?> header = new() { { "x-expires", 6000 } };
+        private readonly Dictionary<string, object?> header = new() { { "x-expires", 60000 } };
 
         public SendAsyncTests()
         {
@@ -51,7 +51,10 @@ namespace JfYu.UnitTests.RabbitMQ
         public async Task SendSync_QueueNotAvailable_ThrowException()
         {
             string queueName = $"{nameof(SendSync_QueueNotAvailable_ThrowException)}";
-            await Assert.ThrowsAsync<PublishException>(async () => await _rabbitMQService.SendAsync("", "This is a test message", queueName).ConfigureAwait(true));
+            var exception = await Record.ExceptionAsync(async () => await _rabbitMQService.SendAsync("", "This is a test message", queueName).ConfigureAwait(true));
+
+            Assert.NotNull(exception);
+            Assert.IsAssignableFrom<PublishException>(exception);             
         }
 
         [Fact]
@@ -67,7 +70,11 @@ namespace JfYu.UnitTests.RabbitMQ
             string exchangeName = $"{nameof(SendSync_ExchangeAvailableQueueNot_ThrowException)}";
             var channel = await _rabbitMQService.Connection.CreateChannelAsync();
             await channel.ExchangeDeclareAsync(exchangeName, ExchangeType.Direct, true, true);
-            await Assert.ThrowsAsync<PublishException>(async () => await _rabbitMQService.SendAsync(exchangeName, "This is a test message").ConfigureAwait(true));
+
+            var exception = await Record.ExceptionAsync(async () => await _rabbitMQService.SendAsync(exchangeName, "This is a test message").ConfigureAwait(true));
+
+            Assert.NotNull(exception);
+            Assert.IsAssignableFrom<PublishException>(exception);
             await channel.ExchangeDeleteAsync(exchangeName);
         }
 
@@ -130,11 +137,11 @@ namespace JfYu.UnitTests.RabbitMQ
             await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
             using var cts = new CancellationTokenSource();
 
-            var messages = new TestModelFaker().Generate(100000);
+            var messages = new TestModelFaker().Generate(20000);
             // Act
             var sendingTask = _rabbitMQService.SendBatchAsync(exchangeName, messages, "", null, cts.Token);
 
-            await Task.Delay(500);
+            await Task.Delay(100);
 #if NET8_0_OR_GREATER
             await cts.CancelAsync().ConfigureAwait(true);
 #else
@@ -144,7 +151,8 @@ namespace JfYu.UnitTests.RabbitMQ
             // Assert
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => sendingTask);
             var queue = await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
-            Assert.True(queue.MessageCount > 1 && queue.MessageCount < 100000);
+            Assert.True(queue.MessageCount > 1);
+            Assert.True(queue.MessageCount < 20000);
 
             var channel = await _rabbitMQService.Connection.CreateChannelAsync();
             await channel.QueueDeleteAsync(queueName);

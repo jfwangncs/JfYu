@@ -223,6 +223,68 @@ namespace JfYu.UnitTests.Data
 
             Assert.NotNull(dbContext);
         }
+
+        [Fact]
+        public void AddService_UseMySql_WithoutVersion_AutoDetect()
+        {
+            // Arrange & Act
+            var services = new ServiceCollection();
+            
+            // This will trigger ServerVersion.AutoDetect(config.ConnectionString)
+            // because Version is not provided (null/empty)
+            services.AddJfYuDbContext<DataContext>(q =>
+            {
+                q.DatabaseType = DatabaseType.MySql;
+                q.ConnectionString = "Server=localhost;Database=test;Uid=root;Pwd=password;";
+                // Version is intentionally not set to trigger AutoDetect branch
+            });
+            
+            var serviceProvider = services.BuildServiceProvider();
+            
+            // Assert
+            // This will fail to connect to actual MySQL, but it will execute
+            // the ServerVersion.AutoDetect code path, increasing coverage
+            var exception = Assert.Throws<MySqlConnector.MySqlException>(() =>
+            {
+                var dbContext = serviceProvider.GetRequiredService<DataContext>();
+                // Accessing the database will trigger connection attempt
+                _ = dbContext.Database;
+            });
+            
+            // The exception is expected since we don't have a real MySQL server
+            Assert.NotNull(exception);
+        }
+
+        [Fact]
+        public void AddService_UseMariaDB_WithoutVersion_AutoDetect()
+        {
+            // Arrange & Act
+            var services = new ServiceCollection();
+            
+            // This will trigger ServerVersion.AutoDetect(config.ConnectionString)
+            // for MariaDB because Version is not provided (null/empty)
+            services.AddJfYuDbContext<DataContext>(q =>
+            {
+                q.DatabaseType = DatabaseType.MariaDB;
+                q.ConnectionString = "Server=localhost;Database=test;Uid=root;Pwd=password;";
+                // Version is intentionally not set to trigger AutoDetect branch
+            });
+            
+            var serviceProvider = services.BuildServiceProvider();
+            
+            // Assert
+            // This will fail to connect to actual MariaDB, but it will execute
+            // the ServerVersion.AutoDetect code path, increasing coverage
+            var exception = Assert.Throws<MySqlConnector.MySqlException>(() =>
+            {
+                var dbContext = serviceProvider.GetRequiredService<DataContext>();
+                // Accessing the database will trigger connection attempt
+                _ = dbContext.Database;
+            });
+            
+            // The exception is expected since we don't have a real MariaDB server
+            Assert.NotNull(exception);
+        }
     }
 }
 #endif
