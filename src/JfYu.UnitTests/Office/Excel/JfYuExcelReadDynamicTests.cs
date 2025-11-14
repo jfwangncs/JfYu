@@ -228,12 +228,12 @@ namespace JfYu.UnitTests.Office.Excel
             headerRow.CreateCell(2).SetCellValue("Note");
 
             var dataRow1 = sheet.CreateRow(1);
-            dataRow1.CreateCell(0).SetCellValue("ÕÅÈı");
+            dataRow1.CreateCell(0).SetCellValue("å¼ ä¸‰");
             dataRow1.CreateCell(1).SetCellValue(""); // empty string
             // Cell 2 not created -> null
 
             var dataRow2 = sheet.CreateRow(2);
-            dataRow2.CreateCell(0).SetCellValue("ÀîËÄ");
+            dataRow2.CreateCell(0).SetCellValue("æå››");
             dataRow2.CreateCell(1).SetCellValue(25);
             dataRow2.CreateCell(2).SetCellValue("Has note");
 
@@ -280,7 +280,7 @@ namespace JfYu.UnitTests.Office.Excel
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
             wb.Close();
 
-            // Act - Ä¬ÈÏ¶ÁÈ¡µÚÒ»¸öSheet
+            // Act - é»˜è®¤è¯»å–ç¬¬ä¸€ä¸ªSheet
             var result = _jfYuExcel.Read<dynamic>(filePath);
 
             // Assert
@@ -322,7 +322,7 @@ namespace JfYu.UnitTests.Office.Excel
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
             wb.Close();
 
-            // Act - ¶ÁÈ¡µÚ¶ş¸öSheet (Ë÷ÒıÎª1)
+            // Act - è¯»å–ç¬¬äºŒä¸ªSheet (ç´¢å¼•ä¸º1)
             var result = _jfYuExcel.Read<dynamic>(filePath, sheetIndex: 1);
 
             // Assert
@@ -358,11 +358,11 @@ namespace JfYu.UnitTests.Office.Excel
             headerRow.CreateCell(4).SetCellValue(" ");
 
             var dataRow = sheet.CreateRow(1);
-            dataRow.CreateCell(0).SetCellValue("ÍõĞ¡Ã÷");
-            dataRow.CreateCell(1).SetCellValue("ÑĞ·¢²¿1");
-            dataRow.CreateCell(2).SetCellValue("ÑĞ·¢²¿2");
+            dataRow.CreateCell(0).SetCellValue("ç‹å°æ˜");
+            dataRow.CreateCell(1).SetCellValue("ç ”å‘éƒ¨1");
+            dataRow.CreateCell(2).SetCellValue("ç ”å‘éƒ¨2");
             dataRow.CreateCell(3).SetCellValue(15000.50);
-            dataRow.CreateCell(4).SetCellValue("ÑĞ·¢²¿3");
+            dataRow.CreateCell(4).SetCellValue("ç ”å‘éƒ¨3");
 
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
             wb.Close();
@@ -376,11 +376,11 @@ namespace JfYu.UnitTests.Office.Excel
 
             var record = result[0] as IDictionary<string, object>;
             Assert.NotNull(record);
-            Assert.Equal("ÍõĞ¡Ã÷", record["_1234"]);
-            Assert.Equal("ÑĞ·¢²¿1", record["_"]);
-            Assert.Equal("ÑĞ·¢²¿2", record["_2dada"]);
+            Assert.Equal("ç‹å°æ˜", record["_1234"]);
+            Assert.Equal("ç ”å‘éƒ¨1", record["_"]);
+            Assert.Equal("ç ”å‘éƒ¨2", record["_2dada"]);
             Assert.Equal(15000.50, record["_1"]);
-            Assert.Equal("ÑĞ·¢²¿3", record["_2"]);
+            Assert.Equal("ç ”å‘éƒ¨3", record["_2"]);
 
             File.Delete(filePath);
         }
@@ -399,13 +399,13 @@ namespace JfYu.UnitTests.Office.Excel
             
             // Chinese headers
             var headerRow = sheet.CreateRow(0);
-            headerRow.CreateCell(0).SetCellValue("Ô±¹¤ĞÕÃû");
-            headerRow.CreateCell(1).SetCellValue("²¿ÃÅÃû³Æ");
-            headerRow.CreateCell(2).SetCellValue("ÔÂ¶È¹¤×Ê");
+            headerRow.CreateCell(0).SetCellValue("å‘˜å·¥å§“å");
+            headerRow.CreateCell(1).SetCellValue("éƒ¨é—¨åç§°");
+            headerRow.CreateCell(2).SetCellValue("æœˆåº¦å·¥èµ„");
             
             var dataRow = sheet.CreateRow(1);
-            dataRow.CreateCell(0).SetCellValue("ÍõĞ¡Ã÷");
-            dataRow.CreateCell(1).SetCellValue("ÑĞ·¢²¿");
+            dataRow.CreateCell(0).SetCellValue("ç‹å°æ˜");
+            dataRow.CreateCell(1).SetCellValue("ç ”å‘éƒ¨");
             dataRow.CreateCell(2).SetCellValue(15000.50);
             
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
@@ -420,9 +420,9 @@ namespace JfYu.UnitTests.Office.Excel
             
             var record = result[0] as IDictionary<string, object>;
             Assert.NotNull(record);
-            Assert.True(record.ContainsKey("Ô±¹¤ĞÕÃû"));
-            Assert.True(record.ContainsKey("²¿ÃÅÃû³Æ"));
-            Assert.True(record.ContainsKey("ÔÂ¶È¹¤×Ê"));
+            Assert.True(record.ContainsKey("å‘˜å·¥å§“å"));
+            Assert.True(record.ContainsKey("éƒ¨é—¨åç§°"));
+            Assert.True(record.ContainsKey("æœˆåº¦å·¥èµ„"));
 
             File.Delete(filePath);
         }
@@ -439,8 +439,8 @@ namespace JfYu.UnitTests.Office.Excel
             
             // Headers with special characters
             var headerRow = sheet.CreateRow(0);
-            headerRow.CreateCell(0).SetCellValue("Name (ĞÕÃû)");
-            headerRow.CreateCell(1).SetCellValue("Age-ÄêÁä");
+            headerRow.CreateCell(0).SetCellValue("Name (å§“å)");
+            headerRow.CreateCell(1).SetCellValue("Age-å¹´é¾„");
             headerRow.CreateCell(2).SetCellValue("Email@Address");
             
             var dataRow = sheet.CreateRow(1);
@@ -550,7 +550,7 @@ namespace JfYu.UnitTests.Office.Excel
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
             wb.Close();
 
-            // Act & Assert - ³¢ÊÔ¶ÁÈ¡²»´æÔÚµÄSheet (Ë÷ÒıÎª5)
+            // Act & Assert - å°è¯•è¯»å–ä¸å­˜åœ¨çš„Sheet (ç´¢å¼•ä¸º5)
             var ex = Record.Exception(() => _jfYuExcel.Read<dynamic>(filePath, sheetIndex: 5));
             Assert.NotNull(ex);
 
@@ -681,7 +681,7 @@ namespace JfYu.UnitTests.Office.Excel
         [Fact]
         public void ReadDynamic_WideTable_ReturnCorrectly()
         {
-            // Arrange - ²âÊÔ¿í±í£¨ºÜ¶àÁĞ£©
+            // Arrange - æµ‹è¯•å®½è¡¨ï¼ˆå¾ˆå¤šåˆ—ï¼‰
             var filePath = $"{nameof(ReadDynamic_WideTable_ReturnCorrectly)}.xlsx";
             if (File.Exists(filePath)) File.Delete(filePath);
 
@@ -729,7 +729,7 @@ namespace JfYu.UnitTests.Office.Excel
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
             wb.Close();
 
-            // Act - ´ÓµÚ3ĞĞ¿ªÊ¼¶ÁÈ¡£¨±íÍ·ÔÚµÚ2ĞĞ£©
+            // Act - ä»ç¬¬3è¡Œå¼€å§‹è¯»å–ï¼ˆè¡¨å¤´åœ¨ç¬¬2è¡Œï¼‰
             var result = _jfYuExcel.Read<dynamic>(filePath, firstRow: 3);
 
             // Assert
