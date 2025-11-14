@@ -104,7 +104,7 @@ namespace JfYu.UnitTests.Request
             var request = factory.CreateRequest();
             request.Url = $"{_url.Url}/get";
             request.Method = HttpMethod.Get;
-            var response = await request.SendAsync();
+            await request.SendAsync();
 
             // Assert
             Assert.NotNull(request);
@@ -144,7 +144,7 @@ namespace JfYu.UnitTests.Request
         {
             // Arrange
             var services = new ServiceCollection();
-            
+
             // Client 1: Short timeout
             services.AddJfYuHttpClient(options =>
             {
@@ -154,7 +154,7 @@ namespace JfYu.UnitTests.Request
                     client.Timeout = TimeSpan.FromSeconds(10);
                 };
             });
-            
+
             // Client 2: Long timeout
             services.AddJfYuHttpClient(options =>
             {
@@ -174,7 +174,7 @@ namespace JfYu.UnitTests.Request
 
             fastRequest.Url = $"{_url.Url}/get?client=fast";
             fastRequest.Method = HttpMethod.Get;
-            
+
             slowRequest.Url = $"{_url.Url}/get?client=slow";
             slowRequest.Method = HttpMethod.Get;
 
@@ -256,7 +256,7 @@ namespace JfYu.UnitTests.Request
         }
 
         [Fact]
-        public async Task NamedClient_WithProxy_CanCreate()
+        public void NamedClient_WithProxy_CanCreate()
         {
             // Arrange
             var services = new ServiceCollection();
@@ -281,17 +281,17 @@ namespace JfYu.UnitTests.Request
         }
 
         [Fact]
-        public async Task NamedClient_IsolatedCookies_Success()
+        public void NamedClient_IsolatedCookies_Success()
         {
             // Arrange
             var services = new ServiceCollection();
-            
+
             services.AddJfYuHttpClient(options =>
             {
                 options.HttpClientName = "SharedCookieClient";
                 options.UseSharedCookieContainer = true;
             });
-            
+
             services.AddJfYuHttpClient(options =>
             {
                 options.HttpClientName = "IsolatedCookieClient";
@@ -393,7 +393,7 @@ namespace JfYu.UnitTests.Request
             request.ContentType = RequestContentType.Json;
             request.RequestData = "{\"data\":\"updated\"}";
 
-            var response = await request.SendAsync();
+            await request.SendAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, request.StatusCode);
@@ -413,7 +413,7 @@ namespace JfYu.UnitTests.Request
             request.Url = $"{_url.Url}/delete";
             request.Method = HttpMethod.Delete;
 
-            var response = await request.SendAsync();
+            await request.SendAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, request.StatusCode);
@@ -445,7 +445,7 @@ namespace JfYu.UnitTests.Request
             var request = factory.CreateRequest("LoggingClient");
             request.Url = $"{_url.Url}/get";
             request.Method = HttpMethod.Get;
-            var response = await request.SendAsync();
+            await request.SendAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, request.StatusCode);
@@ -476,7 +476,7 @@ namespace JfYu.UnitTests.Request
             var request = factory.CreateRequest("LongTimeoutClient");
             request.Url = $"{_url.Url}/delay/1"; // 1 second delay
             request.Method = HttpMethod.Get;
-            var response = await request.SendAsync();
+            await request.SendAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, request.StatusCode);
@@ -499,7 +499,7 @@ namespace JfYu.UnitTests.Request
             var request = factory.CreateRequest("DownloadClient");
             request.Url = $"{_url.Url}/bytes/1024";
             request.Method = HttpMethod.Get;
-            
+
             using var stream = await request.DownloadFileAsync();
 
             // Assert
@@ -524,7 +524,7 @@ namespace JfYu.UnitTests.Request
                 var request = factory.CreateRequest("FileDownloadClient");
                 request.Url = $"{_url.Url}/bytes/2048";
                 request.Method = HttpMethod.Get;
-                
+
                 var success = await request.DownloadFileAsync(tempPath);
 
                 // Assert
@@ -549,7 +549,7 @@ namespace JfYu.UnitTests.Request
         {
             // Arrange
             var services = new ServiceCollection();
-            
+
             services.AddJfYuHttpClient(options =>
             {
                 options.HttpClientName = "TenantA";
@@ -558,7 +558,7 @@ namespace JfYu.UnitTests.Request
                     client.DefaultRequestHeaders.Add("X-Tenant-Id", "tenant-a");
                 };
             });
-            
+
             services.AddJfYuHttpClient(options =>
             {
                 options.HttpClientName = "TenantB";
@@ -577,7 +577,7 @@ namespace JfYu.UnitTests.Request
 
             tenantARequest.Url = $"{_url.Url}/headers";
             tenantARequest.Method = HttpMethod.Get;
-            
+
             tenantBRequest.Url = $"{_url.Url}/headers";
             tenantBRequest.Method = HttpMethod.Get;
 
@@ -587,13 +587,13 @@ namespace JfYu.UnitTests.Request
             // Assert
             Assert.Equal(HttpStatusCode.OK, tenantARequest.StatusCode);
             Assert.Equal(HttpStatusCode.OK, tenantBRequest.StatusCode);
-            
+
             var tenantAHeaders = JsonSerializer.Deserialize<Dictionary<string, object>>(tenantAResponse);
             var tenantBHeaders = JsonSerializer.Deserialize<Dictionary<string, object>>(tenantBResponse);
-            
+
             var aHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(tenantAHeaders!["headers"].ToString()!);
             var bHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(tenantBHeaders!["headers"].ToString()!);
-            
+
             Assert.Equal("tenant-a", aHeaders!["X-Tenant-Id"]);
             Assert.Equal("tenant-b", bHeaders!["X-Tenant-Id"]);
         }
@@ -615,7 +615,7 @@ namespace JfYu.UnitTests.Request
             var request = factory.CreateRequest("ErrorClient");
             request.Url = "http://invalid-domain-that-does-not-exist-12345.com/api";
             request.Method = HttpMethod.Get;
-            
+
             await Assert.ThrowsAsync<HttpRequestException>(async () => await request.SendAsync().ConfigureAwait(false));
         }
 
@@ -632,7 +632,7 @@ namespace JfYu.UnitTests.Request
             var request = factory.CreateRequest("NotFoundClient");
             request.Url = $"{_url.Url}/status/404";
             request.Method = HttpMethod.Get;
-            
+
             try
             {
                 await request.SendAsync();
@@ -662,7 +662,7 @@ namespace JfYu.UnitTests.Request
             var request = serviceProvider.GetRequiredService<IJfYuRequest>();
             request.Url = $"{_url.Url}/get";
             request.Method = HttpMethod.Get;
-            var response = await request.SendAsync();
+            await request.SendAsync();
 
             // Assert
             Assert.NotNull(request);
