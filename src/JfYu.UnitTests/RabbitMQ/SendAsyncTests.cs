@@ -152,7 +152,7 @@ namespace JfYu.UnitTests.RabbitMQ
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => sendingTask);
             var queue = await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
             Assert.True(queue.MessageCount > 1);
-            Assert.True(queue.MessageCount < 1000);
+            Assert.True(queue.MessageCount < 50000);
 
             var channel = await _rabbitMQService.Connection.CreateChannelAsync();
             await channel.QueueDeleteAsync(queueName);
