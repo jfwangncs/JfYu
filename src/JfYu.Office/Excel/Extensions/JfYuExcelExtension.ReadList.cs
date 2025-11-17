@@ -69,7 +69,7 @@ namespace JfYu.Office.Excel.Extensions
                 int x = 1;
                 for (int i = headerRow.FirstCellNum; i < headerRow.LastCellNum; i++)
                 {
-                    var headerValue = headerRow.GetCell(i)?.StringCellValue.Trim() ?? string.Empty;
+                    var headerValue = headerRow.GetCell(i).StringCellValue.Trim();
 
                     if (isDynamic)
                     {
@@ -101,26 +101,26 @@ namespace JfYu.Office.Excel.Extensions
                     if (cell == null) continue;
 
                     var p = col.Value;
-                    if (p == null) continue;
-
-                    var result = ConvertCellValue(isDynamic ? typeof(object) : p.PropertyType, cell);
-
-                    if (isDynamic)
+                    if (p != null)
                     {
-                        dict![titles[col.Key.ToString()]] = result;
-                    }
-                    else
-                    {
-                        if (result != null)
-                            p.SetValue(item, result, null);
-                        else if (p.PropertyType.IsGenericType &&
-                                 p.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            p.SetValue(item, null, null);
-                        else if (Type.GetTypeCode(p.PropertyType) == TypeCode.String)
-                            p.SetValue(item, null, null);
+
+                        var result = ConvertCellValue(isDynamic ? typeof(object) : p.PropertyType, cell);
+
+                        if (isDynamic)
+                            dict![titles[col.Key.ToString()]] = result;
                         else
-                            throw new InvalidCastException(
-                                $"Convert {p.Name} get error,value:{result}，model type:{p.PropertyType.Name},excel type {cell.CellType}.");
+                        {
+                            if (result != null)
+                                p.SetValue(item, result, null);
+                            else if (p.PropertyType.IsGenericType &&
+                                     p.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                                p.SetValue(item, null, null);
+                            else if (Type.GetTypeCode(p.PropertyType) == TypeCode.String)
+                                p.SetValue(item, null, null);
+                            else
+                                throw new InvalidCastException(
+                                    $"Convert {p.Name} get error,value:{result}，model type:{p.PropertyType.Name},excel type {cell.CellType}.");
+                        }
                     }
                 }
             }
