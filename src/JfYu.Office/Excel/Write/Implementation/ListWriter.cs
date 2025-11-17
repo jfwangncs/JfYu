@@ -38,7 +38,7 @@ namespace JfYu.Office.Excel.Write.Implementation
                 }
                 return;
             }
-            IQueryable data = ConvertToQueryable(source) ?? throw new InvalidOperationException($"Unsupported data type {typeof(T)}.");
+            IQueryable data = ConvertToQueryable(source) ?? throw new NotSupportedException($"Unsupported data type {typeof(T)}.");
 
             Write(data, workbook, tType, writeOperation, titles, callback);
 
