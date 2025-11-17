@@ -22,14 +22,8 @@ namespace JfYu.Office.Excel.Write.Implementation
             if (!source.GetType().IsConstructedGenericType)
                 throw new NotSupportedException($"Unsupported data type {typeof(T)}.");
             var tType = source.GetType().GetGenericArguments()[0];
-            IQueryable? data = null;
-            if (typeof(T).GetGenericTypeDefinition() == typeof(IQueryable<>))
-                data = (IQueryable)source;
-            else if (typeof(T).GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                data = ((IEnumerable)source).AsQueryable();
-            else if (typeof(T).GetGenericTypeDefinition() == typeof(IList<>) || typeof(T).GetGenericTypeDefinition() == typeof(List<>))
-                data = ((IList)source).AsQueryable();
-            else if (source.GetType().GetGenericTypeDefinition().Name.StartsWith("Tuple"))
+
+            if (source.GetType().GetGenericTypeDefinition().Name.StartsWith("Tuple"))
             {
                 var newData = (ITuple)source;
                 for (int i = 0; i < newData.Length; i++)
@@ -44,10 +38,25 @@ namespace JfYu.Office.Excel.Write.Implementation
                 }
                 return;
             }
-            else
-                throw new NotSupportedException($"Unsupported data type {typeof(T)}.");
+            IQueryable data = ConvertToQueryable(source) ?? throw new InvalidOperationException($"Unsupported data type {typeof(T)}.");
 
             Write(data, workbook, tType, writeOperation, titles, callback);
+
+            static IQueryable? ConvertToQueryable(T source)
+            {
+                var def = typeof(T).GetGenericTypeDefinition();
+
+                if (def == typeof(IQueryable<>))
+                    return (IQueryable)source;
+
+                if (def == typeof(IEnumerable<>))
+                    return ((IEnumerable)source).AsQueryable();
+
+                if (def == typeof(IList<>) || def == typeof(List<>))
+                    return ((IList)source).AsQueryable();
+
+                return null;
+            }
         }
 
         /// <summary>

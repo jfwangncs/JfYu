@@ -1,4 +1,4 @@
-﻿using JfYu.Office.Word.Constant;
+using JfYu.Office.Word.Constant;
 using JfYu.Office.Word.Extensions;
 using NPOI.XWPF.UserModel;
 using System.Collections.Generic;
@@ -20,46 +20,75 @@ namespace JfYu.Office.Word
 
             using FileStream stream = File.OpenRead(templatePath);
             using XWPFDocument doc = new(stream);
-            var allRuns = doc.Paragraphs.SelectMany(q => q.Runs).ToList();
-            var tables = doc.Tables;
-            foreach (var table in tables)
+
+            var allRuns = CollectRuns(doc);
+
+            var textReplacements = replacements.Where(r => r.Value is JfYuWordString).ToList();
+            var picReplacements = replacements.Where(r => r.Value is JfYuWordPicture).ToList();
+
+            foreach (var run in allRuns)
+            {
+                ProcessTextReplacements(run, textReplacements);
+                ProcessPictureReplacements(run, picReplacements);
+            }
+
+            using FileStream fs = new(outputFilePath, FileMode.Create);
+            doc.Write(fs);
+        }
+        private static List<XWPFRun> CollectRuns(XWPFDocument doc)
+        {
+            var runs = doc.Paragraphs.SelectMany(p => p.Runs).ToList();
+
+            foreach (var table in doc.Tables)
             {
                 foreach (var row in table.Rows)
                 {
                     foreach (var cell in row.GetTableCells())
                     {
                         foreach (var para in cell.Paragraphs)
-                        {
-                            allRuns.AddRange(para.Runs);
-                        }
+                            runs.AddRange(para.Runs);
                     }
                 }
             }
-            foreach (var run in allRuns)
+
+            return runs;
+        }
+        private static void ProcessTextReplacements(XWPFRun run, List<JfYuWordReplacement> replacements)
+        {
+            if (replacements.Count == 0)
+                return;
+
+            string text = run.Text;
+
+            foreach (var rp in replacements)
             {
-                string text = run.Text;
-                var textReplacements = replacements.Where(q => q.Value is JfYuWordString);
-                foreach (var replacement in textReplacements)
+                string placeholder = $"{{{rp.Key}}}";
+
+                if (text.Contains(placeholder))
                 {
-                    string placeholder = $"{{{replacement.Key}}}";
-                    if (text.Contains(placeholder))
-                    {
-                        run.SetText(text.Replace(placeholder, ((JfYuWordString)replacement.Value).Text), 0);
-                        text = run.Text;
-                    }
-                }
-                var picReplacements = replacements.Where(q => q.Value is JfYuWordPicture);
-                foreach (var replacement in picReplacements)
-                {
-                    string placeholder = $"{{{replacement.Key}}}";
-                    if (text.Contains(placeholder))
-                    {
-                        JfYuWordExtension.CreatePicture(run, replacement);
-                    }
+                    run.SetText(
+                        text.Replace(placeholder, ((JfYuWordString)rp.Value).Text),
+                        0);
+                    text = run.Text;
                 }
             }
-            using FileStream fs = new(outputFilePath, FileMode.Create);
-            doc.Write(fs);
+        }
+        private static void ProcessPictureReplacements(XWPFRun run, List<JfYuWordReplacement> replacements)
+        {
+            if (replacements.Count == 0)
+                return;
+
+            string text = run.Text;
+
+            foreach (var rp in replacements)
+            {
+                string placeholder = $"{{{rp.Key}}}";
+
+                if (text.Contains(placeholder))
+                {
+                    JfYuWordExtension.CreatePicture(run, rp);
+                }
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using JfYu.Office.Excel.Constant;
+using JfYu.Office.Excel.Constant;
 using JfYu.Office.Excel.Extensions;
 using JfYu.Office.Excel.Write.Implementation;
 using JfYu.Office.Excel.Write.Interface;
@@ -93,17 +93,22 @@ namespace JfYu.Office.Excel
             }
         }
 
+
+        #region ReadCSV
         /// <inheritdoc/>
         public List<dynamic> ReadCSV(string filePath, int firstRow = 1)
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException(nameof(filePath));
-            using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            using StreamReader sr = new(fs, Encoding.UTF8);
+
+            using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var sr = new StreamReader(fs, Encoding.UTF8);
+
+            var records = new List<dynamic>();
+            List<string> headerNames = [];
             string? line;
             int rowIndex = 1;
-            List<dynamic> records = [];
-            List<string> headerNames = [];
+
             while ((line = sr.ReadLine()) != null)
             {
                 if (rowIndex < firstRow)
@@ -111,82 +116,81 @@ namespace JfYu.Office.Excel
                     rowIndex++;
                     continue;
                 }
-                string[] fields = ParseCsvLine(line);
+
+                var fields = ParseCsvLine(line);
 
                 if (rowIndex == firstRow)
-                    headerNames = ReplaceEmptyStrings([.. fields]);
+                {
+                    headerNames = ReplaceEmptyHeaders(fields);
+                }
                 else
                 {
-                    dynamic record = new ExpandoObject();
-                    var dict = (IDictionary<string, object>)record;
-                    if (fields.Length <= headerNames.Count)
-                    {
-                        for (int i = 0; i < headerNames.Count && i < fields.Length; i++)
-                        {
-                            dict[headerNames[i]] = fields[i];
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < fields.Length; i++)
-                        {
-                            if (i < headerNames.Count)
-                                dict[headerNames[i]] = fields[i];
-                            else
-                                dict[$"Column{i}"] = fields[i];
-                        }
-                    }
-                    records.Add(record);
+                    records.Add(BuildRecord(headerNames, fields));
                 }
+
                 rowIndex++;
             }
+
             return records;
-
-            static List<string> ReplaceEmptyStrings(List<string> list)
-            {
-                string prefix = "Column";
-                int counter = 1;
-
-                for (int i = 0; i < list.Count; i++)
-                {
-                    if (string.IsNullOrEmpty(list[i]))
-                    {
-                        list[i] = $"{prefix}{counter}";
-                        counter++;
-                    }
-                }
-                return list;
-            }
-            static string[] ParseCsvLine(string line)
-            {
-                List<string> fields = [];
-                bool inQuotes = false;
-                StringBuilder currentField = new();
-
-                foreach (char c in line)
-                {
-                    if (c == '"')
-                    {
-                        inQuotes = !inQuotes;
-                    }
-                    else if (c == ',' && !inQuotes)
-                    {
-                        fields.Add(currentField.ToString().Trim('"'));
-                        currentField.Clear();
-                    }
-                    else
-                    {
-                        currentField.Append(c);
-                    }
-                }
-                if (currentField.Length > 0 || fields.Count == 0)
-                {
-                    fields.Add(currentField.ToString().Trim('"'));
-                }
-
-                return [.. fields];
-            }
         }
+
+        private static List<string> ReplaceEmptyHeaders(string[] fields)
+        {
+            var list = new List<string>(fields);
+            int counter = 1;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (string.IsNullOrWhiteSpace(list[i]))
+                {
+                    list[i] = $"Column{counter++}";
+                }
+            }
+            return list;
+        }
+
+        private static dynamic BuildRecord(List<string> headers, string[] fields)
+        {
+            dynamic record = new ExpandoObject();
+            var dict = (IDictionary<string, object>)record;
+
+            for (int i = 0; i < fields.Length; i++)
+            {
+                string key = i < headers.Count ? headers[i] : $"Column{i + 1}";
+                dict[key] = fields[i];
+            }
+
+            return record;
+        }
+
+        private static string[] ParseCsvLine(string line)
+        {
+            var fields = new List<string>();
+            bool inQuotes = false;
+            var current = new StringBuilder();
+
+            foreach (char c in line)
+            {
+                if (c == '"')
+                {
+                    inQuotes = !inQuotes;
+                }
+                else if (c == ',' && !inQuotes)
+                {
+                    fields.Add(current.ToString().Trim('"'));
+                    current.Clear();
+                }
+                else
+                {
+                    current.Append(c);
+                }
+            }
+
+            fields.Add(current.ToString().Trim('"'));
+            return fields.ToArray();
+        }
+
+        #endregion
 
         #region ReadExcel
 
