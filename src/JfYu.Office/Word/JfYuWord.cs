@@ -54,10 +54,7 @@ namespace JfYu.Office.Word
             return runs;
         }
         private static void ProcessTextReplacements(XWPFRun run, List<JfYuWordReplacement> replacements)
-        {
-            if (replacements.Count == 0)
-                return;
-
+        {      
             string text = run.Text;
 
             foreach (var rp in replacements)
@@ -75,9 +72,6 @@ namespace JfYu.Office.Word
         }
         private static void ProcessPictureReplacements(XWPFRun run, List<JfYuWordReplacement> replacements)
         {
-            if (replacements.Count == 0)
-                return;
-
             string text = run.Text;
 
             foreach (var rp in replacements)
