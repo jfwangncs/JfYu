@@ -1,4 +1,4 @@
-﻿using JfYu.Office.Excel.Constant;
+using JfYu.Office.Excel.Constant;
 using JfYu.Office.Excel.Extensions;
 using JfYu.Office.Excel.Write.Interface;
 using NPOI.SS.UserModel;
@@ -24,7 +24,7 @@ namespace JfYu.Office.Excel.Write
             if (File.Exists(filePath))
             {
                 if (writeOperation.AllowAppend == WriteOperation.None)
-                    throw new FileNotFoundException(nameof(filePath));
+                    throw new FileLoadException(nameof(filePath), "cannot create file,file is existing.");
                 using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
                 wb = WorkbookFactory.Create(fs);
             }
@@ -37,7 +37,7 @@ namespace JfYu.Office.Excel.Write
                 else
                     throw new InvalidOperationException("Unsupported file format.");
             }
-            WriteDataToWorkbook(wb, source, writeOperation,titles, callback);
+            WriteDataToWorkbook(wb, source, writeOperation, titles, callback);
             var dir = Path.GetDirectoryName(filePath);
             if (!Directory.Exists(dir) && !string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);

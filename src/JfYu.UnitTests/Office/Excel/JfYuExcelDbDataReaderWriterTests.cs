@@ -1,4 +1,4 @@
-﻿#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using JfYu.Office;
 using JfYu.Office.Excel;
 using JfYu.Office.Excel.Constant;
@@ -43,7 +43,7 @@ namespace JfYu.UnitTests.Office.Excel
 
             IDataReader? dataReader = null;
             var ex = Record.Exception(() => _jfYuExcel.Write(dataReader!, filePath, JfYuExcelExtension.GetTitles<AllTypeTestModel>()));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<ArgumentNullException>(ex);
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace JfYu.UnitTests.Office.Excel
             command.CommandText = "SELECT * FROM sqlite_master";
             using var reader = command.ExecuteReader();
             var ex = Record.Exception(() => _jfYuExcel.Write(reader, filePath));
-            Assert.IsAssignableFrom<ArgumentNullException>(ex);
+            Assert.IsType<ArgumentNullException>(ex);
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace JfYu.UnitTests.Office.Excel
             command.CommandText = "SELECT * FROM sqlite_master";
             using var reader = command.ExecuteReader();
             var ex = Record.Exception(() => _jfYuExcel.Write(reader, filePath, []));
-            Assert.IsAssignableFrom<ArgumentNullException>(ex);
+            Assert.IsType<ArgumentNullException>(ex);
         }
 
         [Fact]
@@ -81,7 +81,7 @@ namespace JfYu.UnitTests.Office.Excel
             var reader = command.ExecuteReader();
             _db.Database.CloseConnection();
             var ex = Record.Exception(() => _jfYuExcel.Write(reader, filePath, JfYuExcelExtension.GetTitles<AllTypeTestModel>()));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<DataException> (ex);
         }
 
         [Fact]

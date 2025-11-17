@@ -54,7 +54,7 @@ namespace JfYu.UnitTests.RabbitMQ
             var exception = await Record.ExceptionAsync(async () => await _rabbitMQService.SendAsync("", "This is a test message", queueName).ConfigureAwait(true));
 
             Assert.NotNull(exception);
-            Assert.IsAssignableFrom<PublishException>(exception);             
+            Assert.IsType<PublishException>(exception,false);             
         }
 
         [Fact]
@@ -74,7 +74,7 @@ namespace JfYu.UnitTests.RabbitMQ
             var exception = await Record.ExceptionAsync(async () => await _rabbitMQService.SendAsync(exchangeName, "This is a test message").ConfigureAwait(true));
 
             Assert.NotNull(exception);
-            Assert.IsAssignableFrom<PublishException>(exception);
+            Assert.IsType<PublishException>(exception,false);
             await channel.ExchangeDeleteAsync(exchangeName);
         }
 

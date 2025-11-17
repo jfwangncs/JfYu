@@ -1,4 +1,4 @@
-﻿using JfYu.Office.Excel.Constant;
+using JfYu.Office.Excel.Constant;
 using JfYu.Office.Excel.Extensions;
 using NPOI.SS.UserModel;
 using System;
@@ -20,7 +20,7 @@ namespace JfYu.Office.Excel.Write.Implementation
         protected override void WriteDataToWorkbook(IWorkbook workbook, T source, JfYuExcelOptions writeOperation, Dictionary<string, string>? titles = null, Action<int>? callback = null)
         {
             if (!source.GetType().IsConstructedGenericType)
-                throw new InvalidOperationException($"Unsupported data type {typeof(T)}.");
+                throw new NotSupportedException($"Unsupported data type {typeof(T)}.");
             var tType = source.GetType().GetGenericArguments()[0];
             IQueryable? data = null;
             if (typeof(T).GetGenericTypeDefinition() == typeof(IQueryable<>))
@@ -45,7 +45,7 @@ namespace JfYu.Office.Excel.Write.Implementation
                 return;
             }
             else
-                throw new InvalidOperationException($"Unsupported data type {typeof(T)}.");
+                throw new NotSupportedException($"Unsupported data type {typeof(T)}.");
 
             Write(data, workbook, tType, writeOperation, titles, callback);
         }

@@ -1,4 +1,4 @@
-﻿#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using JfYu.Office;
 using JfYu.Office.Word;
 using JfYu.Office.Word.Constant;
@@ -55,7 +55,7 @@ namespace JfYu.UnitTests.Office.Word
         public void CreatePicture_NullParameter_ThrowException(XWPFRun run, JfYuWordReplacement replacement)
         {
             var ex = Record.Exception(() => JfYuWordExtension.CreatePicture(run, replacement));
-            Assert.IsAssignableFrom<ArgumentNullException>(ex);
+            Assert.IsType<ArgumentNullException>(ex);
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace JfYu.UnitTests.Office.Word
         public void GenerateWordByTemplate_TemplateEmpty_ThrowException(string templatePath)
         {
             var ex = Record.Exception(() => _jfYuWord.GenerateWordByTemplate(templatePath, _outputFilePath, []));
-            Assert.IsAssignableFrom<FileNotFoundException>(ex);
+            Assert.IsType<FileNotFoundException>(ex);
         }
 
         [Fact]

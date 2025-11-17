@@ -1,4 +1,4 @@
-﻿#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using JfYu.Office;
 using JfYu.Office.Excel;
 using JfYu.Office.Excel.Constant;
@@ -34,10 +34,10 @@ namespace JfYu.UnitTests.Office.Excel
             var d1 = new TestModelFaker().Generate(26);
             d1.ForEach(q => { q.DateTime = DateTime.Parse(q.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), CultureInfo.InvariantCulture); q.Sub = null; q.Items = []; });
             // Act 
-            var source = new Tuple<List<TestModel>, List<TestModel>>(d1, d1);            ;
+            var source = new Tuple<List<TestModel>, List<TestModel>>(d1, d1);
 
             var ex = Record.Exception(() => _jfYuExcel.Write(source, filePath, excelOption: new JfYuExcelOptions() { SheetMaxRecord = 10 }));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<NotSupportedException>(ex);
         }
 
         [Fact]
@@ -189,7 +189,7 @@ namespace JfYu.UnitTests.Office.Excel
             var filePath = "ListWriterUnsupportedType.xlsx";
 
             var ex = Record.Exception(() => _jfYuExcel.Write(new HashSet<int>(), filePath, JfYuExcelExtension.GetTitles<AllTypeTestModel>()));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<NotSupportedException>(ex);
         }
 
         [Fact]
@@ -198,7 +198,7 @@ namespace JfYu.UnitTests.Office.Excel
             var filePath = "ListWriterUnsupportedType1.xlsx";
 
             var ex = Record.Exception(() => _jfYuExcel.Write(new AllTypeTestModel(), filePath, JfYuExcelExtension.GetTitles<AllTypeTestModel>()));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<NotSupportedException>(ex);
         }
 
         #region Tuple
@@ -393,7 +393,7 @@ namespace JfYu.UnitTests.Office.Excel
             var source = new Tuple<List<AllTypeTestModel>, List<TestModel>>(d1, d2);
 
             var ex = Record.Exception(() => _jfYuExcel.Write(source, filePath, JfYuExcelExtension.GetTitles<AllTypeTestModel>(), excelOption: new JfYuExcelOptions() { SheetMaxRecord = 100 }));
-            Assert.IsAssignableFrom<InvalidOperationException>(ex);
+            Assert.IsType<InvalidOperationException>(ex);
         }
 
         [Fact]
@@ -506,7 +506,7 @@ namespace JfYu.UnitTests.Office.Excel
 
             // Act
             var ex = Record.Exception(() => _jfYuExcel.Write(source, filePath, new Dictionary<string, string>() { { "x", "y" } }));
-            Assert.IsAssignableFrom<InvalidOperationException>(ex);
+            Assert.IsType<InvalidOperationException>(ex);
         }
 
         #endregion Tuple

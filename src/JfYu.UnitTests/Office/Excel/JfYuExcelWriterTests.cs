@@ -1,4 +1,4 @@
-﻿#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using JfYu.Office;
 using JfYu.Office.Excel;
 using JfYu.Office.Excel.Constant;
@@ -34,7 +34,7 @@ namespace JfYu.UnitTests.Office.Excel
         public void CreateExcel_UnSupportVersion_ThrowException()
         {
             var ex = Record.Exception(() => _jfYuExcel.CreateExcel(JfYuExcelVersion.Csv));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<ArgumentException>(ex);
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace JfYu.UnitTests.Office.Excel
         {
             using var dt = new DataTable();
             var ex = Record.Exception(() => _jfYuExcel.Write(dt, path!));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<Exception>(ex,false);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace JfYu.UnitTests.Office.Excel
         {
             var data = new Dictionary<string, string>();
             var ex = Record.Exception(() => _jfYuExcel.Write(data, "1.xlsx"));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<NotSupportedException>(ex);
         }
 
         [Fact]

@@ -1,4 +1,4 @@
-﻿#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using JfYu.Office;
 using JfYu.Office.Excel;
 using JfYu.Office.Excel.Extensions;
@@ -26,8 +26,8 @@ namespace JfYu.UnitTests.Office.Excel
         {
             var filePath = $"{nameof(WriteCSV_SourceIsNull_ThrowException)}.csv";
             List<AllTypeTestModel>? source = null;
-            var ex = Record.Exception(() => _jfYuExcel.WriteCSV(source!, filePath));
-            Assert.IsAssignableFrom<ArgumentNullException>(ex);
+            var ex = Record.Exception(() => _jfYuExcel.WriteCSV(source!, filePath)); 
+            Assert.IsType<ArgumentNullException>(ex);
         }
 
         [Theory]
@@ -37,8 +37,8 @@ namespace JfYu.UnitTests.Office.Excel
         public void WriteCSV_PathIsInvalid_ThrowException(string? path)
         {
             var source = new List<AllTypeTestModel>();
-            var ex = Record.Exception(() => _jfYuExcel.Write(source, path!));
-            Assert.IsAssignableFrom<Exception>(ex);
+            var ex = Record.Exception(() => _jfYuExcel.Write(source, path!)); 
+            Assert.IsType<Exception>(ex,false);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace JfYu.UnitTests.Office.Excel
             }
             var source = new List<AllTypeTestModel>();
             var ex = Record.Exception(() => _jfYuExcel.WriteCSV(source, filePath));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<FileNotFoundException>(ex);
             File.Delete(filePath);
         }
 
@@ -159,7 +159,7 @@ namespace JfYu.UnitTests.Office.Excel
             if (File.Exists(filePath))
                 File.Delete(filePath);
             var ex = Record.Exception(() => _jfYuExcel.ReadCSV(filePath));
-            Assert.IsAssignableFrom<FileNotFoundException>(ex);
+            Assert.IsType<FileNotFoundException>(ex);
         }
 
         [Fact]

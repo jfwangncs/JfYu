@@ -1,4 +1,4 @@
-﻿#if NET8_0_OR_GREATER 
+#if NET8_0_OR_GREATER 
 using JfYu.Office;
 using JfYu.Office.Excel;
 using JfYu.Office.Excel.Constant;
@@ -61,7 +61,7 @@ namespace JfYu.UnitTests.Office.Excel
 
             // Act & Assert
             var ex = Record.Exception(() => _jfYuExcel.Write(source, filePath, titles, writeOperation, callback));
-            Assert.IsAssignableFrom<Exception>(ex);
+            Assert.IsType<FileLoadException>(ex);
             if (File.Exists(filePath))
                 File.Delete(filePath);
         }
