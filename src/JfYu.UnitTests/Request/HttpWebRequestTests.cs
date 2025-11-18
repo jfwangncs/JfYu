@@ -428,6 +428,64 @@ namespace JfYu.UnitTests.Request
         }
 
         [Fact]
+        public async Task Test_EmptyCookieContainer_SendAsync()
+        {
+            // Test with empty CookieContainer (not null, but no cookies)
+            var client = new JfYuHttpRequest
+            {
+                Url = $"{_url.Url}/get",
+                RequestCookies = new CookieContainer() // Empty container
+            };
+            await client.SendAsync();
+
+            Assert.Equal(HttpStatusCode.OK, client.StatusCode);
+            // ResponseCookies should be empty since no cookies were set
+            Assert.Empty(client.ResponseCookies);
+        }
+
+        [Fact]
+        public async Task Test_EmptyCookieContainer_DownloadFileAsyncToPath()
+        {
+            // Test with empty CookieContainer for DownloadFileAsync(path)
+            var client = new JfYuHttpRequest
+            {
+                Url = $"{_url.Url}/bytes/1024",
+                RequestCookies = new CookieContainer() // Empty container
+            };
+
+            var path = nameof(Test_EmptyCookieContainer_DownloadFileAsyncToPath);
+            if (File.Exists(path))
+                File.Delete(path);
+
+            await client.DownloadFileAsync(path);
+            
+            Assert.Equal(HttpStatusCode.OK, client.StatusCode);
+            Assert.Empty(client.ResponseCookies);
+            Assert.True(File.Exists(path));
+            
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+
+        [Fact]
+        public async Task Test_EmptyCookieContainer_DownloadFileAsyncToStream()
+        {
+            // Test with empty CookieContainer for DownloadFileAsync()
+            var client = new JfYuHttpRequest
+            {
+                Url = $"{_url.Url}/bytes/1024",
+                RequestCookies = new CookieContainer() // Empty container
+            };
+
+            using var stream = await client.DownloadFileAsync();
+            
+            Assert.Equal(HttpStatusCode.OK, client.StatusCode);
+            Assert.Empty(client.ResponseCookies);
+            Assert.NotNull(stream);
+            Assert.True(stream.Length > 0);
+        }
+
+        [Fact]
         public async Task Test_CustomInitFunc()
         {
             var client = new JfYuHttpRequest

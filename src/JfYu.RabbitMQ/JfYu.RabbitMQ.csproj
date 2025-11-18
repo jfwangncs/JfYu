@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks> 
 		<Version>8.1.0</Version>
-		<Description>RabbitMQ client encapsulation</Description>
+		<Description>Lightweight RabbitMQ client wrapper with async publishing/consuming, retry with dead-letter support, and DI integration.</Description>
 	</PropertyGroup>
 	
 	<ItemGroup>

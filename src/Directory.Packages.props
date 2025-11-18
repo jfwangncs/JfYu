@@ -3,35 +3,37 @@
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageVersion  Include="BenchmarkDotNet" Version="0.15.4" />
-		<PackageVersion  Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
-		<PackageVersion  Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
-		<PackageVersion  Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
-		<PackageVersion  Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageVersion  Include="RabbitMQ.Client" Version="7.1.2" /> 
-		<PackageVersion  Include="Microsoft.Extensions.Http" Version="9.0.10" />  
-		<PackageVersion  Include="Brotli.NET" Version="2.1.1" />
-		<PackageVersion  Include="SharpZipLib" Version="1.4.2" /> 		
-		<PackageVersion  Include="Bogus" Version="35.6.4" />	
-		<PackageVersion  Include="xunit" Version="2.9.3" />
-		<PackageVersion  Include="xunit.runner.visualstudio" Version="3.1.5" />
-		<PackageVersion  Include="Moq" Version="4.20.72" />
-		<PackageVersion  Include="coverlet.collector" Version="6.0.4" />
-		<PackageVersion  Include="coverlet.msbuild" Version="6.0.4" />
-		<PackageVersion  Include="EntityFramework" Version="6.5.1" />
-		<PackageVersion  Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.Extensions.Logging" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.Extensions.Logging.Console" Version="9.0.10" />
-		<PackageVersion  Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+		<PackageVersion Include="BenchmarkDotNet" Version="0.15.4" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
+		<PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+		<PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageVersion Include="RabbitMQ.Client" Version="7.2.0" />
+		<PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.10" />
+		<PackageVersion Include="Brotli.NET" Version="2.1.1" />
+		<PackageVersion Include="SharpZipLib" Version="1.4.2" />
+		<PackageVersion Include="Bogus" Version="35.6.5" />
+		<PackageVersion Include="xunit" Version="2.9.3" />
+		<PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+		<PackageVersion Include="Moq" Version="4.20.72" />
+		<PackageVersion Include="coverlet.collector" Version="6.0.4" />
+		<PackageVersion Include="coverlet.msbuild" Version="6.0.4" />
+		<PackageVersion Include="EntityFramework" Version="6.5.1" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="9.0.10" />
+		<PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10"/>
+		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+		<PackageVersion Include="NPOI" Version="2.7.3" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="xunit" PrivateAssets="all" />
@@ -44,7 +46,7 @@
 		<PackageReference Update="Microsoft.Extensions.Configuration.Json" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.Extensions.Logging" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.Extensions.Logging.Console" PrivateAssets="all" />
-		<PackageReference Update="Microsoft.NET.Test.Sdk" PrivateAssets="all" />		
-		<PackageReference Update="BenchmarkDotNet" PrivateAssets="all" /> 
+		<PackageReference Update="Microsoft.NET.Test.Sdk" PrivateAssets="all" />
+		<PackageReference Update="BenchmarkDotNet" PrivateAssets="all" />
 	</ItemGroup>
 </Project>

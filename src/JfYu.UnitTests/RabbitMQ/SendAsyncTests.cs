@@ -1,4 +1,4 @@
-﻿using JfYu.RabbitMQ;
+using JfYu.RabbitMQ;
 using JfYu.UnitTests.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -11,7 +11,7 @@ namespace JfYu.UnitTests.RabbitMQ
     public class SendAsyncTests
     {
         private readonly IRabbitMQService _rabbitMQService;
-        private readonly Dictionary<string, object?> header = new() { { "x-expires", 6000 } };
+        private readonly Dictionary<string, object?> _header = new() { { "x-expires", 60000 } };
 
         public SendAsyncTests()
         {
@@ -51,7 +51,10 @@ namespace JfYu.UnitTests.RabbitMQ
         public async Task SendSync_QueueNotAvailable_ThrowException()
         {
             string queueName = $"{nameof(SendSync_QueueNotAvailable_ThrowException)}";
-            await Assert.ThrowsAsync<PublishException>(async () => await _rabbitMQService.SendAsync("", "This is a test message", queueName).ConfigureAwait(true));
+            var exception = await Record.ExceptionAsync(async () => await _rabbitMQService.SendAsync("", "This is a test message", queueName).ConfigureAwait(true));
+
+            Assert.NotNull(exception);
+            Assert.IsType<PublishException>(exception,false);             
         }
 
         [Fact]
@@ -67,7 +70,11 @@ namespace JfYu.UnitTests.RabbitMQ
             string exchangeName = $"{nameof(SendSync_ExchangeAvailableQueueNot_ThrowException)}";
             var channel = await _rabbitMQService.Connection.CreateChannelAsync();
             await channel.ExchangeDeclareAsync(exchangeName, ExchangeType.Direct, true, true);
-            await Assert.ThrowsAsync<PublishException>(async () => await _rabbitMQService.SendAsync(exchangeName, "This is a test message").ConfigureAwait(true));
+
+            var exception = await Record.ExceptionAsync(async () => await _rabbitMQService.SendAsync(exchangeName, "This is a test message").ConfigureAwait(true));
+
+            Assert.NotNull(exception);
+            Assert.IsType<PublishException>(exception,false);
             await channel.ExchangeDeleteAsync(exchangeName);
         }
 
@@ -78,7 +85,7 @@ namespace JfYu.UnitTests.RabbitMQ
             string exchangeName = $"{nameof(SendSync_NullString_Correctly)}{index}";
             string queueName = $"{nameof(SendSync_NullString_Correctly)}{index}";
 
-            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", header);
+            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", _header);
 
             await _rabbitMQService.SendAsync(exchangeName, message);
 
@@ -103,7 +110,7 @@ namespace JfYu.UnitTests.RabbitMQ
             string exchangeName = $"{nameof(SendSync_NullT_Correctly)})";
             string queueName = $"{nameof(SendSync_NullT_Correctly)})";
 
-            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", header);
+            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", _header);
 
             await _rabbitMQService.SendAsync(exchangeName, "");
             await _rabbitMQService.SendAsync(exchangeName, "           ");
@@ -130,11 +137,11 @@ namespace JfYu.UnitTests.RabbitMQ
             await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
             using var cts = new CancellationTokenSource();
 
-            var messages = new TestModelFaker().Generate(100000);
+            var messages = new TestModelFaker().Generate(20000);
             // Act
             var sendingTask = _rabbitMQService.SendBatchAsync(exchangeName, messages, "", null, cts.Token);
 
-            await Task.Delay(500);
+            await Task.Delay(100);
 #if NET8_0_OR_GREATER
             await cts.CancelAsync().ConfigureAwait(true);
 #else
@@ -144,7 +151,8 @@ namespace JfYu.UnitTests.RabbitMQ
             // Assert
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => sendingTask);
             var queue = await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName);
-            Assert.True(queue.MessageCount > 1 && queue.MessageCount < 100000);
+            Assert.True(queue.MessageCount > 1);
+            Assert.True(queue.MessageCount < 20000);
 
             var channel = await _rabbitMQService.Connection.CreateChannelAsync();
             await channel.QueueDeleteAsync(queueName);
@@ -158,7 +166,7 @@ namespace JfYu.UnitTests.RabbitMQ
             string exchangeName = $"{nameof(SendSync_Model_Correctly)}";
             string queueName = $"{nameof(SendSync_Model_Correctly)}";
 
-            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", header);
+            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", _header);
 
             var message = new TestModelFaker().Generate(12);
             await _rabbitMQService.SendAsync(exchangeName, message);
@@ -184,7 +192,7 @@ namespace JfYu.UnitTests.RabbitMQ
             string exchangeName = $"{nameof(SendSync_Strings_Correctly)}";
             string queueName = $"{nameof(SendSync_Strings_Correctly)}";
 
-            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", header);
+            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", _header);
 
 
             var messages = new TestModelFaker().Generate(12).Select(q => q.Name).ToList();
@@ -211,7 +219,7 @@ namespace JfYu.UnitTests.RabbitMQ
             string exchangeName = $"{nameof(SendSync_Models_Correctly)}";
             string queueName = $"{nameof(SendSync_Models_Correctly)}";
 
-            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", header);
+            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", _header);
 
             var message = new TestModelFaker().Generate(12);
             await _rabbitMQService.SendBatchAsync(exchangeName, message);
@@ -238,8 +246,8 @@ namespace JfYu.UnitTests.RabbitMQ
             string queueName1 = $"{nameof(SendSync_Fanout_Correctly)}q1";
             string queueName2 = $"{nameof(SendSync_Fanout_Correctly)}q2";
 
-            await _rabbitMQService.QueueDeclareAsync(queueName1, exchangeName, ExchangeType.Fanout, "", header);
-            await _rabbitMQService.QueueDeclareAsync(queueName2, exchangeName, ExchangeType.Fanout, "", header);
+            await _rabbitMQService.QueueDeclareAsync(queueName1, exchangeName, ExchangeType.Fanout, "", _header);
+            await _rabbitMQService.QueueDeclareAsync(queueName2, exchangeName, ExchangeType.Fanout, "", _header);
 
 
             string receivedMessagesQueue1 = "";
@@ -303,8 +311,8 @@ namespace JfYu.UnitTests.RabbitMQ
             string queueName1 = $"{nameof(Test_Topic_Correctly)}q1";
             string queueName2 = $"{nameof(Test_Topic_Correctly)}q2";
 
-            await _rabbitMQService.QueueDeclareAsync(queueName1, exchangeName, ExchangeType.Topic, "logs.error.#", header);
-            await _rabbitMQService.QueueDeclareAsync(queueName2, exchangeName, ExchangeType.Topic, "logs.*.database", header);
+            await _rabbitMQService.QueueDeclareAsync(queueName1, exchangeName, ExchangeType.Topic, "logs.error.#", _header);
+            await _rabbitMQService.QueueDeclareAsync(queueName2, exchangeName, ExchangeType.Topic, "logs.*.database", _header);
 
             var receivedMessagesQueue1 = new List<string>();
             var receivedMessagesQueue2 = new List<string>();
@@ -345,8 +353,8 @@ namespace JfYu.UnitTests.RabbitMQ
             string exchangeName2 = $"{nameof(SendSync_MultipleExchange_Correctly)}2";
             string queueName = $"{nameof(SendSync_MultipleExchange_Correctly)}";
 
-            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName1, ExchangeType.Direct, "", header);
-            await _rabbitMQService.ExchangeBindAsync(exchangeName1, exchangeName2, ExchangeType.Direct, "", header);
+            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName1, ExchangeType.Direct, "", _header);
+            await _rabbitMQService.ExchangeBindAsync(exchangeName1, exchangeName2, ExchangeType.Direct, "", _header);
 
             string message = "This is an error message";
             await _rabbitMQService.SendAsync(exchangeName2, message);

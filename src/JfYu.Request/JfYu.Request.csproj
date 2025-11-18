@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks> 
 		<Version>8.3.0</Version>
-		<Description>HTTP request abstraction supporting HttpClient/HttpWebRequest with configurable logging</Description>
+		<Description>HTTP request abstraction with `HttpClient`, rich headers, logging filters, cookies, proxy, SSL, file download, and multipart upload. Supports multiple named HttpClients for multi-tenant or multi-configuration scenarios</Description>
 	</PropertyGroup>
 	
 	<ItemGroup>

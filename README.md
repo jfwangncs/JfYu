@@ -10,6 +10,8 @@ Welcome to the project! This is an all-in-one toolkit designed for developers, i
 
 - [**RabbitMQ Client**][Github.RabbitMQ] - RabbitMQ client wrapper with async message publishing/consuming, automatic retry, and dead letter queue support.
 
+- [**Office Documents**][Github.Office] - Comprehensive Excel and Word document manipulation library supporting multiple data sources, template-based generation, and high-performance streaming.
+
 ## Nuget Packages
 
 | Package Name                    |
@@ -17,6 +19,7 @@ Welcome to the project! This is an all-in-one toolkit designed for developers, i
 | [JfYu.Data][Nuget.Data]         |
 | [JfYu.Request][Nuget.Request]   |
 | [JfYu.RabbitMQ][Nuget.RabbitMQ] |
+| [JfYu.Office][Nuget.Office]     |
 
 ## Usage
 
@@ -29,7 +32,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [Github.Data]: https://github.com/jfwangncs/JfYu/tree/master/src/JfYu.Data
 [Github.Request]: https://github.com/jfwangncs/JfYu/tree/master/src/JfYu.Request
 [Github.RabbitMQ]: https://github.com/jfwangncs/JfYu/tree/master/src/JfYu.RabbitMQ
+[Github.Office]: https://github.com/jfwangncs/JfYu/tree/master/src/JfYu.Office
 [Nuget.Data]: https://www.nuget.org/packages/JfYu.Data
 [Nuget.Request]: https://www.nuget.org/packages/JfYu.Request
 [Nuget.RabbitMQ]: https://www.nuget.org/packages/JfYu.RabbitMQ
+[Nuget.Office]: https://www.nuget.org/packages/JfYu.Office
 [LICENSE]: https://github.com/jfwangncs/JfYu/blob/master/LICENSE
