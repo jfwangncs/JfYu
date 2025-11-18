@@ -36,25 +36,22 @@ namespace JfYu.UnitTests.Office.Word
             var jfYuWord = serviceProvider.GetService<IJfYuWord>();
 
             Assert.NotNull(jfYuWord);
+        }        
+
+        [Fact]
+        public void CreatePicture_NullReplace_ThrowException()
+        {
+            using var doc = new XWPFDocument();
+            var para = doc.CreateParagraph();
+            var run = para.CreateRun();
+            var ex = Record.Exception(() => JfYuWordExtension.CreatePicture(run, null!));
+            Assert.IsType<ArgumentNullException>(ex);
         }
 
-        public class NullCreatePictureExpectData : TheoryData<XWPFRun?, JfYuWordReplacement?>
+        [Fact]
+        public void CreatePicture_NullRun_ThrowException()
         {
-            public NullCreatePictureExpectData()
-            {
-                using var doc = new XWPFDocument();
-                var para = doc.CreateParagraph();
-                var run = para.CreateRun();
-                Add(null, new JfYuWordReplacement());
-                Add(run, null);
-            }
-        }
-
-        [Theory]
-        [ClassData(typeof(NullCreatePictureExpectData))]
-        public void CreatePicture_NullParameter_ThrowException(XWPFRun run, JfYuWordReplacement replacement)
-        {
-            var ex = Record.Exception(() => JfYuWordExtension.CreatePicture(run, replacement));
+            var ex = Record.Exception(() => JfYuWordExtension.CreatePicture(null!, new JfYuWordReplacement()));
             Assert.IsType<ArgumentNullException>(ex);
         }
 

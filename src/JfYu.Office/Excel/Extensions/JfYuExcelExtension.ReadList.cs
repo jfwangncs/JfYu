@@ -10,12 +10,10 @@ namespace JfYu.Office.Excel.Extensions
 {
     public static partial class JfYuExcelExtension
     {
-        [GeneratedRegex(@"[^\w\u4e00-\u9fa5]",
-            RegexOptions.NonBacktracking | RegexOptions.CultureInvariant)]
+        [GeneratedRegex(@"[^\w\u4e00-\u9fa5]", RegexOptions.CultureInvariant)]
         private static partial Regex InvalidCharRegex();
 
-        [GeneratedRegex(@"_{2,}",
-            RegexOptions.NonBacktracking | RegexOptions.CultureInvariant)]
+        [GeneratedRegex(@"_{2,}", RegexOptions.CultureInvariant)]
         private static partial Regex MultiUnderscoreRegex();
 
         #region Read
