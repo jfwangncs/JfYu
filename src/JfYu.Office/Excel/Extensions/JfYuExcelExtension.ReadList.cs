@@ -88,25 +88,21 @@ namespace JfYu.Office.Excel.Extensions
                 }
             }
 
-            static void ProcessRow(IRow row, object item, bool isDynamic,
-                Dictionary<int, PropertyInfo?> cellNums, Dictionary<string, string> titles)
+            static void ProcessRow(IRow row, object item, bool isDynamic, Dictionary<int, PropertyInfo?> cellNums, Dictionary<string, string> titles)
             {
-                IDictionary<string, object?>? dict = isDynamic ? (IDictionary<string, object?>)item : null;
-
                 foreach (var col in cellNums)
                 {
                     var cell = row.GetCell(col.Key);
-                    if (cell == null) continue;
+                    if (cell == null)
+                        continue;
 
                     var p = col.Value;
                     if (p != null)
                     {
-                        var result = ConvertCellValue(isDynamic ? typeof(object) : p.PropertyType, cell);
-
                         if (isDynamic)
-                            dict![titles[col.Key.ToString()]] = result;
+                            ((IDictionary<string, object?>)item)[titles[col.Key.ToString()]] = ConvertCellValue(typeof(object), cell);
                         else
-                            SetPropertyValue(item, p, result, cell);
+                            SetPropertyValue(item, p, ConvertCellValue(p.PropertyType, cell), cell);
                     }
                 }
             }
