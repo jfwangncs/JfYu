@@ -29,16 +29,16 @@ namespace JfYu.Redis.Implementation
             if (values == null || values.Count <= 0)
                 throw new ArgumentNullException(nameof(values));
             Log(nameof(SortedSetAddAllAsync), key);
-            return await _database.SortedSetAddAsync(key, values.Select(x => new SortedSetEntry(_serializer.Serialize(x.Key), x.Value)).ToArray(), flag).ConfigureAwait(false);
+            return await _database.SortedSetAddAsync(key, [.. values.Select(x => new SortedSetEntry(_serializer.Serialize(x.Key), x.Value))], flag).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
         public async Task<long> SortedSetRemoveAsync<T>(string key, List<T> values, CommandFlags flag = CommandFlags.None)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            values.ThrowListIfNullOrEmpty();
+            values.ThrowIfNullOrEmpty();
             Log(nameof(SortedSetRemoveAsync), key);
-            return await _database.SortedSetRemoveAsync(key, values.Select(x => (RedisValue)_serializer.Serialize(x)).ToArray(), flag).ConfigureAwait(false);
+            return await _database.SortedSetRemoveAsync(key, [.. values.Select(x => (RedisValue)_serializer.Serialize(x))], flag).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>

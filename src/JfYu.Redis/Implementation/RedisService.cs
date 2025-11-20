@@ -87,7 +87,7 @@ namespace JfYu.Redis.Implementation
                 throw new ArgumentException("The parameter 'keys' cannot be null or empty.", nameof(keys));
             Log(nameof(RemoveAllAsync), string.Join(", ", keys));
             var redisKeys = keys.Select(q => (RedisKey)q);
-            return _database.KeyDeleteAsync(redisKeys.ToArray(), flag);
+            return _database.KeyDeleteAsync([.. redisKeys], flag);
         }
 
         /// <inheritdoc/>

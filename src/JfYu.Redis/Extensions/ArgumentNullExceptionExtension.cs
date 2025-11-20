@@ -23,7 +23,7 @@ namespace JfYu.Redis.Extensions
         {
             ArgumentNullException.ThrowIfNull(values);
 
-            var list = values as IList<T> ?? values.ToList();
+            var list = values as IList<T> ?? [.. values];
             if (list.Count == 0)
                 throw new ArgumentException("Collection cannot be empty.", paramName);
 

@@ -22,7 +22,7 @@ namespace JfYu.Redis.Options
         /// Redis server database index default:0
         /// </summary>
 
-        public int DbIndex { get; set; } = 0;
+        public int DbIndex { get; set; }
 
         /// <summary>
         /// Redis server connect timeout, default:5000 Milliseconds
@@ -33,7 +33,7 @@ namespace JfYu.Redis.Options
         /// <summary>
         /// SSL
         /// </summary>
-        public bool SSL { get; set; } = false;
+        public bool SSL { get; set; }
 
         /// <summary>
         /// Prefix
@@ -43,7 +43,7 @@ namespace JfYu.Redis.Options
         /// <summary>
         /// Enabled or disabled logs default:false
         /// </summary>
-        public bool EnableLogs { get; set; } = false;
+        public bool EnableLogs { get; set; }
 
         /// <summary>
         /// Serializer Options

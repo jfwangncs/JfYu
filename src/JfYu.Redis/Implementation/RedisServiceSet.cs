@@ -34,12 +34,11 @@ namespace JfYu.Redis.Implementation
         public async Task<long> SetAddAllAsync<T>(string key, List<T> values, CommandFlags flag = CommandFlags.None)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            values.ThrowListIfNullOrEmpty();
+            values.ThrowIfNullOrEmpty();
             Log(nameof(SetAddAllAsync), key);
-            return await _database.SetAddAsync(key, values
+            return await _database.SetAddAsync(key, [.. values
                     .Select(item => Serializer.Serialize(item))
-                    .Select(x => (RedisValue)x)
-                    .ToArray(), flag).ConfigureAwait(false);
+                    .Select(x => (RedisValue)x)], flag).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -56,13 +55,12 @@ namespace JfYu.Redis.Implementation
         public async Task<long> SetRemoveAllAsync<T>(string key, List<T> values, CommandFlags flag = CommandFlags.None)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            values.ThrowListIfNullOrEmpty();
+            values.ThrowIfNullOrEmpty();
             values.ForEach(value => ArgumentNullException.ThrowIfNull(value));
             Log(nameof(SetRemoveAllAsync), key);
-            return await _database.SetRemoveAsync(key, values
+            return await _database.SetRemoveAsync(key, [.. values
                    .Select(item => Serializer.Serialize(item))
-                   .Select(x => (RedisValue)x)
-                   .ToArray(), flag).ConfigureAwait(false);
+                   .Select(x => (RedisValue)x)], flag).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
