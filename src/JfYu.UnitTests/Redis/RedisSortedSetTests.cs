@@ -3,7 +3,6 @@ using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
 using static JfYu.UnitTests.Redis.RedisBaseTests;
 
 namespace JfYu.UnitTests.Redis
@@ -40,13 +39,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SortedSetAddAsync_WhenkeyOrValueIsNull_ShouldThrowArgumentException(string key, string value)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SortedSetAddAsync(key, value, 1d).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task SortedSetAddAsync_KeyNotExist_ReturnTrue()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetAddAsync_KeyNotExist_ReturnTrue);
             var value = "testValue";
             var score = 1d;
             var result = await _redisService.SortedSetAddAsync(key, value, score);
@@ -57,7 +56,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SortedSetAddAsync_KeyExist_ReturnFalse()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetAddAsync_KeyExist_ReturnFalse);
             var value = "testValue";
             var score = 5.32d;
             await _redisService.SortedSetAddAsync(key, value, 1d);
@@ -75,29 +74,29 @@ namespace JfYu.UnitTests.Redis
         public async Task SortedSetAddAllAsync_WhenkeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SortedSetAddAsync(key, "", 1d).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task SortedSetAddAllAsync_WhenValuesIsNull_ShouldThrowArgumentException()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetAddAllAsync_WhenValuesIsNull_ShouldThrowArgumentException);
             var ex = await Record.ExceptionAsync(async () => await _redisService.SortedSetAddAllAsync<string>(key, null!).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentNullException>(ex);
         }
 
         [Fact]
         public async Task SortedSetAddAllAsync_WhenValuesIsEmpty_ShouldThrowArgumentException()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetAddAllAsync_WhenValuesIsEmpty_ShouldThrowArgumentException);
             var ex = await Record.ExceptionAsync(async () => await _redisService.SortedSetAddAllAsync<string>(key, []).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentNullException>(ex);
         }
 
         [Fact]
         public async Task SortedSetAddAllAsync_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetAddAllAsync_ReturnCorrectly);
             var values = new Dictionary<string, double>
             {
                 {"test", 12.21d},
@@ -117,13 +116,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SortedSetRemoveAsync_WhenkeyIsNullOrValuesIsNull_ShouldThrowArgumentException(string key, string?[] values)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SortedSetRemoveAsync(key, values.ToList()).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task SortedSetRemoveAsync_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetRemoveAsync_ReturnCorrectly);
             var values = new Dictionary<string, double>
             {
                 {"test", 12.21d},
@@ -141,7 +140,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SortedSetRemoveAsync_PartiallyValues_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetRemoveAsync_PartiallyValues_ReturnCorrectly);
             var values = new Dictionary<string, double>
             {
                 {"test", 12.21d},
@@ -166,13 +165,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SortedSetIncrementScoreAsync_WhenkeyIsNullOrValueIsNull_ShouldThrowArgumentException(string key, string value)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SortedSetIncrementScoreAsync(key, value, 1d).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task SortedSetIncrementScoreAsync_KeyNotExist_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetIncrementScoreAsync_KeyNotExist_ReturnCorrectly);
             var value = "testValue";
             var score = 23.213d;
             var result = await _redisService.SortedSetIncrementScoreAsync(key, value, score);
@@ -183,7 +182,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SortedSetIncrementScoreAsync_KeyExist_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetIncrementScoreAsync_KeyExist_ReturnCorrectly);
             var value = "testValue";
             var score = 23.213d;
             await _redisService.SortedSetAddAsync(key, value, score);
@@ -201,13 +200,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SortedSetRankAsync_WhenkeyIsNullOrValueIsNull_ShouldThrowArgumentException(string key, string value)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SortedSetRankAsync(key, value).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task SortedSetRankAsync_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetRankAsync_ReturnCorrectly);
             var values = new Dictionary<string, double>
             {
                 {"test", 12.21d},
@@ -227,7 +226,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SortedSetRankAsync_ValueNotExist_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetRankAsync_ValueNotExist_ReturnCorrectly);
             var values = new Dictionary<string, double>
             {
                 {"test", 12.21d},
@@ -251,13 +250,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SortedSetRangeByRankAsync_WhenkeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SortedSetRangeByRankAsync(key, 0, 1).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task SortedSetRangeByRankAsync_KeyOrValuesNotExist_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetRangeByRankAsync_KeyOrValuesNotExist_ReturnCorrectly);
             var value = "testValue";
             var score = 23.213d;
             var result = await _redisService.SortedSetRangeByRankAsync(key, 0, 10);
@@ -272,7 +271,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SortedSetRangeByRankAsync_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetRangeByRankAsync_ReturnCorrectly);
             var values = new Dictionary<string, double>
             {
                 {"a", 0.8d},
@@ -298,13 +297,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SortedSetRangeByScoreAsync_WhenkeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SortedSetRangeByScoreAsync(key, 1, 2).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task SortedSetRangeByScoreAsync_KeyOrValuesNotExist_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetRangeByScoreAsync_KeyOrValuesNotExist_ReturnCorrectly);
             var value = "testValue";
             var score = 23.213d;
             var result = await _redisService.SortedSetRangeByScoreAsync(key, 1, 2);
@@ -319,7 +318,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SortedSetRangeByScoreAsync_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetRangeByScoreAsync_ReturnCorrectly);
             var values = new Dictionary<string, double>
             {
                 {"a", 0.8d},
@@ -346,13 +345,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SortedSetCountAsync_WhenkeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SortedSetCountAsync(key, 1, 2).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task SortedSetCountAsync_KeyOrValuesNotExist_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetCountAsync_KeyOrValuesNotExist_ReturnCorrectly);
             var value = "testValue";
             var score = 23.213d;
             var result = await _redisService.SortedSetCountAsync(key, 1, 2);
@@ -367,7 +366,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SortedSetCountAsync_ReturnCorrectly()
         {
-            var key = "testSortedSet";
+            var key = nameof(SortedSetCountAsync_ReturnCorrectly);
             var values = new Dictionary<string, double>
             {
                 {"a", 0.8d},

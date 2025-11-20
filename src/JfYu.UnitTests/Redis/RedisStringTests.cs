@@ -2,7 +2,7 @@
 using Bogus;
 using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
-using JfYu.UnitTests.Models;
+using JfYu.UnitTests.Models; 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -42,37 +42,42 @@ namespace JfYu.UnitTests.Redis
         public async Task ExpireAsync_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.ExpireAsync(key, TimeSpan.FromSeconds(3)));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task ExpireAsync_KeyDoesNotExist_ReturnsFalse()
         {
-            var result = await _redisService.ExpireAsync("nonexistent_key", TimeSpan.FromSeconds(3));
+            var key = nameof(ExpireAsync_KeyDoesNotExist_ReturnsFalse); 
+            var result = await _redisService.ExpireAsync(key, TimeSpan.FromSeconds(3));
             Assert.False(result);
         }
 
         [Fact]
         public async Task ExpireAsync_KeyExists_ReturnsTrue()
         {
-            await _redisService.AddAsync("existent_key", "value");
-            var result = await _redisService.ExpireAsync("existent_key", TimeSpan.FromSeconds(3));
+            var key = nameof(ExpireAsync_KeyExists_ReturnsTrue);
+            var value = "dada";
+            await _redisService.AddAsync(key, value);
+            var result = await _redisService.ExpireAsync(key, TimeSpan.FromSeconds(3));
             Assert.True(result);
-            var value = await _redisService.GetAsync<string>("existent_key");
-            Assert.Equal("value", value);
+            var value1= await _redisService.GetAsync<string>(key);
+            Assert.Equal(value, value1);
             await Task.Delay(4000);
-            value = await _redisService.GetAsync<string>("existent_key");
+            value = await _redisService.GetAsync<string>(key);
             Assert.Null(value);
         }
 
         [Fact]
         public async Task ExpireAsync_WithTimeSpanZero_ReturnsTrue()
         {
-            await _redisService.AddAsync("existent_key", "value");
-            var result = await _redisService.ExpireAsync("existent_key", TimeSpan.Zero);
+            var key = nameof(ExpireAsync_WithTimeSpanZero_ReturnsTrue);
+            var value = "dada";
+            await _redisService.AddAsync(key, value);
+            var result = await _redisService.ExpireAsync(key, TimeSpan.Zero);
             Assert.True(result);
-            var value = await _redisService.GetAsync<string>("existent_key");
-            Assert.Null(value);
+            var value1 = await _redisService.GetAsync<string>(key);
+            Assert.Null(value1);
         }
 
         #endregion ExpireAsync
@@ -84,23 +89,26 @@ namespace JfYu.UnitTests.Redis
         public async Task ExistsAsync_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.ExistsAsync(key));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task ExistsAsync_KeyDoesNotExist_ReturnsFalse()
         {
-            var result = await _redisService.ExistsAsync("nonexistent_key");
+            var key = nameof(ExistsAsync_KeyDoesNotExist_ReturnsFalse);
+            var result = await _redisService.ExistsAsync(key);
             Assert.False(result);
         }
 
         [Fact]
         public async Task ExistsAsync_KeyExists_ReturnsTrue()
         {
-            await _redisService.AddAsync("existent_key", "value");
-            var result = await _redisService.ExistsAsync("existent_key");
+            var key = nameof(ExistsAsync_KeyExists_ReturnsTrue);
+            var value = "dada";
+            await _redisService.AddAsync(key, value);
+            var result = await _redisService.ExistsAsync(key);
             Assert.True(result);
-            await _redisService.RemoveAsync("existent_key");
+            await _redisService.RemoveAsync(key);
         }
 
         #endregion ExistsAsync
@@ -112,21 +120,24 @@ namespace JfYu.UnitTests.Redis
         public async Task RemoveAsync_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.RemoveAsync(key));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task RemoveAsync_KeyDoesNotExist_ReturnsFalse()
         {
-            var result = await _redisService.RemoveAsync("nonexistent_key");
+            var key = nameof(RemoveAsync_KeyDoesNotExist_ReturnsFalse); 
+            var result = await _redisService.RemoveAsync(key);
             Assert.False(result);
         }
 
         [Fact]
         public async Task RemoveAsync_KeyExists_ReturnsTrue()
         {
-            await _redisService.AddAsync("existent_key", "value");
-            var result = await _redisService.RemoveAsync("existent_key");
+            var key = nameof(RemoveAsync_KeyExists_ReturnsTrue);
+            var value = "dada";
+            await _redisService.AddAsync(key, value);
+            var result = await _redisService.RemoveAsync(key);
             Assert.True(result);
         }
 
@@ -138,7 +149,8 @@ namespace JfYu.UnitTests.Redis
         [ClassData(typeof(NullKeysExpectData))]
         public async Task RemoveAllAsync_KeyIsNull_ThrowsException(string[] keys)
         {
-            await Assert.ThrowsAsync<ArgumentException>(() => _redisService.RemoveAllAsync([.. keys]));
+            var ex = await Record.ExceptionAsync(() => _redisService.RemoveAllAsync([.. keys]));
+            Assert.IsType<ArgumentException>(ex, false); 
         }
 
         [Fact]
@@ -178,7 +190,7 @@ namespace JfYu.UnitTests.Redis
         public async Task GetAsync_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.GetAsync<string>(key));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
@@ -191,16 +203,18 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task GetAsync_KeyExists_ReturnsValue()
         {
-            await _redisService.AddAsync("existent_key", "value");
-            var result = await _redisService.GetAsync<string>("existent_key");
-            Assert.Equal("value", result);
-            await _redisService.RemoveAsync("existent_key");
+            var key = nameof(GetAsync_KeyExists_ReturnsValue);
+            var value = "dada";
+            await _redisService.AddAsync(key, value);
+            var result = await _redisService.GetAsync<string>(key);
+            Assert.Equal(value, result);
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
         public async Task GetAsync_ValueInt_ReturnsValue()
         {
-            var key = "key1";
+            var key = nameof(GetAsync_ValueInt_ReturnsValue);
             var value = 1;
             await _redisService.AddAsync(key, value);
             var result = await _redisService.GetAsync<int>(key);
@@ -211,7 +225,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task GetAsync_ValueLong_ReturnsValue()
         {
-            var key = "key1";
+            var key = nameof(GetAsync_ValueLong_ReturnsValue);
             long value = 121132321321;
             await _redisService.AddAsync(key, value);
             var result = await _redisService.GetAsync<long>(key);
@@ -222,7 +236,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task GetAsync_ValueDouble_ReturnsValue()
         {
-            var key = "key1";
+            var key = nameof(GetAsync_ValueDouble_ReturnsValue);
             double value = 121132321321.3123131414;
             await _redisService.AddAsync(key, value);
             var result = await _redisService.GetAsync<double>(key);
@@ -233,7 +247,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task GetAsync_ValueDecimal_ReturnsValue()
         {
-            var key = "key1";
+            var key = nameof(GetAsync_ValueDecimal_ReturnsValue);
             decimal value = 12113232132131.3114142131M;
             await _redisService.AddAsync(key, value);
             var result = await _redisService.GetAsync<decimal>(key);
@@ -244,7 +258,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task GetAsync_ValueDateTime_ReturnsValue()
         {
-            var key = "key1";
+            var key = nameof(GetAsync_ValueDateTime_ReturnsValue);
             DateTime value = DateTime.UtcNow;
             await _redisService.AddAsync(key, value);
             var result = await _redisService.GetAsync<DateTime>(key);
@@ -255,7 +269,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task GetAsync_ValueModel_ReturnsValue()
         {
-            var key = "key1";
+            var key = nameof(GetAsync_ValueModel_ReturnsValue); 
             var value = new TestModelFaker().GenerateBetween(1, 10);
             await _redisService.AddAsync(key, value);
             var result = await _redisService.GetAsync<List<TestModel>>(key);
@@ -268,7 +282,7 @@ namespace JfYu.UnitTests.Redis
         public async Task GetAsync_WithExpiry_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.GetAsync<string>(key, TimeSpan.FromSeconds(10)));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
@@ -281,38 +295,44 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task GetAsync_WithExpiry_KeyExist_ReturnsNull()
         {
-            await _redisService.AddAsync("existent_key", "value");
-            var result = await _redisService.GetAsync<string>("existent_key", TimeSpan.FromSeconds(3));
-            Assert.Equal("value", result);
+            var key = nameof(GetAsync_WithExpiry_KeyExist_ReturnsNull);
+            var value = "dada";
+            await _redisService.AddAsync(key, value);
+            var result = await _redisService.GetAsync<string>(key, TimeSpan.FromSeconds(3));
+            Assert.Equal(value, result);
             await Task.Delay(5000);
-            result = await _redisService.GetAsync<string>("existent_key");
+            result = await _redisService.GetAsync<string>(key);
             Assert.Null(result);
-            await _redisService.RemoveAsync("existent_key");
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
         public async Task GetAsync_WithExpiry_KeyExist_ReturnsValue()
         {
-            await _redisService.AddAsync("existent_key", "value");
-            var result = await _redisService.GetAsync<string>("existent_key", TimeSpan.FromSeconds(5));
-            Assert.Equal("value", result);
+            var key = nameof(GetAsync_WithExpiry_KeyExist_ReturnsValue);
+            var value = "dada";
+            await _redisService.AddAsync(key, value);
+            var result = await _redisService.GetAsync<string>(key, TimeSpan.FromSeconds(5));
+            Assert.Equal(value, result);
             await Task.Delay(3000);
-            result = await _redisService.GetAsync<string>("existent_key");
-            Assert.Equal("value", result);
+            result = await _redisService.GetAsync<string>(key);
+            Assert.Equal(value, result);
             await Task.Delay(3000);
-            result = await _redisService.GetAsync<string>("existent_key");
+            result = await _redisService.GetAsync<string>(key);
             Assert.Null(result);
-            await _redisService.RemoveAsync("existent_key");
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
         public async Task GetAsync_WithExpiry_KeyExists_ReturnsValueAndUpdatesExpiry()
         {
+            var key = nameof(GetAsync_WithExpiry_KeyExists_ReturnsValueAndUpdatesExpiry);
+            var value = "dada";
             var expiry = TimeSpan.FromSeconds(10);
-            await _redisService.AddAsync("key_with_expiry", "value", expiry);
-            var result = await _redisService.GetAsync<string>("key_with_expiry", expiry);
-            Assert.Equal("value", result);
-            await _redisService.RemoveAsync("key_with_expiry");
+            await _redisService.AddAsync(key, value, expiry);
+            var result = await _redisService.GetAsync<string>(key, expiry);
+            Assert.Equal(value, result);
+            await _redisService.RemoveAsync(key);
         }
 
         #endregion GetAsync
@@ -324,67 +344,79 @@ namespace JfYu.UnitTests.Redis
         public async Task AddAsync_KeyIsNull_ThrowsException(string key, string value)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.AddAsync(key, value));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task AddAsync_KeyAlreadyExists_ReturnsNewValue()
         {
-            await _redisService.AddAsync("existent_key", "value");
-            var result = await _redisService.AddAsync("existent_key", "new_value");
+            var key = nameof(AddAsync_KeyAlreadyExists_ReturnsNewValue);
+            var value = "dada";
+            await _redisService.AddAsync(key, value);
+            var result = await _redisService.AddAsync(key, value);
             Assert.True(result);
-            var value = await _redisService.GetAsync<string>("existent_key");
-            Assert.Equal("new_value", value);
-            await _redisService.RemoveAsync("existent_key");
+            var value1 = await _redisService.GetAsync<string>(key);
+            Assert.Equal(value, value1);
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
         public async Task AddAsync_KeyDoesNotExist_ReturnsTrue()
         {
-            var result = await _redisService.AddAsync("nonexistent_key", "value");
+            var key = nameof(AddAsync_KeyDoesNotExist_ReturnsTrue);
+            var value = "dada";
+            var result = await _redisService.AddAsync(key, value);
             Assert.True(result);
-            await _redisService.RemoveAsync("nonexistent_key");
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
         public async Task AddAsync_WithExpiry_KeyDoesNotExist_ReturnsTrue()
         {
+            var key = nameof(AddAsync_WithExpiry_KeyDoesNotExist_ReturnsTrue);
+            var value = "dada";
             var expiry = TimeSpan.FromSeconds(3);
-            var result = await _redisService.AddAsync("key_with_expiry", "value", expiry);
+            var result = await _redisService.AddAsync(key, value, expiry);
             Assert.True(result);
             await Task.Delay(5000);
-            var value = await _redisService.GetAsync<string>("key_with_expiry");
-            Assert.Null(value);
-            await _redisService.RemoveAsync("key_with_expiry");
+            var value1 = await _redisService.GetAsync<string>(key);
+            Assert.Null(value1);
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
         public async Task AddAsync_WithExpiry_KeyExist_ReturnsNewValue()
         {
-            await _redisService.AddAsync("key_with_expiry", "value");
+            var key = nameof(AddAsync_WithExpiry_KeyExist_ReturnsNewValue);
+            var value = "dada";
+            await _redisService.AddAsync(key, value);
             var expiry = TimeSpan.FromSeconds(10);
-            var result = await _redisService.AddAsync("key_with_expiry", "new_value", expiry);
+            var result = await _redisService.AddAsync(key, value, expiry);
             Assert.True(result);
-            var value = await _redisService.GetAsync<string>("key_with_expiry");
-            Assert.Equal("new_value", value);
-            await _redisService.RemoveAsync("key_with_expiry");
+            var value1 = await _redisService.GetAsync<string>(key);
+            Assert.Equal(value, value1);
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
         public async Task AddAsync_WithCondition_KeyDoesNotExist_ReturnsTrue()
         {
-            var result = await _redisService.AddAsync("conditional_key", "value", When.NotExists);
+            var key = nameof(AddAsync_WithCondition_KeyDoesNotExist_ReturnsTrue);
+            var value = "dada";
+            var result = await _redisService.AddAsync(key, value, When.NotExists);
             Assert.True(result);
-            await _redisService.RemoveAsync("conditional_key");
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
         public async Task AddAsync_WithCondition_KeyExists_ReturnsFalse()
         {
-            await _redisService.AddAsync("conditional_key", "value");
-            var result = await _redisService.AddAsync("conditional_key", "new_value", When.NotExists);
+            var key = nameof(AddAsync_WithCondition_KeyExists_ReturnsFalse);
+            var value = "dada";
+            await _redisService.AddAsync(key, value);
+            var result = await _redisService.AddAsync(key, value, When.NotExists);
             Assert.False(result);
-            await _redisService.RemoveAsync("conditional_key");
+            await _redisService.RemoveAsync(key);
         }
 
         #endregion AddAsync
@@ -396,13 +428,13 @@ namespace JfYu.UnitTests.Redis
         public async Task IncrementAsync_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.IncrementAsync(key));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task IncrementAsync_KeyExistValueNotNumeric_ThrowsException()
         {
-            var key = "key";
+            var key = nameof(IncrementAsync_KeyExistValueNotNumeric_ThrowsException);
             var value = "dada";
             await _redisService.AddAsync(key, value);
             await Assert.ThrowsAsync<RedisServerException>(async () => await _redisService.IncrementAsync(key).ConfigureAwait(true));
@@ -412,7 +444,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task IncrementAsync_KeyNotExist_ReturnCorrectly()
         {
-            var key = "key";
+            var key = nameof(IncrementAsync_KeyNotExist_ReturnCorrectly);
             var value = 1;
             var result = await _redisService.IncrementAsync(key);
             Assert.Equal(value, result);
@@ -422,7 +454,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task IncrementAsync_KeyExist_ReturnCorrectly()
         {
-            var key = "key";
+            var key = nameof(IncrementAsync_KeyExist_ReturnCorrectly);
             var value = 11;
             await _redisService.AddAsync(key, value);
             var result = await _redisService.IncrementAsync(key);
@@ -433,7 +465,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task IncrementAsync_WithSpecificValue_ThrowsException()
         {
-            var key = "key";
+            var key = nameof(IncrementAsync_WithSpecificValue_ThrowsException);
             var value = 11;
             var incrementValue = 5;
             await _redisService.AddAsync(key, value);
@@ -445,7 +477,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task IncrementAsync_DoubleKeyExist_ReturnCorrectly()
         {
-            var key = "key";
+            var key = nameof(IncrementAsync_DoubleKeyExist_ReturnCorrectly);
             var value = 11.24;
             await _redisService.AddAsync(key, value);
             var result = await _redisService.IncrementAsync(key, 1D);
@@ -456,7 +488,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task IncrementAsync_DoubleWithSpecificValue_ThrowsException()
         {
-            var key = "key";
+            var key = nameof(IncrementAsync_DoubleWithSpecificValue_ThrowsException);
             var value = 11.24;
             var incrementValue = 5.37;
             await _redisService.AddAsync(key, value);
@@ -474,13 +506,13 @@ namespace JfYu.UnitTests.Redis
         public async Task DecrementAsync_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.DecrementAsync(key));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task DecrementAsync_KeyExistValueNotNumeric_ThrowsException()
         {
-            var key = "key";
+            var key = nameof(DecrementAsync_KeyExistValueNotNumeric_ThrowsException);
             var value = "dada";
             await _redisService.AddAsync(key, value);
             await Assert.ThrowsAsync<RedisServerException>(async () => await _redisService.DecrementAsync(key).ConfigureAwait(true));
@@ -490,7 +522,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task DecrementAsync_KeyNotExist_ReturnCorrectly()
         {
-            var key = "key";
+            var key = nameof(DecrementAsync_KeyNotExist_ReturnCorrectly);
             var value = -1;
             var result = await _redisService.DecrementAsync(key);
             Assert.Equal(value, result);
@@ -500,7 +532,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task DecrementAsync_KeyExist_ReturnCorrectly()
         {
-            var key = "key";
+            var key = nameof(DecrementAsync_KeyExist_ReturnCorrectly);
             var value = 11;
             await _redisService.AddAsync(key, value);
             var result = await _redisService.DecrementAsync(key);
@@ -511,7 +543,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task DecrementAsync_WithSpecificValue_ThrowsException()
         {
-            var key = "key";
+            var key = nameof(DecrementAsync_WithSpecificValue_ThrowsException);
             var value = 11;
             var incrementValue = 5;
             await _redisService.AddAsync(key, value);
@@ -523,7 +555,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task DecrementAsync_DoubleKeyExist_ReturnCorrectly()
         {
-            var key = "key";
+            var key = nameof(DecrementAsync_DoubleKeyExist_ReturnCorrectly);
             var value = 11.24;
             await _redisService.AddAsync(key, value);
             var result = await _redisService.DecrementAsync(key, 1D);
@@ -534,7 +566,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task DecrementAsync_DoubleWithSpecificValue_ThrowsException()
         {
-            var key = "key";
+            var key = nameof(DecrementAsync_DoubleWithSpecificValue_ThrowsException);
             var value = 11.24;
             var incrementValue = 5.37;
             await _redisService.AddAsync(key, value);

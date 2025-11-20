@@ -40,13 +40,13 @@ namespace JfYu.UnitTests.Redis
         public async Task ListAddAsync_KeyIsNull_ThrowsException(string key, string value)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.ListAddAsync(key, value));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task ListAddAsync_ValidInput_ReturnsLong()
         {
-            var key = "testKey";
+            var key = nameof(ListAddAsync_ValidInput_ReturnsLong);
             var value = "testValue";
 
             var result = await _redisService.ListAddAsync(key, value);
@@ -60,13 +60,13 @@ namespace JfYu.UnitTests.Redis
         public async Task ListAddToLeftAsync_KeyIsNull_ThrowsException(string key, string value)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.ListAddToLeftAsync(key, value));
-            Assert.IsType<ArgumentNullException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task ListAddToLeftAsync_ValidInput_ReturnsLong()
         {
-            var key = "testKey";
+            var key = nameof(ListAddToLeftAsync_ValidInput_ReturnsLong);
             var value = "testValue";
 
             var result = await _redisService.ListAddToLeftAsync(key, value);
@@ -84,13 +84,13 @@ namespace JfYu.UnitTests.Redis
         public async Task ListPopFromRightAsync_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.ListPopFromRightAsync<string>(key));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task ListPopFromRightAsync_KeyNotExist_ReturnsNull()
         {
-            var key = "testKey";
+            var key = nameof(ListPopFromRightAsync_KeyNotExist_ReturnsNull);
             await _redisService.ListPopFromRightAsync<string>(key);
             Assert.Null(null);
         }
@@ -98,7 +98,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task ListPopFromRightAsync_ValidInput_ReturnsValue()
         {
-            var key = "testKey";
+            var key = nameof(ListPopFromRightAsync_ValidInput_ReturnsValue);
             var value = "testValue";
 
             await _redisService.ListAddAsync(key, value);
@@ -119,13 +119,13 @@ namespace JfYu.UnitTests.Redis
         public async Task ListPopFromLeftAsync_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.ListPopFromLeftAsync<string>(key));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task ListPopFromLeftAsync_KeyNotExist_ReturnsNull()
         {
-            var key = "testKey";
+            var key = nameof(ListPopFromLeftAsync_KeyNotExist_ReturnsNull);
             await _redisService.ListPopFromLeftAsync<string>(key);
             Assert.Null(null);
         }
@@ -133,7 +133,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task ListPopFromLeftAsync_ValidInput_ReturnsValue()
         {
-            var key = "testKey";
+            var key = nameof(ListPopFromLeftAsync_ValidInput_ReturnsValue);
             var value = "testValue";
 
             await _redisService.ListAddAsync(key, value);
@@ -154,13 +154,13 @@ namespace JfYu.UnitTests.Redis
         public async Task ListLengthAsync_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.ListLengthAsync(key));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task ListLengthAsync_KeyNotExist_ReturnsNull()
         {
-            var key = "testKey";
+            var key = nameof(ListLengthAsync_KeyNotExist_ReturnsNull);
             await _redisService.ListLengthAsync(key);
             Assert.Null(null);
         }
@@ -168,7 +168,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task ListLengthAsync_ValidInput_ReturnsLong()
         {
-            var key = "testKey";
+            var key = nameof(ListLengthAsync_ValidInput_ReturnsLong);
 
             await _redisService.ListAddAsync(key, "testValue");
             await _redisService.ListAddAsync(key, "testValue");
@@ -190,13 +190,13 @@ namespace JfYu.UnitTests.Redis
         public async Task ListRemoveAsync_KeyIsNull_ThrowsException(string key, string value)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.ListRemoveAsync(key, value, 0));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task ListRemoveAsync_KeyNotExist_ReturnsNull()
         {
-            var key = "testKey";
+            var key = nameof(ListRemoveAsync_KeyNotExist_ReturnsNull);
             await _redisService.ListRemoveAsync(key, "value", 0);
             Assert.Null(null);
         }
@@ -204,7 +204,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task ListRemoveAsync_CountEqual0_ReturnsLong()
         {
-            var key = "testKey";
+            var key = nameof(ListRemoveAsync_CountEqual0_ReturnsLong);
             var value = "testValue";
 
             await _redisService.ListAddAsync(key, value + "0");
@@ -227,7 +227,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task ListRemoveAsync_CountGreaterThan0_ReturnsLong()
         {
-            var key = "testKey";
+            var key = nameof(ListRemoveAsync_CountGreaterThan0_ReturnsLong);
             var value = "testValue";
 
             await _redisService.ListAddAsync(key, value + "0");
@@ -252,7 +252,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task ListRemoveAsync_CountGreaterThanActual_ReturnsLong()
         {
-            var key = "testKey";
+            var key = nameof(ListRemoveAsync_CountGreaterThanActual_ReturnsLong);
             var value = "testValue";
 
             await _redisService.ListAddAsync(key, value + "0");
@@ -277,7 +277,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task ListRemoveAsync_CountLessThan0_ReturnsLong()
         {
-            var key = "testKey";
+            var key = nameof(ListRemoveAsync_CountLessThan0_ReturnsLong);
             var value = "testValue";
 
             await _redisService.ListAddAsync(key, value + "0");
@@ -302,7 +302,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task ListRemoveAsync_CountLessThanActual_ReturnsLong()
         {
-            var key = "testKey";
+            var key = nameof(ListRemoveAsync_CountLessThanActual_ReturnsLong);
             var value = "testValue";
 
             await _redisService.ListAddAsync(key, value + "0");
@@ -333,13 +333,13 @@ namespace JfYu.UnitTests.Redis
         public async Task ListGetRangeAsync_KeyIsNull_ThrowsException(string key)
         {
             var ex = await Record.ExceptionAsync(() => _redisService.ListGetRangeAsync(key, 0, 0));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task ListGetRangeAsync_KeyNotExist_ReturnsNull()
         {
-            var key = "testKey";
+            var key = nameof(ListGetRangeAsync_KeyNotExist_ReturnsNull);
             await _redisService.ListGetRangeAsync(key, -1110, -1);
             Assert.Null(null);
         }
@@ -350,7 +350,7 @@ namespace JfYu.UnitTests.Redis
         [InlineData(11, 13)]
         public async Task ListGetRangeAsync_InValidInput_ReturnsList(int start, int stop)
         {
-            var key = "testKey";
+            var key = nameof(ListGetRangeAsync_InValidInput_ReturnsList);
             await _redisService.ListAddAsync(key, "value");
             var result = await _redisService.ListGetRangeAsync(key, start, stop);
             Assert.Empty(result);
@@ -360,7 +360,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task ListGetRangeAsync_ValidInput_ReturnsList()
         {
-            var key = "testKey";
+            var key = nameof(ListGetRangeAsync_ValidInput_ReturnsList);
             var value = "testValue";
 
             var v1 = new TestModelFaker().Generate();
@@ -386,7 +386,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task ListGetRangeAsync_ReturnsAll()
         {
-            var key = "testKey";
+            var key = nameof(ListGetRangeAsync_ReturnsAll);
             var value = "testValue";
 
             var v1 = new TestModelFaker().Generate();

@@ -40,13 +40,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SetAddAsync_WhenKeyOrValueIsNull_ShouldThrowArgumentException(string key, string value)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SetAddAsync(key, value).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task SetAddAsync_ValueNotExist_ReturnTrue()
         {
-            string key = "testKey";
+            string key = nameof(SetAddAsync_ValueNotExist_ReturnTrue);
             var value = "v1";
             bool result = await _redisService.SetAddAsync(key, value);
             Assert.True(result);
@@ -56,7 +56,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetAddAsync_ValueExist_ReturnFalse()
         {
-            string key = "testKey";
+            string key = nameof(SetAddAsync_ValueExist_ReturnFalse);
             var value = "v1";
             await _redisService.SetAddAsync(key, value);
             bool result = await _redisService.SetAddAsync(key, value);
@@ -73,13 +73,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SetAddAllAsync_WhenKeyOrValueIsNull_ShouldThrowArgumentException(string key, string?[] values)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SetAddAllAsync(key, values.ToList()).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task SetAddAllAsync_ValuesNotExist_ReturnCorrectLength()
         {
-            string key = "testKey";
+            string key = nameof(SetAddAllAsync_ValuesNotExist_ReturnCorrectLength);
             List<string> values = ["v1", "v2", "v3"];
             var result = await _redisService.SetAddAllAsync(key, values);
             Assert.Equal(values.Count, result);
@@ -89,7 +89,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetAddAllAsync_ValuesExistPartially_ReturnCorrectLength()
         {
-            string key = "testKey";
+            string key = nameof(SetAddAllAsync_ValuesExistPartially_ReturnCorrectLength);
             var value = "v1";
             await _redisService.SetAddAsync(key, value);
             List<string> values = ["v1", "v2", "v3"];
@@ -107,13 +107,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SetRemoveAsync_WhenKeyOrValueIsNull_ShouldThrowArgumentException(string key, string value)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SetRemoveAsync(key, value).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task SetRemoveAsync_ValuesNotExist_ReturnFalse()
         {
-            string key = "testKey";
+            string key = nameof(SetRemoveAsync_ValuesNotExist_ReturnFalse);
             var value = "v1";
             var result = await _redisService.SetRemoveAsync(key, value);
             Assert.False(result);
@@ -123,7 +123,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetRemoveAsync_ValuesExistPartially_ReturnTrue()
         {
-            string key = "testKey";
+            string key = nameof(SetRemoveAsync_ValuesExistPartially_ReturnTrue);
             var value = "v1";
             await _redisService.SetAddAsync(key, value);
             var result = await _redisService.SetRemoveAsync(key, value);
@@ -140,13 +140,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SetRemoveAllAsync_WhenKeyOrValueIsNull_ShouldThrowArgumentException(string key, string?[] values)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SetRemoveAllAsync(key, values.ToList()).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task SetRemoveAllAsync_ValuesNotExist_ReturnCorrectLength()
         {
-            string key = "testKey";
+            string key = nameof(SetRemoveAllAsync_ValuesNotExist_ReturnCorrectLength);
             List<string> values = ["v1", "v2", "v3"];
             var result = await _redisService.SetRemoveAllAsync(key, values);
             Assert.Equal(0, result);
@@ -156,7 +156,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetRemoveAllAsync_ValuesExist_ReturnCorrectLength()
         {
-            string key = "testKey";
+            string key = nameof(SetRemoveAllAsync_ValuesExist_ReturnCorrectLength);
             List<string> values = ["v1", "v2", "v3"];
             await _redisService.SetAddAllAsync(key, values);
             var result = await _redisService.SetRemoveAllAsync(key, values);
@@ -167,7 +167,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetRemoveAllAsync_ValuesExistPartially_ReturnCorrectLength()
         {
-            string key = "testKey";
+            string key = nameof(SetRemoveAllAsync_ValuesExistPartially_ReturnCorrectLength);
             var value = "v1";
             await _redisService.SetAddAsync(key, value);
             List<string> values = ["v1", "v2", "v3"];
@@ -185,13 +185,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SetContainsAsync_WhenKeyOrValueIsNull_ShouldThrowArgumentException(string key, string value)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SetContainsAsync(key, value).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task SetContainsAsync_KeyNotExist_ReturnFalse()
         {
-            string key = "testKey";
+            string key = nameof(SetContainsAsync_KeyNotExist_ReturnFalse);
             var value = "v1";
             bool result = await _redisService.SetContainsAsync(key, value);
             Assert.False(result);
@@ -200,9 +200,9 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetContainsAsync_ValueNotExist_ReturnFalse()
         {
-            string key = "testKey";
+            string key = nameof(SetContainsAsync_ValueNotExist_ReturnFalse);
             var value = "v1";
-            await _redisService.SetAddAsync(key, value);        
+            await _redisService.SetAddAsync(key, value);
             value = "v2";
             bool result = await _redisService.SetContainsAsync(key, value);
             Assert.False(result);
@@ -211,7 +211,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetContainsAsync_ValueExist_ReturnTrue()
         {
-            string key = "testKey";
+            string key = nameof(SetContainsAsync_ValueExist_ReturnTrue);
             var value = "v1";
             await _redisService.SetAddAsync(key, value);
             var result = await _redisService.SetContainsAsync(key, value);
@@ -222,7 +222,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetContainsAsync_complexValueExist_ReturnTrue()
         {
-            string key = "testKey";
+            string key = nameof(SetContainsAsync_complexValueExist_ReturnTrue);
             var value = new TestModelFaker().Generate();
             await _redisService.SetAddAsync(key, value);
             var result = await _redisService.SetContainsAsync(key, value);
@@ -239,13 +239,14 @@ namespace JfYu.UnitTests.Redis
         public async Task SetMembersAsync_WhenKeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SetMembersAsync(key).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task SetMembersAsync_KeyNotExist_ReturnCorrectly()
         {
-            string key = "testKey";
+            string key = nameof(SetMembersAsync_KeyNotExist_ReturnCorrectly);
+            await _redisService.RemoveAsync(key);
             var result = await _redisService.SetMembersAsync(key);
             Assert.Empty(result);
         }
@@ -253,7 +254,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetMembersAsync_ValueNotExist_ReturnCorrectly()
         {
-            string key = "testKey";
+            string key = nameof(SetMembersAsync_ValueNotExist_ReturnCorrectly);   
             var value = "v1";
             await _redisService.SetAddAsync(key, value);
             await _redisService.SetRemoveAsync(key, value);
@@ -264,7 +265,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetMembersAsync_ReturnCorrectly()
         {
-            string key = "testKey";
+            string key = nameof(SetMembersAsync_ReturnCorrectly);
             var value = new TestModelFaker().Generate();
             List<object> values = ["v1", 1, "v3", 423.442, value, new TestModelFaker().Generate(2), "", new TestModelSubFaker().Generate()];
             await _redisService.SetAddAllAsync(key, values);
@@ -285,13 +286,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SetLengthAsync_WhenKeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SetLengthAsync(key).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task SetLengthAsync_KeyNotExist_ReturnCorrectly()
         {
-            string key = "testKey";
+            string key = nameof(SetLengthAsync_KeyNotExist_ReturnCorrectly);
             var result = await _redisService.SetLengthAsync(key);
             Assert.Equal(0, result);
         }
@@ -299,7 +300,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetLengthAsync_ValueNotExist_ReturnCorrectly()
         {
-            string key = "testKey";
+            string key = nameof(SetLengthAsync_ValueNotExist_ReturnCorrectly);
             var value = "v1";
             await _redisService.SetAddAsync(key, value);
             await _redisService.SetRemoveAsync(key, value);
@@ -310,7 +311,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetLengthAsync_ReturnCorrectly()
         {
-            string key = "testKey";
+            string key = nameof(SetLengthAsync_ReturnCorrectly);
             List<object> values = ["v1", 1, "v3", 423.442, new TestModelFaker().Generate(), new TestModelFaker().Generate(2), "", new TestModelSubFaker().Generate()];
             await _redisService.SetAddAllAsync(key, values);
             var result = await _redisService.SetLengthAsync(key);
@@ -327,13 +328,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SetRandomMemberAsync_WhenKeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SetRandomMemberAsync(key).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task SetRandomMemberAsync_KeyNotExist_ReturnEmpty()
         {
-            string key = "testKey";
+            string key = nameof(SetRandomMemberAsync_KeyNotExist_ReturnEmpty);
             var result = await _redisService.SetRandomMemberAsync(key);
             Assert.False(result.HasValue);
         }
@@ -341,7 +342,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetRandomMemberAsync_ValueNotExist_ReturnEmpty()
         {
-            string key = "testKey";
+            string key = nameof(SetRandomMemberAsync_ValueNotExist_ReturnEmpty);
             var value = "v1";
             await _redisService.SetAddAsync(key, value);
             await _redisService.SetRemoveAsync(key, value);
@@ -352,7 +353,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetRandomMemberAsync_WithOneStringValue_ReturnOne()
         {
-            string key = "testKey";
+            string key = nameof(SetRandomMemberAsync_WithOneStringValue_ReturnOne);
             var value = "v1";
             await _redisService.SetAddAsync(key, value);
             var result = await _redisService.SetRandomMemberAsync(key);
@@ -363,7 +364,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetRandomMemberAsync_WithOneModelValue_ReturnOne()
         {
-            string key = "testKey";
+            string key = nameof(SetRandomMemberAsync_WithOneModelValue_ReturnOne);
             var value = new TestModelFaker().Generate(10);
             await _redisService.SetAddAsync(key, value);
             var result = await _redisService.SetRandomMemberAsync(key);
@@ -374,7 +375,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetRandomMemberAsync_WithMoreValues_ReturnOne()
         {
-            string key = "testKey";
+            string key = nameof(SetRandomMemberAsync_WithMoreValues_ReturnOne);
             List<string> values = ["v1", "v2", "v3", "v4"];
             await _redisService.SetAddAllAsync(key, values);
             var result = await _redisService.SetRandomMemberAsync(key);
@@ -391,13 +392,13 @@ namespace JfYu.UnitTests.Redis
         public async Task SetRandomMembersAsync_WhenKeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.SetRandomMembersAsync(key, 1).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task SetRandomMembersAsync_KeyNotExist_ReturnEmpty()
         {
-            string key = "testKey";
+            string key = nameof(SetRandomMembersAsync_KeyNotExist_ReturnEmpty);
             var result = await _redisService.SetRandomMembersAsync(key, 1);
             Assert.Empty(result);
         }
@@ -405,7 +406,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetRandomMembersAsync_ValueNotExist_ReturnEmpty()
         {
-            string key = "testKey";
+            string key = nameof(SetRandomMembersAsync_ValueNotExist_ReturnEmpty);
             var value = "v1";
             await _redisService.SetAddAsync(key, value);
             await _redisService.SetRemoveAsync(key, value);
@@ -416,7 +417,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task SetRandomMembersAsync_ReturnCorrectly()
         {
-            string key = "testKey";
+            string key = nameof(SetRandomMembersAsync_ReturnCorrectly);
             List<string> values = ["v1", "v2", "v3", "v4"];
             await _redisService.SetAddAllAsync(key, values);
             var result = await _redisService.SetRandomMembersAsync(key, 3);

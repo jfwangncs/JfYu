@@ -1,3 +1,4 @@
+using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
 using JfYu.Redis.Options;
 using JfYu.Redis.Serializer;
@@ -83,8 +84,7 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public Task<long> RemoveAllAsync(List<string> keys, CommandFlags flag = CommandFlags.None)
         {
-            if (keys == null || keys.Count == 0)
-                throw new ArgumentException("The parameter 'keys' cannot be null or empty.", nameof(keys));
+            ArgumentNullExceptionExtension.ThrowIfNullOrEmpty(keys);
             Log(nameof(RemoveAllAsync), string.Join(", ", keys));
             var redisKeys = keys.Select(q => (RedisKey)q);
             return _database.KeyDeleteAsync([.. redisKeys], flag);

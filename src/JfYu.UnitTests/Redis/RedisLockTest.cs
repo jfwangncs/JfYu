@@ -39,13 +39,13 @@ namespace JfYu.UnitTests.Redis
         public async Task LockTakeAsync_WhenkeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.LockTakeAsync(key).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task LockTakeAsync_WhenKeyNotExist_ReturnsTrue()
         {
-            string key = "testLock";
+            string key = nameof(LockTakeAsync_WhenKeyNotExist_ReturnsTrue);
             bool result = await _redisService.LockTakeAsync(key);
             Assert.True(result);
             await _redisService.LockReleaseAsync(key);
@@ -54,7 +54,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task LockTakeAsync_WhenKeyExist_ReturnsFalse()
         {
-            string key = "testLock";
+            string key = nameof(LockTakeAsync_WhenKeyExist_ReturnsFalse);
             await _redisService.LockTakeAsync(key);
             bool result = await _redisService.LockTakeAsync(key);
             Assert.False(result);
@@ -64,7 +64,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task LockTakeAsync_WhenKeyExpires_ReturnsTrue()
         {
-            string key = "testLock";
+            string key = nameof(LockTakeAsync_WhenKeyExpires_ReturnsTrue);
             await _redisService.LockTakeAsync(key, TimeSpan.FromSeconds(3));
             bool result = await _redisService.LockTakeAsync(key);
             Assert.False(result);
@@ -83,13 +83,13 @@ namespace JfYu.UnitTests.Redis
         public async Task LockReleaseAsync_WhenkeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.LockReleaseAsync(key).ConfigureAwait(true));
-            Assert.IsType<ArgumentException>(ex);
+            Assert.IsType<ArgumentException>(ex,false);
         }
 
         [Fact]
         public async Task LockReleaseAsync_WhenKeyNotExist_ReturnsFalse()
         {
-            string key = "testLock";
+            string key = nameof(LockReleaseAsync_WhenKeyNotExist_ReturnsFalse);
             bool result = await _redisService.LockReleaseAsync(key);
             Assert.False(result);
         }
@@ -97,7 +97,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task LockReleaseAsync_WhenKeyExist_ReturnsTrue()
         {
-            string key = "testLock";
+            string key = nameof(LockReleaseAsync_WhenKeyExist_ReturnsTrue);
             await _redisService.LockTakeAsync(key);
             bool result = await _redisService.LockReleaseAsync(key);
             Assert.True(result);
@@ -110,7 +110,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task HighConcurrency_LockCorrectly()
         {
-            const string LockKey = "test:lock";
+            const string LockKey = "test:lock1";
             const int NumberOfTasks = 100;
             const int LockTimeoutInSeconds = 5;
             const int IncrementCount = 1000;
@@ -141,7 +141,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task HighConcurrency_ReleaseTwice_LockFaild()
         {
-            const string LockKey = "test:lock";
+            const string LockKey = "test:lock2";
             const int NumberOfTasks = 100;
             const int LockTimeoutInSeconds = 5;
             const int IncrementCount = 1000;

@@ -40,14 +40,14 @@ namespace JfYu.UnitTests.Redis
         public async Task HashSetAsync_WhenkeyOrHashKeyIsNull_ShouldThrowArgumentException(string key, string hashKey, string value)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.HashSetAsync(key, hashKey, value).ConfigureAwait(true));
-            Assert.IsType<ArgumentNullException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task HashSetAsync_SetsValue_ReturnsTrue()
         {
-            string key = "testHash";
-            string hashKey = "testKey";
+            string key = nameof(HashSetAsync_SetsValue_ReturnsTrue);
+            string hashKey = nameof(HashSetAsync_SetsValue_ReturnsTrue) + "_hash";
             string value = "testValue";
             bool result = await _redisService.HashSetAsync(key, hashKey, value);
             Assert.True(result);
@@ -59,7 +59,7 @@ namespace JfYu.UnitTests.Redis
         public async Task HashGetAsync_WhenkeyOrKeyIsNull_ShouldThrowArgumentException(string key, string hashKey)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.HashGetAsync<int>(key, hashKey).ConfigureAwait(true));
-            Assert.IsType<ArgumentNullException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         #endregion HashSetAsync
@@ -69,8 +69,8 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task HashGetAsync_KetNotExist_ReturnsExpectedValue()
         {
-            string key = "testHash";
-            string hashKey = "testKey";
+            string key = nameof(HashGetAsync_KetNotExist_ReturnsExpectedValue);
+            string hashKey = nameof(HashGetAsync_KetNotExist_ReturnsExpectedValue) + "_hash";
             var actualValue = await _redisService.HashGetAsync<string>(key, hashKey);
             Assert.Null(actualValue);
         }
@@ -78,8 +78,8 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task HashGetAsync_RetrievesStringValueWithAddTwice_ReturnsExpectedValue()
         {
-            string key = "testHash";
-            string hashKey = "testKey";
+            string key = nameof(HashGetAsync_RetrievesStringValueWithAddTwice_ReturnsExpectedValue);
+            string hashKey = nameof(HashGetAsync_RetrievesStringValueWithAddTwice_ReturnsExpectedValue) + "_hash";
             string expectedValue = "testValue";
             string expectedValue1 = "testValue";
             await _redisService.HashSetAsync(key, hashKey, expectedValue);
@@ -92,8 +92,8 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task HashGetAsync_RetrievesStringValue_ReturnsExpectedValue()
         {
-            string key = "testHash";
-            string hashKey = "testKey";
+            string key = nameof(HashGetAsync_RetrievesStringValue_ReturnsExpectedValue);
+            string hashKey = nameof(HashGetAsync_RetrievesStringValue_ReturnsExpectedValue) + "_hash";
             string expectedValue = "testValue";
             await _redisService.HashSetAsync(key, hashKey, expectedValue);
             string? actualValue = await _redisService.HashGetAsync<string>(key, hashKey);
@@ -104,8 +104,8 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task HashGetAsync_RetrievesIntValue_ReturnsExpectedValue()
         {
-            string key = "testHash";
-            string hashKey = "testKey";
+            string key = nameof(HashGetAsync_RetrievesIntValue_ReturnsExpectedValue);
+            string hashKey = nameof(HashGetAsync_RetrievesIntValue_ReturnsExpectedValue) + "_hash";
             var expectedValue = 9898;
             await _redisService.HashSetAsync(key, hashKey, expectedValue);
             var actualValue = await _redisService.HashGetAsync<int>(key, hashKey);
@@ -116,8 +116,8 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task HashGetAsync_RetrievesModelValue_ReturnsExpectedValue()
         {
-            string key = "testHash";
-            string hashKey = "testKey";
+            string key = nameof(HashGetAsync_RetrievesModelValue_ReturnsExpectedValue);
+            string hashKey = nameof(HashGetAsync_RetrievesModelValue_ReturnsExpectedValue) + "_hash";
             var expectedValue = new TestModelFaker().Generate();
             await _redisService.HashSetAsync(key, hashKey, expectedValue);
             var actualValue = await _redisService.HashGetAsync<TestModel>(key, hashKey);
@@ -134,13 +134,13 @@ namespace JfYu.UnitTests.Redis
         public async Task HashGetAllAsync_WhenkeyIsNull_ShouldThrowArgumentException(string key)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.HashGetAllAsync(key).ConfigureAwait(true));
-            Assert.IsType<ArgumentNullException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task HashGetAllAsync_RetrievesAllEntries_ReturnsEntries()
         {
-            string key = "testHash";
+            string key = nameof(HashGetAllAsync_RetrievesAllEntries_ReturnsEntries);
             await _redisService.HashSetAsync(key, "key1", "value1");
             await _redisService.HashSetAsync(key, "key2", "value2");
             HashEntry[] entries = await _redisService.HashGetAllAsync(key);
@@ -159,14 +159,14 @@ namespace JfYu.UnitTests.Redis
         public async Task HashDeleteAsyncHashSetAsync_WhenkeyOrKeyIsNull_ShouldThrowArgumentException(string key, string hashKey)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.HashDeleteAsync(key, hashKey).ConfigureAwait(true));
-            Assert.IsType<ArgumentNullException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task HashDeleteAsync_DeletesValue_ReturnsTrue()
         {
-            string key = "testHash";
-            string hashKey = "testKey";
+            string key = nameof(HashDeleteAsync_DeletesValue_ReturnsTrue);
+            string hashKey = nameof(HashDeleteAsync_DeletesValue_ReturnsTrue) + "_hash";
             await _redisService.HashSetAsync(key, hashKey, "anyValue");
             bool result = await _redisService.HashDeleteAsync(key, hashKey);
             Assert.True(result);
@@ -176,8 +176,8 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task HashDeleteAsync_DeletesValue_ReturnsFalse()
         {
-            string key = "testHash";
-            string hashKey = "testKey";
+            string key = nameof(HashDeleteAsync_DeletesValue_ReturnsFalse);
+            string hashKey = nameof(HashDeleteAsync_DeletesValue_ReturnsFalse) + "_hash";
             bool result = await _redisService.HashDeleteAsync(key, hashKey);
             Assert.False(result);
         }
@@ -191,14 +191,14 @@ namespace JfYu.UnitTests.Redis
         public async Task HashExistsAsyncHashSetAsync_WhenkeyOrKeyIsNull_ShouldThrowArgumentException(string key, string hashKey)
         {
             var ex = await Record.ExceptionAsync(async () => await _redisService.HashExistsAsync(key, hashKey).ConfigureAwait(true));
-            Assert.IsType<ArgumentNullException>(ex);
+            Assert.IsType<ArgumentException>(ex, false);
         }
 
         [Fact]
         public async Task HashExistsAsync_ChecksValueExistence_ReturnsTrue()
         {
-            string key = "testHash";
-            string hashKey = "testKey";
+            string key = nameof(HashExistsAsync_ChecksValueExistence_ReturnsTrue);
+            string hashKey = nameof(HashExistsAsync_ChecksValueExistence_ReturnsTrue) + "_hash";
             await _redisService.HashSetAsync(key, hashKey, "anyValue");
             bool exists = await _redisService.HashExistsAsync(key, hashKey);
             Assert.True(exists);
@@ -208,8 +208,8 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task HashExistsAsync_ChecksValueExistence_ReturnsFalse()
         {
-            string key = "testHash";
-            string hashKey = "testKey";
+            string key = nameof(HashExistsAsync_ChecksValueExistence_ReturnsFalse);
+            string hashKey = nameof(HashExistsAsync_ChecksValueExistence_ReturnsFalse) + "_hash";
             bool exists = await _redisService.HashExistsAsync(key, hashKey);
             Assert.False(exists);
         }

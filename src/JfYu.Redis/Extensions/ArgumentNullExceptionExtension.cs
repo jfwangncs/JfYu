@@ -22,8 +22,7 @@ namespace JfYu.Redis.Extensions
         public static void ThrowIfNullOrEmpty<T>(this IEnumerable<T> values, string paramName = "values")
         {
             ArgumentNullException.ThrowIfNull(values);
-
-            var list = values as IList<T> ?? [.. values];
+            var list = values.ToList();
             if (list.Count == 0)
                 throw new ArgumentException("Collection cannot be empty.", paramName);
 
