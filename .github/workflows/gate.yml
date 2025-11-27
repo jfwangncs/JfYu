@@ -20,6 +20,15 @@ jobs:
         env: { RABBITMQ_DEFAULT_USER: guest, RABBITMQ_DEFAULT_PASS: guest }
         ports: 
           - 5672:5672
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4      
       - name: Install fonts
@@ -88,6 +97,20 @@ jobs:
         run: |
           choco install redis-64 rabbitmq python -y
           python -m pip install httpbin uvicorn asgiref
+
+      - name: Start Redis service
+        shell: pwsh
+        run: |
+          $redisPath = "C:\Program Files\Redis"
+          if (Test-Path $redisPath) {
+            Start-Process -FilePath "$redisPath\redis-server.exe" -ArgumentList "--port 6379" -WindowStyle Hidden
+            Start-Sleep -Seconds 3
+            Write-Host "Redis started on port 6379"
+          } else {
+            Write-Host "Redis installation path not found, trying alternative..."
+            Start-Process -FilePath "redis-server" -ArgumentList "--port 6379" -WindowStyle Hidden -ErrorAction SilentlyContinue
+            Start-Sleep -Seconds 3
+          }
 
       - name: Start httpbin and test
         id: start-httpbin
@@ -168,6 +191,17 @@ jobs:
           brew install redis rabbitmq
           brew services start redis
           brew services start rabbitmq
+          
+          # Wait for Redis to be ready
+          for i in {1..30}; do
+            if redis-cli ping &> /dev/null; then
+              echo "Redis is ready"
+              break
+            fi
+            echo "Waiting for Redis to be ready... ($i/30)"
+            sleep 1
+          done
+          
           python3 -m venv venv
           source venv/bin/activate
           python3 -m pip install --upgrade pip
