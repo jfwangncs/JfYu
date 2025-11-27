@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace JfYu.Redis.Serializer.MessagePack
 {
     /// <summary>
-    /// MsgPac implementation of <see cref="ISerializer"/>
+    /// MsgPack implementation of <see cref="ISerializer"/>
     /// </summary>
     /// <remarks>
     /// Initializes a new instance of the <see cref="MsgPackObjectSerializer"/> class.
