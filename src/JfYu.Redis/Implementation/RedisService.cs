@@ -23,6 +23,7 @@ namespace JfYu.Redis.Implementation
         private readonly ISerializer _serializer;
         private readonly ILogger<RedisService>? _logger;
         private readonly RedisOptions _configuration;
+        private readonly string _lockToken;
 
         /// <summary>
         /// Redis client
@@ -56,6 +57,7 @@ namespace JfYu.Redis.Implementation
             else
                 _database = Client.GetDatabase(redisConfiguration.Value.DbIndex).WithKeyPrefix(redisConfiguration.Value.Prefix);
             _serializer = serializer;
+            _lockToken = $"{Environment.MachineName}_{Environment.ProcessId}_{Guid.NewGuid()}";
         }
 
         /// <inheritdoc/>
@@ -171,23 +173,90 @@ namespace JfYu.Redis.Implementation
             return await _database.StringDecrementAsync(key, value, flag).ConfigureAwait(false);
         }
 
-        private static readonly RedisValue LockToken = Environment.MachineName;
-
         /// <inheritdoc/>
         public async Task<bool> LockTakeAsync(string key, TimeSpan? expiresIn = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             Log(nameof(LockTakeAsync), key);
-            return await _database.LockTakeAsync(key, LockToken, expiresIn ?? TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+            return await _database.LockTakeAsync(key, _lockToken, expiresIn ?? TimeSpan.FromMinutes(1)).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-
         public async Task<bool> LockReleaseAsync(string key)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             Log(nameof(LockReleaseAsync), key);
-            return await _database.LockReleaseAsync(key, LockToken).ConfigureAwait(false);
+            return await _database.LockReleaseAsync(key, _lockToken).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
+        public async Task<Dictionary<string, T?>> GetBatchAsync<T>(List<string> keys, CommandFlags flag = CommandFlags.None)
+        {
+            if (keys == null || keys.Count == 0)
+                throw new ArgumentException("The parameter 'keys' cannot be null or empty.", nameof(keys));
+
+            Log(nameof(GetBatchAsync), string.Join(", ", keys));
+
+            var redisKeys = keys.Select(k => (RedisKey)k).ToArray();
+            var values = await _database.StringGetAsync(redisKeys, flag).ConfigureAwait(false);
+
+            var result = new Dictionary<string, T?>();
+            for (int i = 0; i < keys.Count; i++)
+            {
+                result[keys[i]] = values[i].HasValue ? Serializer.Deserialize<T>(values[i]!) : default;
+            }
+
+            return result;
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> AddBatchAsync<T>(Dictionary<string, T> keyValues, TimeSpan? expiresIn = null, CommandFlags flag = CommandFlags.None)
+        {
+            if (keyValues == null || keyValues.Count == 0)
+                throw new ArgumentException("The parameter 'keyValues' cannot be null or empty.", nameof(keyValues));
+
+            Log(nameof(AddBatchAsync), string.Join(", ", keyValues.Keys));
+
+            var keyValuePairs = keyValues.Select(kv => new KeyValuePair<RedisKey, RedisValue>(kv.Key, _serializer.Serialize(kv.Value))).ToArray();
+            var success = await _database.StringSetAsync(keyValuePairs, flag).ConfigureAwait(false);
+
+            if (success && expiresIn.HasValue)
+            {
+                var tasks = keyValues.Keys.Select(key => _database.KeyExpireAsync(key, expiresIn.Value, flag));
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
+
+            return success;
+        }
+
+        /// <inheritdoc/>
+        public async Task<TimeSpan?> GetTimeToLiveAsync(string key, CommandFlags flag = CommandFlags.None)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(key);
+            Log(nameof(GetTimeToLiveAsync), key);
+            return await _database.KeyTimeToLiveAsync(key, flag).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> PersistAsync(string key, CommandFlags flag = CommandFlags.None)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(key);
+            Log(nameof(PersistAsync), key);
+            return await _database.KeyPersistAsync(key, flag).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
+        public async Task<TimeSpan> PingAsync()
+        {
+            Log(nameof(PingAsync), "server");
+            try
+            {
+                return await _database.PingAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                return TimeSpan.Zero;
+            }
         }
     }
 }

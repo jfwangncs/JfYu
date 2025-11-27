@@ -65,11 +65,12 @@ namespace JfYu.Redis.Interface
         ///     <value>count = 0: Remove all elements equal to value.</value>
         /// </list>
         /// </summary>
+        /// <typeparam name="T">The type of the values.</typeparam>
         /// <param name="key">The Redis key.</param>
         /// <param name="value">The value associated with the key.</param>
         /// <param name="count">The count behavior</param>
         /// <returns>The number of removed elements.</returns>
-        Task<long> ListRemoveAsync(string key, string value, int count);
+        Task<long> ListRemoveAsync<T>(string key, T value, int count);
 
         /// <summary>
         ///  Returns the specified elements of the list stored at key.

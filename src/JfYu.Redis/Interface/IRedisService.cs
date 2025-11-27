@@ -159,5 +159,46 @@ namespace JfYu.Redis.Interface
         /// <param name="key">The unique identifier for the lock.</param>
         /// <returns>True if the operation was successful, false otherwise.</returns>
         Task<bool> LockReleaseAsync(string key);
+
+        /// <summary>
+        /// Gets multiple values for the specified keys.
+        /// </summary>
+        /// <typeparam name="T">The type of the values.</typeparam>
+        /// <param name="keys">The Redis keys.</param>
+        /// <param name="flag">Optional command flags. Default is CommandFlags.None.</param>
+        /// <returns>A dictionary of keys and their associated values.</returns>
+        Task<Dictionary<string, T?>> GetBatchAsync<T>(List<string> keys, CommandFlags flag = CommandFlags.None);
+
+        /// <summary>
+        /// Adds multiple key-value pairs to Redis.
+        /// </summary>
+        /// <typeparam name="T">The type of the values.</typeparam>
+        /// <param name="keyValues">Dictionary of keys and values to add.</param>
+        /// <param name="expiresIn">Optional expiration time for all keys.</param>
+        /// <param name="flag">Optional command flags. Default is CommandFlags.None.</param>
+        /// <returns>True if all operations were successful, false otherwise.</returns>
+        Task<bool> AddBatchAsync<T>(Dictionary<string, T> keyValues, TimeSpan? expiresIn = null, CommandFlags flag = CommandFlags.None);
+
+        /// <summary>
+        /// Gets the remaining time to live for a key.
+        /// </summary>
+        /// <param name="key">The Redis key.</param>
+        /// <param name="flag">Optional command flags. Default is CommandFlags.None.</param>
+        /// <returns>The time to live, or null if the key does not exist or has no expiration.</returns>
+        Task<TimeSpan?> GetTimeToLiveAsync(string key, CommandFlags flag = CommandFlags.None);
+
+        /// <summary>
+        /// Removes the expiration from a key.
+        /// </summary>
+        /// <param name="key">The Redis key.</param>
+        /// <param name="flag">Optional command flags. Default is CommandFlags.None.</param>
+        /// <returns>True if the operation was successful, false otherwise.</returns>
+        Task<bool> PersistAsync(string key, CommandFlags flag = CommandFlags.None);
+
+        /// <summary>
+        /// Pings the Redis server to check connectivity.
+        /// </summary>
+        /// <returns>The response time, or TimeSpan.Zero if failed.</returns>
+        Task<TimeSpan> PingAsync();
     }
 }

@@ -4,7 +4,7 @@ using JfYu.Redis.Options;
 using JfYu.Redis.Serializer.MessagePack;
 using JfYu.Redis.Serializer.Newtonsoft;
 using MessagePack;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection; 
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
@@ -50,7 +50,11 @@ namespace JfYu.Redis.Extensions
 
             services.Configure(setupAction);
 
-            services.AddSingleton(sp => new Lazy<IConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(configurationOptions)).Value);
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                var multiplexer = ConnectionMultiplexer.Connect(configurationOptions);              
+                return multiplexer;
+            });
 
             services.AddScoped<IRedisService, RedisService>();
 

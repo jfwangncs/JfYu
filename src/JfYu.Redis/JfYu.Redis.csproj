@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net8.0</TargetFrameworks>
 		<Version>8.1.3</Version>
-		<Description></Description>
+		<Description>A high-performance Redis client library for .NET with support for multiple serialization formats, distributed locking, and comprehensive data structure operations.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>

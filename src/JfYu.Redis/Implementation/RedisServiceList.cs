@@ -58,10 +58,10 @@ namespace JfYu.Redis.Implementation
         }
 
         /// <inheritdoc/>
-        public async Task<long> ListRemoveAsync(string key, string value, int count)
+        public async Task<long> ListRemoveAsync<T>(string key, T value, int count)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            ArgumentException.ThrowIfNullOrWhiteSpace(value);
+            ArgumentNullException.ThrowIfNull(value);
             Log(nameof(ListRemoveAsync), key);
             var entryBytes = _serializer.Serialize(value);
             return await _database.ListRemoveAsync(key, entryBytes, count).ConfigureAwait(false);
