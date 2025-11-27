@@ -206,6 +206,7 @@ namespace JfYu.UnitTests.Redis
             value = "v2";
             bool result = await _redisService.SetContainsAsync(key, value);
             Assert.False(result);
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
@@ -347,7 +348,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.SetAddAsync(key, value);
             await _redisService.SetRemoveAsync(key, value);
             var result = await _redisService.SetRandomMemberAsync(key);
-            Assert.False(result.HasValue);
+            Assert.False(result.HasValue); 
         }
 
         [Fact]
@@ -359,6 +360,7 @@ namespace JfYu.UnitTests.Redis
             var result = await _redisService.SetRandomMemberAsync(key);
             Assert.True(result.HasValue);
             Assert.Equal(value, _redisService.Serializer.Deserialize<string>(result!));
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
@@ -370,6 +372,7 @@ namespace JfYu.UnitTests.Redis
             var result = await _redisService.SetRandomMemberAsync(key);
             Assert.True(result.HasValue);
             Assert.Equal(value, _redisService.Serializer.Deserialize<List<TestModel>>(result!));
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
@@ -381,6 +384,7 @@ namespace JfYu.UnitTests.Redis
             var result = await _redisService.SetRandomMemberAsync(key);
             Assert.True(result.HasValue);
             Assert.Contains(_redisService.Serializer.Deserialize<string>(result!), values);
+            await _redisService.RemoveAsync(key);
         }
 
         #endregion SetRandomMemberAsync
@@ -422,6 +426,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.SetAddAllAsync(key, values);
             var result = await _redisService.SetRandomMembersAsync(key, 3);
             Assert.Equal(3, result.Count);
+            await _redisService.RemoveAsync(key);
         }
 
         #endregion SetRandomMembersAsync

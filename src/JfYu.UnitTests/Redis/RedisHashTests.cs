@@ -51,7 +51,7 @@ namespace JfYu.UnitTests.Redis
             string value = "testValue";
             bool result = await _redisService.HashSetAsync(key, hashKey, value);
             Assert.True(result);
-            await _redisService.RemoveAsync("testHash");
+            await _redisService.RemoveAsync(key);
         }
 
         [Theory]
@@ -86,7 +86,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.HashSetAsync(key, hashKey, expectedValue1);
             string? actualValue = await _redisService.HashGetAsync<string>(key, hashKey);
             Assert.Equal(expectedValue1, actualValue);
-            await _redisService.RemoveAsync("testHash");
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.HashSetAsync(key, hashKey, expectedValue);
             string? actualValue = await _redisService.HashGetAsync<string>(key, hashKey);
             Assert.Equal(expectedValue, actualValue);
-            await _redisService.RemoveAsync("testHash");
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.HashSetAsync(key, hashKey, expectedValue);
             var actualValue = await _redisService.HashGetAsync<int>(key, hashKey);
             Assert.Equal(expectedValue, actualValue);
-            await _redisService.RemoveAsync("testHash");
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.HashSetAsync(key, hashKey, expectedValue);
             var actualValue = await _redisService.HashGetAsync<TestModel>(key, hashKey);
             Assert.Equal(expectedValue, actualValue);
-            await _redisService.RemoveAsync("testHash");
+            await _redisService.RemoveAsync(key);
         }
 
         #endregion HashGet
@@ -147,7 +147,7 @@ namespace JfYu.UnitTests.Redis
             Assert.NotNull(entries);
             Assert.Contains(entries, e => e.Name == "key1" && e.Value == _redisService.Serializer.Serialize("value1"));
             Assert.Contains(entries, e => e.Name == "key2" && e.Value == _redisService.Serializer.Serialize("value2"));
-            await _redisService.RemoveAsync("testHash");
+            await _redisService.RemoveAsync(key);
         }
 
         #endregion HaskGetAll
@@ -170,7 +170,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.HashSetAsync(key, hashKey, "anyValue");
             bool result = await _redisService.HashDeleteAsync(key, hashKey);
             Assert.True(result);
-            await _redisService.RemoveAsync("testHash");
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
@@ -202,7 +202,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.HashSetAsync(key, hashKey, "anyValue");
             bool exists = await _redisService.HashExistsAsync(key, hashKey);
             Assert.True(exists);
-            await _redisService.RemoveAsync("testHash");
+            await _redisService.RemoveAsync(key);
         }
 
         [Fact]
