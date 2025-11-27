@@ -98,20 +98,6 @@ jobs:
           choco install redis-64 rabbitmq python -y
           python -m pip install httpbin uvicorn asgiref
 
-      - name: Start Redis service
-        shell: pwsh
-        run: |
-          $redisPath = "C:\Program Files\Redis"
-          if (Test-Path $redisPath) {
-            Start-Process -FilePath "$redisPath\redis-server.exe" -ArgumentList "--port 6379" -WindowStyle Hidden
-            Start-Sleep -Seconds 3
-            Write-Host "Redis started on port 6379"
-          } else {
-            Write-Host "Redis installation path not found, trying alternative..."
-            Start-Process -FilePath "redis-server" -ArgumentList "--port 6379" -WindowStyle Hidden -ErrorAction SilentlyContinue
-            Start-Sleep -Seconds 3
-          }
-
       - name: Start httpbin and test
         id: start-httpbin
         shell: pwsh
