@@ -409,6 +409,185 @@ namespace JfYu.UnitTests.Redis
                It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Never);
         }
 
+        [Fact]
+        public void Log_ValueIsNull_LogsEmptyString()
+        {
+            // Arrange
+            var loggerMock = new Mock<ILogger<RedisService>>();
+            loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
+
+            var services = new ServiceCollection();
+            services.AddRedisService(options =>
+            {
+                options.EndPoints.Add(new RedisEndPoint { Host = "localhost" });
+                options.Timeout = 5000;
+                options.SSL = false;
+                options.DbIndex = 1;
+                options.Prefix = "Mytest:";
+                options.EnableLogs = true;
+            });
+            services.AddSingleton(loggerMock.Object);
+            var serviceProvider = services.BuildServiceProvider();
+            var redisService = serviceProvider.GetRequiredService<IRedisService>();
+
+            // Act
+            redisService.Log(nameof(Log_ValueIsNull_LogsEmptyString), "testKey", null);
+
+            // Assert
+            loggerMock.Verify(logger => logger.Log(
+               LogLevel.Trace,
+               It.IsAny<EventId>(),
+               It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(nameof(Log_ValueIsNull_LogsEmptyString)) 
+                   && v.ToString()!.Contains("testKey") 
+                   && v.ToString()!.Contains("Value: ")),
+               It.IsAny<Exception?>(),
+               It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+        }
+
+        [Fact]
+        public void Log_ValueIsEmpty_LogsEmptyString()
+        {
+            // Arrange
+            var loggerMock = new Mock<ILogger<RedisService>>();
+            loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
+
+            var services = new ServiceCollection();
+            services.AddRedisService(options =>
+            {
+                options.EndPoints.Add(new RedisEndPoint { Host = "localhost" });
+                options.Timeout = 5000;
+                options.SSL = false;
+                options.DbIndex = 1;
+                options.Prefix = "Mytest:";
+                options.EnableLogs = true;
+            });
+            services.AddSingleton(loggerMock.Object);
+            var serviceProvider = services.BuildServiceProvider();
+            var redisService = serviceProvider.GetRequiredService<IRedisService>();
+
+            // Act
+            redisService.Log(nameof(Log_ValueIsEmpty_LogsEmptyString), "testKey", "");
+
+            // Assert
+            loggerMock.Verify(logger => logger.Log(
+               LogLevel.Trace,
+               It.IsAny<EventId>(),
+               It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(nameof(Log_ValueIsEmpty_LogsEmptyString)) 
+                   && v.ToString()!.Contains("testKey") 
+                   && v.ToString()!.Contains("Value: ")),
+               It.IsAny<Exception?>(),
+               It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+        }
+
+        [Fact]
+        public void Log_ValueFilterIsNull_LogsOriginalValue()
+        {
+            // Arrange
+            var loggerMock = new Mock<ILogger<RedisService>>();
+            loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
+
+            var services = new ServiceCollection();
+            services.AddRedisService(options =>
+            {
+                options.EndPoints.Add(new RedisEndPoint { Host = "localhost" });
+                options.Timeout = 5000;
+                options.SSL = false;
+                options.DbIndex = 1;
+                options.Prefix = "Mytest:";
+                options.EnableLogs = true;
+                // ValueFilter is null by default
+            });
+            services.AddSingleton(loggerMock.Object);
+            var serviceProvider = services.BuildServiceProvider();
+            var redisService = serviceProvider.GetRequiredService<IRedisService>();
+
+            // Act
+            redisService.Log(nameof(Log_ValueFilterIsNull_LogsOriginalValue), "testKey", "testValue");
+
+            // Assert
+            loggerMock.Verify(logger => logger.Log(
+               LogLevel.Trace,
+               It.IsAny<EventId>(),
+               It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(nameof(Log_ValueFilterIsNull_LogsOriginalValue)) 
+                   && v.ToString()!.Contains("testKey") 
+                   && v.ToString()!.Contains("testValue")),
+               It.IsAny<Exception?>(),
+               It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+        }
+
+        [Fact]
+        public void Log_ValueFilterIsNotNull_LogsFilteredValue()
+        {
+            // Arrange
+            var loggerMock = new Mock<ILogger<RedisService>>();
+            loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
+
+            var services = new ServiceCollection();
+            services.AddRedisService(options =>
+            {
+                options.EndPoints.Add(new RedisEndPoint { Host = "localhost" });
+                options.Timeout = 5000;
+                options.SSL = false;
+                options.DbIndex = 1;
+                options.Prefix = "Mytest:";
+                options.EnableLogs = true;
+                options.ValueFilter = (value) => value.Replace("sensitive", "***");
+            });
+            services.AddSingleton(loggerMock.Object);
+            var serviceProvider = services.BuildServiceProvider();
+            var redisService = serviceProvider.GetRequiredService<IRedisService>();
+
+            // Act
+            redisService.Log(nameof(Log_ValueFilterIsNotNull_LogsFilteredValue), "testKey", "sensitive data");
+
+            // Assert
+            loggerMock.Verify(logger => logger.Log(
+               LogLevel.Trace,
+               It.IsAny<EventId>(),
+               It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(nameof(Log_ValueFilterIsNotNull_LogsFilteredValue)) 
+                   && v.ToString()!.Contains("testKey") 
+                   && v.ToString()!.Contains("*** data")
+                   && !v.ToString()!.Contains("sensitive")),
+               It.IsAny<Exception?>(),
+               It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+        }
+
+        [Fact]
+        public void Log_ValueIsNullAndValueFilterIsNotNull_LogsEmptyString()
+        {
+            // Arrange
+            var loggerMock = new Mock<ILogger<RedisService>>();
+            loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
+
+            var services = new ServiceCollection();
+            services.AddRedisService(options =>
+            {
+                options.EndPoints.Add(new RedisEndPoint { Host = "localhost" });
+                options.Timeout = 5000;
+                options.SSL = false;
+                options.DbIndex = 1;
+                options.Prefix = "Mytest:";
+                options.EnableLogs = true;
+                options.ValueFilter = (value) => string.IsNullOrEmpty(value) ? "[NULL]" : value;
+            });
+            services.AddSingleton(loggerMock.Object);
+            var serviceProvider = services.BuildServiceProvider();
+            var redisService = serviceProvider.GetRequiredService<IRedisService>();
+
+            // Act
+            redisService.Log(nameof(Log_ValueIsNullAndValueFilterIsNotNull_LogsEmptyString), "testKey", null);
+
+            // Assert
+            loggerMock.Verify(logger => logger.Log(
+               LogLevel.Trace,
+               It.IsAny<EventId>(),
+               It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(nameof(Log_ValueIsNullAndValueFilterIsNotNull_LogsEmptyString)) 
+                   && v.ToString()!.Contains("testKey") 
+                   && v.ToString()!.Contains("[NULL]")),
+               It.IsAny<Exception?>(),
+               It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+        }
+
         #endregion Logs
     }
 }

@@ -28,12 +28,12 @@ namespace JfYu.Redis.Interface
         ISerializer Serializer { get; }
 
         /// <summary>
-        /// Logs a message with the specified method name and key.
+        /// Logs a message with the specified method name, key, and optional value.
         /// </summary>
         /// <param name="methodName">The name of the method</param>
         /// <param name="key">The Redis key.</param>
-        /// <param name="logLevel">The level of the log message. Default is LogLevel.Trace.</param>
-        void Log(string methodName, string key, LogLevel logLevel = LogLevel.Trace);
+        /// <param name="value">The optional value to log.</param>
+        void Log(string methodName, string key, object? value = null);
 
         /// <summary>
         /// Verify that the specified key exists

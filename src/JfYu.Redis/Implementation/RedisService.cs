@@ -67,7 +67,11 @@ namespace JfYu.Redis.Implementation
         public void Log(string methodName, string key, object? value = null)
         {
             if (_configuration.EnableLogs && _logger != null)
-                LogRedis(_logger, methodName, key, _configuration.ValueFilter?.Invoke(value?.ToString() ?? "") ?? string.Empty);
+            {
+                var valueStr = value?.ToString() ?? string.Empty;
+                var filteredValue = _configuration.ValueFilter?.Invoke(valueStr) ?? valueStr;
+                LogRedis(_logger, methodName, key, filteredValue);
+            }
         }
 
         /// <inheritdoc/>
