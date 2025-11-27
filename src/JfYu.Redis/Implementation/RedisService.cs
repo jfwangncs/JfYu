@@ -41,12 +41,12 @@ namespace JfYu.Redis.Implementation
         public ISerializer Serializer => _serializer;
 
         /// <summary>
-        ///
+        /// Initializes a new instance of the <see cref="RedisService"/> class.
         /// </summary>
-        /// <param name="redisConfiguration"></param>
-        /// <param name="client"></param>
-        /// <param name="serializer"></param>
-        /// <param name="logger"></param>
+        /// <param name="redisConfiguration">The Redis configuration options.</param>
+        /// <param name="client">The Redis connection multiplexer.</param>
+        /// <param name="serializer">The serializer for Redis values.</param>
+        /// <param name="logger">Optional logger for Redis operations.</param>
         public RedisService(IOptions<RedisOptions> redisConfiguration, IConnectionMultiplexer client, ISerializer serializer, ILogger<RedisService>? logger = null)
         {
             _configuration = redisConfiguration.Value;

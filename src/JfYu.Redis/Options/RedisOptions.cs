@@ -47,7 +47,7 @@ namespace JfYu.Redis.Options
         public bool EnableLogs { get; set; }
 
         /// <summary>
-        /// 
+        /// Custom value filter function for logging
         /// </summary>
         public Func<string, string>? ValueFilter { get; set; }
 
