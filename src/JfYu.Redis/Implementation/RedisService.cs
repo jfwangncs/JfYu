@@ -9,7 +9,7 @@ using StackExchange.Redis.KeyspaceIsolation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading.Tasks; 
 
 namespace JfYu.Redis.Implementation
 {
@@ -60,11 +60,14 @@ namespace JfYu.Redis.Implementation
             _lockToken = $"{Environment.MachineName}_{Environment.ProcessId}_{Guid.NewGuid()}";
         }
 
+        [LoggerMessage(EventId = 1, Level = LogLevel.Trace, Message = "Redis {Method} - Key: {Key}, Value: {Value}")]
+        static partial void LogRedis(ILogger logger, string method, string key, string value);
+
         /// <inheritdoc/>
-        public void Log(string methodName, string key, LogLevel logLevel = LogLevel.Trace)
+        public void Log(string methodName, string key, object? value = null)
         {
-            if (_configuration.EnableLogs)
-                _logger?.Log(logLevel, "Redis {Method} - Key: {Key}", methodName, key);
+            if (_configuration.EnableLogs && _logger != null)
+                LogRedis(_logger, methodName, key, _configuration.ValueFilter?.Invoke(value?.ToString() ?? "") ?? string.Empty);
         }
 
         /// <inheritdoc/>

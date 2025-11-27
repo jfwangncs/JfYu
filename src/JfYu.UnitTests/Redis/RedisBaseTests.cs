@@ -325,7 +325,8 @@ namespace JfYu.UnitTests.Redis
         public void Logs_LogsEnabled_MethodHaveBeenCalled()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<RedisService>>();
+            var loggerMock = new Mock<ILogger<RedisService>>(); 
+            loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
             var services = new ServiceCollection();
             services.AddRedisService(options =>
@@ -344,9 +345,11 @@ namespace JfYu.UnitTests.Redis
             redisService.Log(nameof(Logs_LogsEnabled_MethodHaveBeenCalled), "key");
 
             // Assert
-            loggerMock.Verify(logger => logger.Log(LogLevel.Trace, It.IsAny<EventId>(),
-               It.Is<It.IsAnyType>((o, t) => o.ToString() == $"Redis {nameof(Logs_LogsEnabled_MethodHaveBeenCalled)} - Key: key"),
-               null,
+            loggerMock.Verify(logger => logger.Log(
+               It.Is<LogLevel>(l => l == LogLevel.Trace),
+               It.IsAny<EventId>(),
+               It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(nameof(Logs_LogsEnabled_MethodHaveBeenCalled)) && v.ToString()!.Contains("key")),
+               It.IsAny<Exception?>(),
                It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
         }
 

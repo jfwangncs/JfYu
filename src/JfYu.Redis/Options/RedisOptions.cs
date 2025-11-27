@@ -1,4 +1,5 @@
 using JfYu.Redis.Serializer;
+using System;
 using System.Collections.Generic;
 
 namespace JfYu.Redis.Options
@@ -44,6 +45,11 @@ namespace JfYu.Redis.Options
         /// Enabled or disabled logs default:false
         /// </summary>
         public bool EnableLogs { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Func<string, string>? ValueFilter { get; set; }
 
         /// <summary>
         /// Serializer Options
