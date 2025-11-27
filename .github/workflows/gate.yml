@@ -1,9 +1,9 @@
 ﻿name: Build
 on:
   pull_request:
-    branches: [ master ]
+    branches: [master]
 jobs:
-  ubuntu: 
+  ubuntu:
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -18,10 +18,19 @@ jobs:
       rabbitmq:
         image: rabbitmq:3.13
         env: { RABBITMQ_DEFAULT_USER: guest, RABBITMQ_DEFAULT_PASS: guest }
-        ports: 
+        ports:
           - 5672:5672
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
-      - uses: actions/checkout@v4      
+      - uses: actions/checkout@v4
       - name: Install fonts
         run: |
           sudo apt-get update && sudo apt-get install -y fonts-noto fonts-dejavu-core 
@@ -63,7 +72,7 @@ jobs:
           name: test-results-linux9
           path: src/JfYu.UnitTests/TestResults/results9.trx
 
-  win:  
+  win:
     runs-on: windows-latest
     permissions:
       checks: write
@@ -149,7 +158,7 @@ jobs:
       run:
         working-directory: src
     steps:
-      - uses: actions/checkout@v4       
+      - uses: actions/checkout@v4
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -168,18 +177,29 @@ jobs:
           brew install redis rabbitmq
           brew services start redis
           brew services start rabbitmq
+
+          # Wait for Redis to be ready
+          for i in {1..30}; do
+            if redis-cli ping &> /dev/null; then
+              echo "Redis is ready"
+              break
+            fi
+            echo "Waiting for Redis to be ready... ($i/30)"
+            sleep 1
+          done
+
           python3 -m venv venv
           source venv/bin/activate
           python3 -m pip install --upgrade pip
           python3 -m pip install httpbin uvicorn asgiref
- 
+
           cat << 'EOF' > asgi_httpbin.py
           from httpbin import app as wsgi_app
           from asgiref.wsgi import WsgiToAsgi
           app = WsgiToAsgi(wsgi_app)
           EOF
           echo "Created asgi_httpbin.py"
-          
+
           python -m uvicorn asgi_httpbin:app --host 127.0.0.1 --port 8080 &
           HTTPBIN_PID=$!
           echo "HTTPBIN_PID=$HTTPBIN_PID" >> $GITHUB_ENV
@@ -224,16 +244,15 @@ jobs:
         uses: dawidd6/action-download-artifact@v9
         with:
           name: test-results-win48
-          path: TestResults 
+          path: TestResults
           run_id: ${{ github.run_id }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
 
       - name: Download test results (win9)
         uses: dawidd6/action-download-artifact@v9
         with:
           name: test-results-win9
-          path: TestResults 
+          path: TestResults
           run_id: ${{ github.run_id }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 

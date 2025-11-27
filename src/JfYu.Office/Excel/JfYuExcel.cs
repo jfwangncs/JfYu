@@ -187,7 +187,7 @@ namespace JfYu.Office.Excel
             }
 
             fields.Add(current.ToString().Trim('"'));
-            return fields.ToArray();
+            return [.. fields];
         }
 
         #endregion
