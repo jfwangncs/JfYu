@@ -1,16 +1,18 @@
 ### Redis
 
-A high-performance Redis client library for .NET with support for multiple serialization formats, distributed locking, and comprehensive data structure operations.
+A high-performance Redis client library for .NET with support for multiple serialization formats, distributed locking, pub/sub messaging, and comprehensive data structure operations.
 
 ## Features
 
 - ✅ Support for all major Redis data structures (String, Hash, List, Set, Sorted Set)
+- ✅ Pub/Sub messaging with pattern matching support
 - ✅ Multiple serialization formats (Newtonsoft.Json, MessagePack)
 - ✅ Distributed locking with unique token per instance
 - ✅ Batch operations for improved performance
 - ✅ Connection health monitoring and automatic recovery
 - ✅ Key prefix support for multi-tenant scenarios
-- ✅ Configurable logging
+- ✅ High-performance logging with LoggerMessage source generators
+- ✅ Custom value filtering for sensitive data
 - ✅ Multi-targeting: .NET Standard 2.0 and .NET 8.0
 
 ## Installation
@@ -71,6 +73,9 @@ services.AddRedisService(options =>
     options.DbIndex = 1;
     options.Prefix = "MyTest:";
     options.EnableLogs = true;
+
+    // Optional: Custom value filter for logging (e.g., hide sensitive data)
+    options.ValueFilter = value => value.Length > 100 ? value.Substring(0, 100) + "..." : value;
 
     // Choose serialization format
     options.UsingMessagePack(settings =>
@@ -256,6 +261,35 @@ if (locked)
 }
 ```
 
+### Pub/Sub Messaging
+
+```csharp
+// Subscribe to a channel
+await _redisService.SubscribeAsync<string>("notifications", (channel, message) =>
+{
+    Console.WriteLine($"Received on {channel}: {message}");
+});
+
+// Subscribe with pattern matching
+await _redisService.SubscribePatternAsync<string>("events:*", (channel, message) =>
+{
+    Console.WriteLine($"Pattern matched {channel}: {message}");
+});
+
+// Publish a message
+var subscriberCount = await _redisService.PublishAsync("notifications", "Hello World");
+Console.WriteLine($"Message delivered to {subscriberCount} subscribers");
+
+// Unsubscribe from specific channel
+await _redisService.UnsubscribeAsync("notifications");
+
+// Unsubscribe from pattern
+await _redisService.UnsubscribePatternAsync("events:*");
+
+// Unsubscribe from all channels
+await _redisService.UnsubscribeAllAsync();
+```
+
 ### Key Management
 
 ```csharp
@@ -299,6 +333,39 @@ options.UsingMsgPack(settings =>
 });
 ```
 
+## Logging Configuration
+
+### Enable Logging
+
+```csharp
+services.AddRedisService(options =>
+{
+    options.EndPoints.Add(new RedisEndPoint { Host = "localhost" });
+    options.EnableLogs = true;  // Enable logging
+
+    // Custom value filter to sanitize logged values
+    options.ValueFilter = value =>
+    {
+        // Remove sensitive information
+        if (value.Contains("password", StringComparison.OrdinalIgnoreCase))
+            return "***FILTERED***";
+
+        // Truncate long values
+        return value.Length > 200 ? value.Substring(0, 200) + "..." : value;
+    };
+});
+```
+
+### Logging Output
+
+When enabled, Redis operations are logged at `Trace` level:
+
+```
+[Trace] Redis GetAsync - Key: user:123, Value: {"Name":"John","Age":30}
+[Trace] Redis SetAddAsync - Key: tags, Value:
+[Trace] Redis PublishAsync - Key: notifications, Value: Hello World
+```
+
 ## Best Practices
 
 1. **Use Key Prefixes**: Organize keys with prefixes for different tenants or modules
@@ -307,6 +374,8 @@ options.UsingMsgPack(settings =>
 4. **Connection Pooling**: The library uses singleton ConnectionMultiplexer for optimal performance
 5. **Error Handling**: Always wrap Redis operations in try-catch blocks
 6. **Distributed Locks**: Always release locks in finally blocks to prevent deadlocks
+7. **Pub/Sub**: Use pattern matching for flexible message routing across multiple channels
+8. **Logging**: Use custom value filters to sanitize sensitive data before logging
 
 ## Connection Events
 
@@ -317,17 +386,6 @@ The library automatically logs connection events:
 - Error messages
 
 Monitor these logs to ensure Redis health.
-
-## Version History
-
-### 8.1.3
-
-- Fixed distributed lock token to be unique per instance
-- Added batch operations (GetBatchAsync, AddBatchAsync)
-- Added key management methods (GetTimeToLiveAsync, PersistAsync, PingAsync)
-- Improved connection lifecycle management with event logging
-- Fixed ListRemoveAsync to support generic types
-- Multi-targeting support for .NET Standard 2.0 and .NET 8.0
 
 ## License
 
