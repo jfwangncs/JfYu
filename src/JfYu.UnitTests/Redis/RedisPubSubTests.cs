@@ -491,7 +491,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.UnsubscribeAsync(channel);
         }
 
-        private class TestUser
+        private sealed class TestUser
         {
             public int Id { get; set; }
             public string Name { get; set; } = string.Empty;
