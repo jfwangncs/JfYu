@@ -576,6 +576,266 @@ namespace JfYu.UnitTests.Redis
         }
 
         #endregion DecrementAsync
+
+        #region GetBatchAsync
+
+        [Fact]
+        public async Task GetBatchAsync_WithNullKeys_ThrowsException()
+        {
+            var ex = await Record.ExceptionAsync(() => _redisService.GetBatchAsync<string>(null!));
+            Assert.IsType<ArgumentException>(ex);
+        }
+
+        [Fact]
+        public async Task GetBatchAsync_WithEmptyKeys_ThrowsException()
+        {
+            var ex = await Record.ExceptionAsync(() => _redisService.GetBatchAsync<string>(new List<string>()));
+            Assert.IsType<ArgumentException>(ex);
+        }
+
+        [Fact]
+        public async Task GetBatchAsync_ReturnsMultipleValues()
+        {
+            var key1 = nameof(GetBatchAsync_ReturnsMultipleValues) + "_1";
+            var key2 = nameof(GetBatchAsync_ReturnsMultipleValues) + "_2";
+            var key3 = nameof(GetBatchAsync_ReturnsMultipleValues) + "_3";
+            var value1 = "value1";
+            var value2 = "value2";
+
+            await _redisService.AddAsync(key1, value1);
+            await _redisService.AddAsync(key2, value2);
+
+            var result = await _redisService.GetBatchAsync<string>(new List<string> { key1, key2, key3 });
+
+            Assert.Equal(3, result.Count);
+            Assert.Equal(value1, result[key1]);
+            Assert.Equal(value2, result[key2]);
+            Assert.Null(result[key3]);
+
+            await _redisService.RemoveAsync(key1);
+            await _redisService.RemoveAsync(key2);
+        }
+
+        [Fact]
+        public async Task GetBatchAsync_WithComplexObjects_ReturnsCorrectly()
+        {
+            var key1 = nameof(GetBatchAsync_WithComplexObjects_ReturnsCorrectly) + "_1";
+            var key2 = nameof(GetBatchAsync_WithComplexObjects_ReturnsCorrectly) + "_2";
+            var models1 = new TestModelFaker().GenerateBetween(1, 5);
+            var models2 = new TestModelFaker().GenerateBetween(1, 5);
+
+            await _redisService.AddAsync(key1, models1);
+            await _redisService.AddAsync(key2, models2);
+
+            var result = await _redisService.GetBatchAsync<List<TestModel>>(new List<string> { key1, key2 });
+
+            Assert.Equal(2, result.Count);
+            Assert.Equal(models1, result[key1], new TestModelComparer());
+            Assert.Equal(models2, result[key2], new TestModelComparer());
+
+            await _redisService.RemoveAsync(key1);
+            await _redisService.RemoveAsync(key2);
+        }
+
+        #endregion GetBatchAsync
+
+        #region AddBatchAsync
+
+        [Fact]
+        public async Task AddBatchAsync_WithNullKeyValues_ThrowsException()
+        {
+            var ex = await Record.ExceptionAsync(() => _redisService.AddBatchAsync<string>(null!));
+            Assert.IsType<ArgumentException>(ex);
+        }
+
+        [Fact]
+        public async Task AddBatchAsync_WithEmptyKeyValues_ThrowsException()
+        {
+            var ex = await Record.ExceptionAsync(() => _redisService.AddBatchAsync(new Dictionary<string, string>()));
+            Assert.IsType<ArgumentException>(ex);
+        }
+
+        [Fact]
+        public async Task AddBatchAsync_AddsMultipleValues()
+        {
+            var prefix = nameof(AddBatchAsync_AddsMultipleValues);
+            var keyValues = new Dictionary<string, string>
+            {
+                { $"{prefix}_1", "value1" },
+                { $"{prefix}_2", "value2" },
+                { $"{prefix}_3", "value3" }
+            };
+
+            var result = await _redisService.AddBatchAsync(keyValues);
+            Assert.True(result);
+
+            foreach (var kv in keyValues)
+            {
+                var value = await _redisService.GetAsync<string>(kv.Key);
+                Assert.Equal(kv.Value, value);
+                await _redisService.RemoveAsync(kv.Key);
+            }
+        }
+
+        [Fact]
+        public async Task AddBatchAsync_WithExpiry_SetsExpirationOnAllKeys()
+        {
+            var prefix = nameof(AddBatchAsync_WithExpiry_SetsExpirationOnAllKeys);
+            var keyValues = new Dictionary<string, string>
+            {
+                { $"{prefix}_1", "value1" },
+                { $"{prefix}_2", "value2" }
+            };
+            var expiry = TimeSpan.FromSeconds(2);
+
+            var result = await _redisService.AddBatchAsync(keyValues, expiry);
+            Assert.True(result);
+
+            await Task.Delay(3000);
+
+            foreach (var kv in keyValues)
+            {
+                var value = await _redisService.GetAsync<string>(kv.Key);
+                Assert.Null(value);
+            }
+        }
+
+        [Fact]
+        public async Task AddBatchAsync_WithComplexObjects_AddsCorrectly()
+        {
+            var prefix = nameof(AddBatchAsync_WithComplexObjects_AddsCorrectly);
+            var models1 = new TestModelFaker().GenerateBetween(1, 5);
+            var models2 = new TestModelFaker().GenerateBetween(1, 5);
+            var keyValues = new Dictionary<string, List<TestModel>>
+            {
+                { $"{prefix}_1", models1 },
+                { $"{prefix}_2", models2 }
+            };
+
+            var result = await _redisService.AddBatchAsync(keyValues);
+            Assert.True(result);
+
+            var value1 = await _redisService.GetAsync<List<TestModel>>($"{prefix}_1");
+            var value2 = await _redisService.GetAsync<List<TestModel>>($"{prefix}_2");
+
+            Assert.Equal(models1, value1, new TestModelComparer());
+            Assert.Equal(models2, value2, new TestModelComparer());
+
+            await _redisService.RemoveAsync($"{prefix}_1");
+            await _redisService.RemoveAsync($"{prefix}_2");
+        }
+
+        #endregion AddBatchAsync
+
+        #region GetTimeToLiveAsync
+
+        [Theory]
+        [ClassData(typeof(NullKeyExpectData))]
+        public async Task GetTimeToLiveAsync_KeyIsNull_ThrowsException(string key)
+        {
+            var ex = await Record.ExceptionAsync(() => _redisService.GetTimeToLiveAsync(key));
+            Assert.IsType<ArgumentException>(ex, false);
+        }
+
+        [Fact]
+        public async Task GetTimeToLiveAsync_KeyDoesNotExist_ReturnsNull()
+        {
+            var key = nameof(GetTimeToLiveAsync_KeyDoesNotExist_ReturnsNull);
+            var ttl = await _redisService.GetTimeToLiveAsync(key);
+            Assert.Null(ttl);
+        }
+
+        [Fact]
+        public async Task GetTimeToLiveAsync_KeyWithoutExpiry_ReturnsNull()
+        {
+            var key = nameof(GetTimeToLiveAsync_KeyWithoutExpiry_ReturnsNull);
+            await _redisService.AddAsync(key, "value");
+            
+            var ttl = await _redisService.GetTimeToLiveAsync(key);
+            
+            Assert.Null(ttl);
+            await _redisService.RemoveAsync(key);
+        }
+
+        [Fact]
+        public async Task GetTimeToLiveAsync_KeyWithExpiry_ReturnsRemainingTime()
+        {
+            var key = nameof(GetTimeToLiveAsync_KeyWithExpiry_ReturnsRemainingTime);
+            var expiry = TimeSpan.FromSeconds(10);
+            await _redisService.AddAsync(key, "value", expiry);
+
+            var ttl = await _redisService.GetTimeToLiveAsync(key);
+
+            Assert.NotNull(ttl);
+            Assert.True(ttl.Value.TotalSeconds > 0);
+            Assert.True(ttl.Value.TotalSeconds <= expiry.TotalSeconds);
+            await _redisService.RemoveAsync(key);
+        }
+
+        #endregion GetTimeToLiveAsync
+
+        #region PersistAsync
+
+        [Theory]
+        [ClassData(typeof(NullKeyExpectData))]
+        public async Task PersistAsync_KeyIsNull_ThrowsException(string key)
+        {
+            var ex = await Record.ExceptionAsync(() => _redisService.PersistAsync(key));
+            Assert.IsType<ArgumentException>(ex, false);
+        }
+
+        [Fact]
+        public async Task PersistAsync_KeyDoesNotExist_ReturnsFalse()
+        {
+            var key = nameof(PersistAsync_KeyDoesNotExist_ReturnsFalse);
+            var result = await _redisService.PersistAsync(key);
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task PersistAsync_KeyWithExpiry_RemovesExpiration()
+        {
+            var key = nameof(PersistAsync_KeyWithExpiry_RemovesExpiration);
+            await _redisService.AddAsync(key, "value", TimeSpan.FromSeconds(5));
+
+            var result = await _redisService.PersistAsync(key);
+            Assert.True(result);
+
+            var ttl = await _redisService.GetTimeToLiveAsync(key);
+            Assert.Null(ttl);
+
+            await Task.Delay(6000);
+            var value = await _redisService.GetAsync<string>(key);
+            Assert.NotNull(value);
+
+            await _redisService.RemoveAsync(key);
+        }
+
+        [Fact]
+        public async Task PersistAsync_KeyWithoutExpiry_ReturnsFalse()
+        {
+            var key = nameof(PersistAsync_KeyWithoutExpiry_ReturnsFalse);
+            await _redisService.AddAsync(key, "value");
+
+            var result = await _redisService.PersistAsync(key);
+            Assert.False(result);
+
+            await _redisService.RemoveAsync(key);
+        }
+
+        #endregion PersistAsync
+
+        #region PingAsync
+
+        [Fact]
+        public async Task PingAsync_ReturnsResponseTime()
+        {
+            var responseTime = await _redisService.PingAsync();
+            Assert.True(responseTime > TimeSpan.Zero);
+            Assert.True(responseTime < TimeSpan.FromSeconds(1));
+        }
+
+        #endregion PingAsync
     }
 }
 #endif

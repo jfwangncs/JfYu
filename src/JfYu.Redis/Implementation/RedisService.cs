@@ -217,16 +217,15 @@ namespace JfYu.Redis.Implementation
 
             Log(nameof(AddBatchAsync), string.Join(", ", keyValues.Keys));
 
-            var keyValuePairs = keyValues.Select(kv => new KeyValuePair<RedisKey, RedisValue>(kv.Key, _serializer.Serialize(kv.Value))).ToArray();
-            var success = await _database.StringSetAsync(keyValuePairs, flag).ConfigureAwait(false);
-
-            if (success && expiresIn.HasValue)
+            var tasks = keyValues.Select(async kv =>
             {
-                var tasks = keyValues.Keys.Select(key => _database.KeyExpireAsync(key, expiresIn.Value, flag));
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-            }
+                var serializedValue = _serializer.Serialize(kv.Value);
+                return await _database.StringSetAsync(kv.Key, serializedValue, expiresIn, When.Always, flag).ConfigureAwait(false);
+            });
 
-            return success;
+            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            return results.All(r => r);
         }
 
         /// <inheritdoc/>
@@ -249,14 +248,7 @@ namespace JfYu.Redis.Implementation
         public async Task<TimeSpan> PingAsync()
         {
             Log(nameof(PingAsync), "server");
-            try
-            {
-                return await _database.PingAsync().ConfigureAwait(false);
-            }
-            catch
-            {
-                return TimeSpan.Zero;
-            }
+            return await _database.PingAsync().ConfigureAwait(false);
         }
     }
 }
