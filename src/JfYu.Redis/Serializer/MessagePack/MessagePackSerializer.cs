@@ -23,7 +23,7 @@ namespace JfYu.Redis.Serializer.MessagePack
         /// <inheritdoc/>
         public byte[] Serialize<T>(T? value)
         {
-            if (EqualityComparer<T>.Default.Equals(value, default))
+            if (EqualityComparer<T?>.Default.Equals(value, default))
                 return [];
 
             return MessagePackSerializer.Serialize(value!.GetType(), value, _settings);
