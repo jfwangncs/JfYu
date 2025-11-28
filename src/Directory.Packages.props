@@ -37,7 +37,10 @@
 		<PackageVersion Include="MessagePack" Version="3.1.4" />
 		<PackageVersion Include="StackExchange.Redis" Version="2.10.1" />
 		<PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageVersion Include="System.Dynamic.Runtime" Version="4.3.0" />
+		<PackageVersion Include="System.Dynamic.Runtime" Version="4.3.0" /> 
+		<PackageVersion Include="System.Data.SQLite.Linq" Version="1.0.118" />
+		<PackageVersion Include="System.Data.SQLite" Version="1.0.118" />
+		<PackageVersion Include="System.Data.SQLite.EF6" Version="1.0.118" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="xunit" PrivateAssets="all" />
@@ -51,6 +54,9 @@
 		<PackageReference Update="Microsoft.Extensions.Logging" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.Extensions.Logging.Console" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.NET.Test.Sdk" PrivateAssets="all" />
-		<PackageReference Update="BenchmarkDotNet" PrivateAssets="all" />
+		<PackageReference Update="BenchmarkDotNet" PrivateAssets="all" /> 
+		<PackageReference Update="System.Data.SQLite.Linq" PrivateAssets="all" /> 
+		<PackageReference Update="System.Data.SQLite" PrivateAssets="all" /> 
+		<PackageReference Update="System.Data.SQLite.EF6" PrivateAssets="all" /> 
 	</ItemGroup>
 </Project>

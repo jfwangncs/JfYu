@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 #else
 using System.Data.Entity;
+using System.Data.SQLite;
 #endif
 namespace JfYu.UnitTests.Models.Entity
 {
@@ -12,7 +13,7 @@ namespace JfYu.UnitTests.Models.Entity
         public DbSet<TestSubModel> TestSubModels { get; set; }
     }
 #else
-    public class TestDbContext(string connectionString) : DbContext(connectionString)
+    public class TestDbContext(string connectionString) : DbContext(new SQLiteConnection(connectionString), contextOwnsConnection: true)
     {
         public DbSet<TestModel> TestModels { get; set; } = null!;
         public DbSet<TestSubModel> TestSubModels { get; set; } = null!;

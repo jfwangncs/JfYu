@@ -23,6 +23,12 @@
 		<PackageReference Include="xunit.runner.visualstudio" />	
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net481'">
+		<PackageReference Include="System.Data.SQLite" />
+		<PackageReference Include="System.Data.SQLite.Linq" />
+		<PackageReference Include="System.Data.SQLite.EF6" />
+	</ItemGroup> 
+
 	<ItemGroup>
 		<ProjectReference Include="..\JfYu.Data\JfYu.Data.csproj" Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'" />
 		<ProjectReference Include="..\JfYu.Office\JfYu.Office.csproj" />
@@ -36,6 +42,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Update="App.config">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="appsettings.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
