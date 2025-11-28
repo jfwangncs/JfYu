@@ -29,7 +29,7 @@ namespace JfYu.Office.Excel.Write.Implementation
                 var properties = tupleType.GetProperties();
                 for (int i = 0; i < properties.Length; i++)
                 {
-                    if (properties[i] is IList newItemData)
+                    if (properties[i].GetValue(source) is IList newItemData)
                     {
                         if (newItemData.Count > writeOperation.SheetMaxRecord)
                             throw new NotSupportedException($"For write multiple sheets each sheet count need less than SheetMaxRecord:{writeOperation.SheetMaxRecord}");
