@@ -1,4 +1,4 @@
-﻿using JfYu.Office.Excel.Constant;
+using JfYu.Office.Excel.Constant;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.Streaming;
@@ -100,7 +100,12 @@ namespace JfYu.Office.Excel.Extensions
         /// <exception cref="ArgumentNullException">Thrown when sheet is null.</exception>
         public static ISheet AddTitle(this ISheet sheet, Dictionary<string, string> titles)
         {
+
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(sheet);
+#else
             ArgumentNullException.ThrowIfNull(sheet);
+#endif
             IRow headerRow = sheet.CreateRow(0);
             ICellStyle headStyle = sheet.Workbook.CreateCellStyle();
             headStyle.Alignment = HorizontalAlignment.Center;

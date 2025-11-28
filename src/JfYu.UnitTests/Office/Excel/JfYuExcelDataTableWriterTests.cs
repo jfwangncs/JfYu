@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER 
 using JfYu.Office;
 using JfYu.Office.Excel;
 using JfYu.Office.Excel.Constant;
@@ -382,4 +381,3 @@ namespace JfYu.UnitTests.Office.Excel
         }
     }
 }
-#endif

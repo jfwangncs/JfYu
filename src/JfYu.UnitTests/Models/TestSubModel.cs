@@ -1,5 +1,3 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
 namespace JfYu.UnitTests.Models
 {
     public sealed class TestSubModel : IEquatable<TestSubModel>

@@ -2,7 +2,7 @@ using JfYu.Office.Excel.Constant;
 using JfYu.Office.Excel.Extensions;
 using JfYu.Office.Excel.Write.Implementation;
 using JfYu.Office.Excel.Write.Interface;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options; 
 using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
@@ -40,16 +40,28 @@ namespace JfYu.Office.Excel
         /// <inheritdoc/>
         public void Write<T>(T source, string filePath, Dictionary<string, string>? titles = null, JfYuExcelOptions? excelOption = null, Action<int>? callback = null) where T : notnull
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(source);
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(filePath);
+#else
             ArgumentNullException.ThrowIfNull(source);
-            ArgumentException.ThrowIfNullOrEmpty(filePath);
+            ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+#endif
+
             var writer = _excelWriterFactory.GetWriter<T>();
             writer.Write(source, filePath, excelOption ?? _configuration, titles, callback);
         }
         /// <inheritdoc/>
         public void WriteCSV<T>(List<T> source, string filePath, Dictionary<string, string>? titles = null, Action<int>? callback = null)
         {
+
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(source);
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(filePath);
+#else
             ArgumentNullException.ThrowIfNull(source);
-            ArgumentException.ThrowIfNullOrEmpty(filePath);
+            ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+#endif
             var ext = Path.GetExtension(filePath);
             if (string.IsNullOrEmpty(ext))
                 filePath += ".csv";
@@ -197,7 +209,12 @@ namespace JfYu.Office.Excel
         /// <inheritdoc/>
         public List<T> Read<T>(Stream stream, int firstRow = 1, int sheetIndex = 0) where T : class
         {
-            ArgumentNullException.ThrowIfNull(stream);
+
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(stream);
+#else
+            ArgumentNullException.ThrowIfNull(stream); 
+#endif
             using var wb = WorkbookFactory.Create(stream);
             return JfYuExcelExtension.Read<T>(wb, firstRow, sheetIndex);
         }
@@ -217,7 +234,11 @@ namespace JfYu.Office.Excel
             where T1 : class
             where T2 : class
         {
-            ArgumentNullException.ThrowIfNull(stream);
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(stream);
+#else
+            ArgumentNullException.ThrowIfNull(stream); 
+#endif
             using var wb = WorkbookFactory.Create(stream);
             return JfYuExcelExtension.Read<T1, T2>(wb, firstRow);
         }
@@ -240,7 +261,11 @@ namespace JfYu.Office.Excel
             where T2 : class
             where T3 : class
         {
-            ArgumentNullException.ThrowIfNull(stream);
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(stream);
+#else
+            ArgumentNullException.ThrowIfNull(stream); 
+#endif
             using var wb = WorkbookFactory.Create(stream);
             return JfYuExcelExtension.Read<T1, T2, T3>(wb, firstRow);
         }
@@ -265,7 +290,12 @@ namespace JfYu.Office.Excel
             where T3 : class
             where T4 : class
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(stream);
+#else
             ArgumentNullException.ThrowIfNull(stream);
+
+#endif
             using var wb = WorkbookFactory.Create(stream);
             return JfYuExcelExtension.Read<T1, T2, T3, T4>(wb, firstRow);
         }
@@ -292,7 +322,11 @@ namespace JfYu.Office.Excel
             where T4 : class
             where T5 : class
         {
-            ArgumentNullException.ThrowIfNull(stream);
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(stream);
+#else
+            ArgumentNullException.ThrowIfNull(stream); 
+#endif
             using var wb = WorkbookFactory.Create(stream);
             return JfYuExcelExtension.Read<T1, T2, T3, T4, T5>(wb, firstRow);
         }
@@ -321,7 +355,11 @@ namespace JfYu.Office.Excel
             where T5 : class
             where T6 : class
         {
-            ArgumentNullException.ThrowIfNull(stream);
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(stream);
+#else
+            ArgumentNullException.ThrowIfNull(stream); 
+#endif
             using var wb = WorkbookFactory.Create(stream);
             return JfYuExcelExtension.Read<T1, T2, T3, T4, T5, T6>(wb, firstRow);
         }
@@ -352,7 +390,11 @@ namespace JfYu.Office.Excel
             where T6 : class
             where T7 : class
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(stream);
+#else
             ArgumentNullException.ThrowIfNull(stream);
+#endif
             using var wb = WorkbookFactory.Create(stream);
             return JfYuExcelExtension.Read<T1, T2, T3, T4, T5, T6, T7>(wb, firstRow);
         }

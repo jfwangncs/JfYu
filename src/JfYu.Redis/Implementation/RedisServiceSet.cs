@@ -24,15 +24,11 @@ namespace JfYu.Redis.Implementation
         public async Task<bool> SetAddAsync<T>(string key, T value, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullExceptionExtension.ThrowIfNull(value);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullException.ThrowIfNull(value);
-
 #endif
             Log(nameof(SetAddAsync), key);
             var entryBytes = _serializer.Serialize(value);
@@ -43,13 +39,9 @@ namespace JfYu.Redis.Implementation
         public async Task<long> SetAddAllAsync<T>(string key, List<T> values, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-
 #endif
             values.ThrowIfNullOrEmpty();
             Log(nameof(SetAddAllAsync), key);
@@ -62,15 +54,11 @@ namespace JfYu.Redis.Implementation
         public async Task<bool> SetRemoveAsync<T>(string key, T value)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullExceptionExtension.ThrowIfNull(value);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullException.ThrowIfNull(value);
-
 #endif
             Log(nameof(SetRemoveAsync), key);
             var entryBytes = _serializer.Serialize(value);
@@ -82,14 +70,11 @@ namespace JfYu.Redis.Implementation
         {
             values.ThrowIfNullOrEmpty();
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
             values.ForEach(value => ArgumentNullExceptionExtension.ThrowIfNull(value));
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             values.ForEach(value => ArgumentNullException.ThrowIfNull(value));
-
 #endif            
 
             Log(nameof(SetRemoveAllAsync), key);
@@ -102,15 +87,11 @@ namespace JfYu.Redis.Implementation
         public async Task<bool> SetContainsAsync<T>(string key, T value, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullExceptionExtension.ThrowIfNull(value);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullException.ThrowIfNull(value);
-
 #endif
             Log(nameof(SetContainsAsync), key);
             var entryBytes = _serializer.Serialize(value);
@@ -121,13 +102,9 @@ namespace JfYu.Redis.Implementation
         public async Task<List<RedisValue>> SetMembersAsync(string key, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-
 #endif
             Log(nameof(SetMembersAsync), key);
             return [.. await _database.SetMembersAsync(key, flag).ConfigureAwait(false)];
@@ -137,13 +114,9 @@ namespace JfYu.Redis.Implementation
         public async Task<long> SetLengthAsync(string key, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-
 #endif
             Log(nameof(SetLengthAsync), key);
             return await _database.SetLengthAsync(key, flag).ConfigureAwait(false);
@@ -153,13 +126,9 @@ namespace JfYu.Redis.Implementation
         public async Task<RedisValue> SetRandomMemberAsync(string key, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-
 #endif
             Log(nameof(SetRandomMemberAsync), key);
             return await _database.SetRandomMemberAsync(key, flag).ConfigureAwait(false);
@@ -169,13 +138,9 @@ namespace JfYu.Redis.Implementation
         public async Task<List<RedisValue>> SetRandomMembersAsync(string key, int count, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-
 #endif
             Log(nameof(SetRandomMembersAsync), key);
             return [.. await _database.SetRandomMembersAsync(key, count, flag).ConfigureAwait(false)];

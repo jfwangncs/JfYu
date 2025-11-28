@@ -1,4 +1,4 @@
-﻿namespace JfYu.Office.Word.Constant
+namespace JfYu.Office.Word.Constant
 {
     /// <summary>
     /// Base interface for Word document replacement values.

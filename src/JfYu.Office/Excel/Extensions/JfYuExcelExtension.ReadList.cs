@@ -10,11 +10,16 @@ namespace JfYu.Office.Excel.Extensions
 {
     public static partial class JfYuExcelExtension
     {
+#if NET8_0_OR_GREATER
         [GeneratedRegex(@"[^\w\u4e00-\u9fa5]", RegexOptions.CultureInvariant)]
         private static partial Regex InvalidCharRegex();
 
         [GeneratedRegex(@"_{2,}", RegexOptions.CultureInvariant)]
         private static partial Regex MultiUnderscoreRegex();
+#else
+        private static readonly Regex InvalidCharRegex = new(@"[^\w\u4e00-\u9fa5]", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+        private static readonly Regex MultiUnderscoreRegex = new(@"_{2,}", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+#endif
 
         #region Read
         /// <summary>
@@ -37,7 +42,7 @@ namespace JfYu.Office.Excel.Extensions
 
             bool isDynamic = type == typeof(object) || type == typeof(System.Dynamic.ExpandoObject);
             var cellNums = new Dictionary<int, PropertyInfo?>();
-            var titles = isDynamic ? new Dictionary<string, string>() : GetTitles(type);
+            var titles = isDynamic ? [] : GetTitles(type);
             InitHeader(headerRow, type, isDynamic, cellNums, titles);
 
             for (int i = firstRow; i <= sheet.LastRowNum; i++)
@@ -125,8 +130,13 @@ namespace JfYu.Office.Excel.Extensions
             {
                 if (string.IsNullOrWhiteSpace(key))
                     return "_";
+#if NET8_0_OR_GREATER
                 var cleaned = InvalidCharRegex().Replace(key, "_");
                 cleaned = MultiUnderscoreRegex().Replace(cleaned, "_");
+#else
+                var cleaned = InvalidCharRegex.Replace(key, "_");
+                cleaned = MultiUnderscoreRegex.Replace(cleaned, "_");
+#endif
                 cleaned = cleaned.Trim('_');
                 if (string.IsNullOrEmpty(cleaned) || char.IsDigit(cleaned[0]))
                     cleaned = "_" + cleaned;

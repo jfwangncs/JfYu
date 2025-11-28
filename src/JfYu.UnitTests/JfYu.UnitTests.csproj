@@ -20,12 +20,12 @@
 		<PackageReference Include="Moq" />
 		<PackageReference Include="SharpZipLib" />
 		<PackageReference Include="xunit" />
-		<PackageReference Include="xunit.runner.visualstudio" />
+		<PackageReference Include="xunit.runner.visualstudio" />	
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\JfYu.Data\JfYu.Data.csproj" Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'" />
-		<ProjectReference Include="..\JfYu.Office\JfYu.Office.csproj" Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'" />
+		<ProjectReference Include="..\JfYu.Office\JfYu.Office.csproj" />
 		<ProjectReference Include="..\JfYu.RabbitMQ\JfYu.RabbitMQ.csproj" />
 		<ProjectReference Include="..\JfYu.Redis\JfYu.Redis.csproj" />
 		<ProjectReference Include="..\JfYu.Request\JfYu.Request.csproj" />

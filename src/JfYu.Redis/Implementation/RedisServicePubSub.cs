@@ -16,15 +16,11 @@ namespace JfYu.Redis.Implementation
         public async Task<long> PublishAsync<T>(string channel, T message)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(channel);
             ArgumentNullExceptionExtension.ThrowIfNull(message);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(channel);
             ArgumentNullException.ThrowIfNull(message);
-
 #endif
             Log(nameof(PublishAsync), channel);
 
@@ -37,15 +33,11 @@ namespace JfYu.Redis.Implementation
         public async Task SubscribeAsync<T>(string channel, Action<string, T?> handler)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(channel);
             ArgumentNullExceptionExtension.ThrowIfNull(handler);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(channel);
             ArgumentNullException.ThrowIfNull(handler);
-
 #endif
             Log(nameof(SubscribeAsync), channel);
 
@@ -61,15 +53,11 @@ namespace JfYu.Redis.Implementation
         public async Task SubscribePatternAsync<T>(string channelPattern, Action<string, T?> handler)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(channelPattern);
             ArgumentNullExceptionExtension.ThrowIfNull(handler);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(channelPattern);
             ArgumentNullException.ThrowIfNull(handler);
-
 #endif
             Log(nameof(SubscribePatternAsync), channelPattern);
 
@@ -85,13 +73,9 @@ namespace JfYu.Redis.Implementation
         public async Task UnsubscribeAsync(string channel)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(channel);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(channel);
-
 #endif
             Log(nameof(UnsubscribeAsync), channel);
 
@@ -112,13 +96,9 @@ namespace JfYu.Redis.Implementation
         public async Task UnsubscribePatternAsync(string channelPattern)
         {
 #if NETSTANDARD2_0
-
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(channelPattern);
-
 #else
-
             ArgumentException.ThrowIfNullOrWhiteSpace(channelPattern);
-
 #endif
             Log(nameof(UnsubscribePatternAsync), channelPattern);
 
