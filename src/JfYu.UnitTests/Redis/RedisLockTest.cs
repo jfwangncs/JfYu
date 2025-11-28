@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
 using Microsoft.Extensions.Configuration;
@@ -182,4 +181,3 @@ namespace JfYu.UnitTests.Redis
         #endregion HighConcurrency
     }
 }
-#endif

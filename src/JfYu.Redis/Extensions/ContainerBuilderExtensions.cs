@@ -26,10 +26,14 @@ namespace JfYu.Redis.Extensions
         /// <exception cref="NullReferenceException">Thrown when no endpoints are configured.</exception>
         public static IServiceCollection AddRedisService(this IServiceCollection services, Action<RedisOptions>? setupAction)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(setupAction);
+#else
             ArgumentNullException.ThrowIfNull(setupAction);
+#endif
 
             var options = new RedisOptions();
-            setupAction.Invoke(options);
+            setupAction!.Invoke(options);
 
             if (options.EndPoints.Count == 0)
                 throw new ArgumentNullException(nameof(setupAction), "EndPoints cannot be empty.");

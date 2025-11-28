@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
 using Microsoft.Extensions.Configuration;
@@ -330,7 +329,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.SortedSetAddAllAsync(key, values);
             var result = await _redisService.SortedSetRangeByScoreAsync(key, 1.1d, 1.3d);
             Assert.Equal("b", _redisService.Serializer.Deserialize<string>(result[0]!));
-            Assert.Equal("c", _redisService.Serializer.Deserialize<string>(result[^1]!));
+            Assert.Equal("c", _redisService.Serializer.Deserialize<string>(result.Last()!));
             result = await _redisService.SortedSetRangeByScoreAsync(key, 1.1d, 1.3d, StackExchange.Redis.Exclude.None, StackExchange.Redis.Order.Descending);
             Assert.Equal("c", _redisService.Serializer.Deserialize<string>(result[0]!));
             await _redisService.RemoveAsync(key);
@@ -385,5 +384,4 @@ namespace JfYu.UnitTests.Redis
 
         #endregion SortedSetCountAsync
     }
-}
-#endif
+} 

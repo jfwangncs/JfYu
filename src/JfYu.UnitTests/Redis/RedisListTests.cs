@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
 using JfYu.UnitTests.Models;
@@ -406,4 +405,3 @@ namespace JfYu.UnitTests.Redis
         #endregion ListGetRangeAsync
     }
 }
-#endif

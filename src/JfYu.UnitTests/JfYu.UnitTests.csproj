@@ -27,7 +27,7 @@
 		<ProjectReference Include="..\JfYu.Data\JfYu.Data.csproj" Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'" />
 		<ProjectReference Include="..\JfYu.Office\JfYu.Office.csproj" Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'" />
 		<ProjectReference Include="..\JfYu.RabbitMQ\JfYu.RabbitMQ.csproj" />
-		<ProjectReference Include="..\JfYu.Redis\JfYu.Redis.csproj" Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'" />
+		<ProjectReference Include="..\JfYu.Redis\JfYu.Redis.csproj" />
 		<ProjectReference Include="..\JfYu.Request\JfYu.Request.csproj" />
 	</ItemGroup>
 

@@ -1,3 +1,4 @@
+using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
 using StackExchange.Redis;
 using System;
@@ -14,8 +15,17 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<long> ListAddAsync<T>(string key, T value, When when = When.Always, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+            ArgumentNullExceptionExtension.ThrowIfNull(value);
+
+#else
+
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullException.ThrowIfNull(value);
+
+#endif
             Log(nameof(ListAddAsync), key);
             var entryBytes = _serializer.Serialize(value);
             return await _database.ListRightPushAsync(key, entryBytes, when, flag).ConfigureAwait(false);
@@ -24,8 +34,17 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<long> ListAddToLeftAsync<T>(string key, T value, When when = When.Always, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+            ArgumentNullExceptionExtension.ThrowIfNull(value);
+
+#else
+
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullException.ThrowIfNull(value);
+
+#endif
             Log(nameof(ListAddToLeftAsync), key);
             var entryBytes = _serializer.Serialize(value);
             return await _database.ListLeftPushAsync(key, entryBytes, when, flag).ConfigureAwait(false);
@@ -34,7 +53,15 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<T?> ListPopFromRightAsync<T>(string key, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+
+#else
+
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+#endif
             Log(nameof(ListPopFromRightAsync), key);
             var valueBytes = await _database.ListRightPopAsync(key, flag).ConfigureAwait(false);
             return !valueBytes.HasValue ? default : Serializer.Deserialize<T>(valueBytes!);
@@ -43,7 +70,15 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<T?> ListPopFromLeftAsync<T>(string key, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+
+#else
+
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+#endif
             Log(nameof(ListPopFromLeftAsync), key);
             var valueBytes = await _database.ListLeftPopAsync(key, flag).ConfigureAwait(false);
             return !valueBytes.HasValue ? default : Serializer.Deserialize<T>(valueBytes!);
@@ -52,7 +87,15 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<long> ListLengthAsync(string key, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+
+#else
+
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+#endif
             Log(nameof(ListLengthAsync), key);
             return await _database.ListLengthAsync(key, flag).ConfigureAwait(false);
         }
@@ -60,8 +103,17 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<long> ListRemoveAsync<T>(string key, T value, int count)
         {
+#if NETSTANDARD2_0
+
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+            ArgumentNullExceptionExtension.ThrowIfNull(value);
+
+#else
+
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullException.ThrowIfNull(value);
+
+#endif
             Log(nameof(ListRemoveAsync), key);
             var entryBytes = _serializer.Serialize(value);
             return await _database.ListRemoveAsync(key, entryBytes, count).ConfigureAwait(false);
@@ -70,7 +122,15 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<List<RedisValue>> ListGetRangeAsync(string key, int start, int stop = -1, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+
+#else
+
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+#endif
             Log(nameof(ListGetRangeAsync), key);
             return [.. await _database.ListRangeAsync(key, start, stop, flag).ConfigureAwait(false)];
         }

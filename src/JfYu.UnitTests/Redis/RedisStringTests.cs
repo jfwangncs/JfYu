@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using Bogus;
 using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
@@ -589,7 +588,7 @@ namespace JfYu.UnitTests.Redis
         [Fact]
         public async Task GetBatchAsync_WithEmptyKeys_ThrowsException()
         {
-            var ex = await Record.ExceptionAsync(() => _redisService.GetBatchAsync<string>(new List<string>()));
+            var ex = await Record.ExceptionAsync(() => _redisService.GetBatchAsync<string>([]));
             Assert.IsType<ArgumentException>(ex);
         }
 
@@ -605,7 +604,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.AddAsync(key1, value1);
             await _redisService.AddAsync(key2, value2);
 
-            var result = await _redisService.GetBatchAsync<string>(new List<string> { key1, key2, key3 });
+            var result = await _redisService.GetBatchAsync<string>([key1, key2, key3]);
 
             Assert.Equal(3, result.Count);
             Assert.Equal(value1, result[key1]);
@@ -627,7 +626,7 @@ namespace JfYu.UnitTests.Redis
             await _redisService.AddAsync(key1, models1);
             await _redisService.AddAsync(key2, models2);
 
-            var result = await _redisService.GetBatchAsync<List<TestModel>>(new List<string> { key1, key2 });
+            var result = await _redisService.GetBatchAsync<List<TestModel>>([key1, key2]);
 
             Assert.Equal(2, result.Count);
             Assert.Equal(models1, result[key1], new TestModelComparer());
@@ -838,4 +837,3 @@ namespace JfYu.UnitTests.Redis
         #endregion PingAsync
     }
 }
-#endif

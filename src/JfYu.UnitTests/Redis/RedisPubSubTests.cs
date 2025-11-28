@@ -1,9 +1,7 @@
-#if NET8_0_OR_GREATER
 using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using Microsoft.Extensions.DependencyInjection; 
 using Newtonsoft.Json;
 using StackExchange.Redis;
 
@@ -498,5 +496,4 @@ namespace JfYu.UnitTests.Redis
             public string Email { get; set; } = string.Empty;
         }
     }
-}
-#endif
+} 

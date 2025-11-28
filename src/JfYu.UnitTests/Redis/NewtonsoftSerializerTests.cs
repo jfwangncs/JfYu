@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Redis.Serializer.Newtonsoft;
 using JfYu.UnitTests.Models;
 using Newtonsoft.Json;
@@ -56,4 +55,3 @@ namespace JfYu.UnitTests.Redis
         }
     }
 }
-#endif
