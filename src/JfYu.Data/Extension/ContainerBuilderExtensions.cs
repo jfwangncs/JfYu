@@ -1,4 +1,4 @@
-﻿using JfYu.Data.Constant;
+using JfYu.Data.Constant;
 using JfYu.Data.Context;
 using JfYu.Data.Service;
 using Microsoft.EntityFrameworkCore;
@@ -101,9 +101,7 @@ namespace JfYu.Data.Extension
                         : new MariaDbServerVersion(version);
                 }
                 else
-                {
                     serverVersion = ServerVersion.AutoDetect(config.ConnectionString);
-                }
             }
 
             switch (config.DatabaseType)

@@ -17,8 +17,8 @@ namespace JfYu.Office.Excel.Extensions
         [GeneratedRegex(@"_{2,}", RegexOptions.CultureInvariant)]
         private static partial Regex MultiUnderscoreRegex();
 #else
-        private static readonly Regex InvalidCharRegex = new(@"[^\w\u4e00-\u9fa5]", RegexOptions.CultureInvariant | RegexOptions.Compiled);
-        private static readonly Regex MultiUnderscoreRegex = new(@"_{2,}", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+        private static readonly Regex InvalidCharRegex = new(@"[^\w\u4e00-\u9fa5]", RegexOptions.CultureInvariant);
+        private static readonly Regex MultiUnderscoreRegex = new(@"_{2,}", RegexOptions.CultureInvariant);
 #endif
 
         #region Read
