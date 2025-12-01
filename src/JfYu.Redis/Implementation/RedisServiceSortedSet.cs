@@ -64,8 +64,9 @@ namespace JfYu.Redis.Implementation
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullException.ThrowIfNull(value);
 #endif
-            Log(nameof(SortedSetIncrementScoreAsync), key);
-            return await _database.SortedSetIncrementAsync(key, _serializer.Serialize(value), increment, flag).ConfigureAwait(false);
+            var result = await _database.SortedSetIncrementAsync(key, _serializer.Serialize(value), increment, flag).ConfigureAwait(false);
+            Log(nameof(SortedSetIncrementScoreAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>

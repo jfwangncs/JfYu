@@ -106,8 +106,9 @@ namespace JfYu.Redis.Implementation
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
 #endif
-            Log(nameof(SetMembersAsync), key);
-            return [.. await _database.SetMembersAsync(key, flag).ConfigureAwait(false)];
+            List<RedisValue> result = [.. await _database.SetMembersAsync(key, flag).ConfigureAwait(false)];
+            Log(nameof(SetMembersAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -129,9 +130,10 @@ namespace JfYu.Redis.Implementation
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-#endif
-            Log(nameof(SetRandomMemberAsync), key);
-            return await _database.SetRandomMemberAsync(key, flag).ConfigureAwait(false);
+#endif            
+            var result = await _database.SetRandomMemberAsync(key, flag).ConfigureAwait(false);
+            Log(nameof(SetRandomMemberAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -142,8 +144,9 @@ namespace JfYu.Redis.Implementation
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
 #endif
-            Log(nameof(SetRandomMembersAsync), key);
-            return [.. await _database.SetRandomMembersAsync(key, count, flag).ConfigureAwait(false)];
+            List<RedisValue> result = [.. await _database.SetRandomMembersAsync(key, count, flag).ConfigureAwait(false)];
+            Log(nameof(SetRandomMembersAsync), key, result);
+            return result;
         }
     }
 }

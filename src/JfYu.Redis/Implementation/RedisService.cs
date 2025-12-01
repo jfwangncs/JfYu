@@ -114,10 +114,11 @@ namespace JfYu.Redis.Implementation
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-#endif
-            Log(nameof(GetAsync), key);
+#endif           
             var valueBytes = await _database.StringGetAsync(key, flag).ConfigureAwait(false);
-            return !valueBytes.HasValue ? default : Serializer.Deserialize<T>(valueBytes!);
+            var result = !valueBytes.HasValue ? default : Serializer.Deserialize<T>(valueBytes!);
+            Log(nameof(GetAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -129,10 +130,9 @@ namespace JfYu.Redis.Implementation
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
 #endif
             var result = await GetAsync<T>(key, flag).ConfigureAwait(false);
-            Log(nameof(GetAsync), key);
             if (!EqualityComparer<T?>.Default.Equals(result, default))
                 await _database.KeyExpireAsync(key, expiresIn).ConfigureAwait(false);
-
+            Log(nameof(GetAsync), key, result);
             return result;
         }
 
@@ -143,7 +143,7 @@ namespace JfYu.Redis.Implementation
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullExceptionExtension.ThrowIfNull(value);
 #else
-            ArgumentException.ThrowIfNullOrWhiteSpace(key); 
+            ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullException.ThrowIfNull(value);
 #endif
             Log(nameof(AddAsync), key);
@@ -185,9 +185,10 @@ namespace JfYu.Redis.Implementation
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-#endif
-            Log(nameof(IncrementAsync), key);
-            return await _database.StringIncrementAsync(key, value, flag).ConfigureAwait(false);
+#endif 
+            var result = await _database.StringIncrementAsync(key, value, flag).ConfigureAwait(false);
+            Log(nameof(IncrementAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -197,9 +198,10 @@ namespace JfYu.Redis.Implementation
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-#endif
-            Log(nameof(IncrementAsync), key);
-            return await _database.StringIncrementAsync(key, value, flag).ConfigureAwait(false);
+#endif 
+            var result = await _database.StringIncrementAsync(key, value, flag).ConfigureAwait(false);
+            Log(nameof(IncrementAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -209,9 +211,10 @@ namespace JfYu.Redis.Implementation
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-#endif
-            Log(nameof(DecrementAsync), key);
-            return await _database.StringDecrementAsync(key, value, flag).ConfigureAwait(false);
+#endif 
+            var result = await _database.StringDecrementAsync(key, value, flag).ConfigureAwait(false);
+            Log(nameof(DecrementAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -221,9 +224,10 @@ namespace JfYu.Redis.Implementation
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-#endif
-            Log(nameof(DecrementAsync), key);
-            return await _database.StringDecrementAsync(key, value, flag).ConfigureAwait(false);
+#endif 
+            var result = await _database.StringDecrementAsync(key, value, flag).ConfigureAwait(false);
+            Log(nameof(DecrementAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -256,8 +260,6 @@ namespace JfYu.Redis.Implementation
             if (keys == null || keys.Count == 0)
                 throw new ArgumentException("The parameter 'keys' cannot be null or empty.", nameof(keys));
 
-            Log(nameof(GetBatchAsync), string.Join(", ", keys));
-
             var redisKeys = keys.Select(k => (RedisKey)k).ToArray();
             var values = await _database.StringGetAsync(redisKeys, flag).ConfigureAwait(false);
 
@@ -266,6 +268,8 @@ namespace JfYu.Redis.Implementation
             {
                 result[keys[i]] = values[i].HasValue ? Serializer.Deserialize<T>(values[i]!) : default;
             }
+
+            Log(nameof(GetBatchAsync), string.Join(", ", keys), result);
 
             return result;
         }
@@ -297,8 +301,9 @@ namespace JfYu.Redis.Implementation
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
 #endif
-            Log(nameof(GetTimeToLiveAsync), key);
-            return await _database.KeyTimeToLiveAsync(key, flag).ConfigureAwait(false);
+            var result = await _database.KeyTimeToLiveAsync(key, flag).ConfigureAwait(false);
+            Log(nameof(GetTimeToLiveAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -308,16 +313,18 @@ namespace JfYu.Redis.Implementation
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-#endif
-            Log(nameof(PersistAsync), key);
-            return await _database.KeyPersistAsync(key, flag).ConfigureAwait(false);
+#endif            
+            var result = await _database.KeyPersistAsync(key, flag).ConfigureAwait(false);
+            Log(nameof(PersistAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
         public async Task<TimeSpan> PingAsync()
         {
-            Log(nameof(PingAsync), "server");
-            return await _database.PingAsync().ConfigureAwait(false);
+            var result = await _database.PingAsync().ConfigureAwait(false);
+            Log(nameof(PingAsync), "server", result);
+            return result;
         }
     }
 }

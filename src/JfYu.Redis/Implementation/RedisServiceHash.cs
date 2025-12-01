@@ -37,10 +37,11 @@ namespace JfYu.Redis.Implementation
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentException.ThrowIfNullOrWhiteSpace(hashKey);
-#endif
-            Log(nameof(HashGetAsync), key);
+#endif           
             var redisValue = await _database.HashGetAsync(key, hashKey, flag).ConfigureAwait(false);
-            return redisValue.HasValue ? _serializer.Deserialize<T>(redisValue!) : default;
+            var result = redisValue.HasValue ? _serializer.Deserialize<T>(redisValue!) : default;
+            Log(nameof(HashGetAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
@@ -51,8 +52,9 @@ namespace JfYu.Redis.Implementation
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
 #endif
-            Log(nameof(HashGetAllAsync), key);
-            return await _database.HashGetAllAsync(key, flag).ConfigureAwait(false);
+            var result = await _database.HashGetAllAsync(key, flag).ConfigureAwait(false);
+            Log(nameof(HashGetAllAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>

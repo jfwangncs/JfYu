@@ -102,9 +102,10 @@ namespace JfYu.Redis.Implementation
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-#endif
-            Log(nameof(ListGetRangeAsync), key);
-            return [.. await _database.ListRangeAsync(key, start, stop, flag).ConfigureAwait(false)];
+#endif            
+            List<RedisValue> result = [.. await _database.ListRangeAsync(key, start, stop, flag).ConfigureAwait(false)];
+            Log(nameof(ListGetRangeAsync), key, result);
+            return result;
         }
     }
 }

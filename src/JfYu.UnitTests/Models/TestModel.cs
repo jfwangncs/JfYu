@@ -13,7 +13,7 @@ namespace JfYu.UnitTests.Models
 
         public DateTime DateTime { get; set; }
         public TestSubModel? Sub { get; set; }
-        public List<TestSubModel> Items { get; set; } = new List<TestSubModel>();
+        public List<TestSubModel> Items { get; set; } = [];
 
         public override bool Equals(object? obj)
         {
