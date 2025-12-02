@@ -103,8 +103,14 @@ namespace JfYu.Redis.Implementation
         {
             ArgumentNullExceptionExtension.ThrowIfNullOrEmpty(keys);
             Log(nameof(RemoveAllAsync), string.Join(", ", keys));
-            var redisKeys = keys.Select(q => (RedisKey)q);
-            return _database.KeyDeleteAsync([.. redisKeys], flag);
+
+            var redisKeys = new RedisKey[keys.Count];
+            for (int i = 0; i < keys.Count; i++)
+            {
+                redisKeys[i] = keys[i];
+            }
+
+            return _database.KeyDeleteAsync(redisKeys, flag);
         }
 
         /// <inheritdoc/>
@@ -192,7 +198,7 @@ namespace JfYu.Redis.Implementation
         }
 
         /// <inheritdoc/>
-        public async Task<double> IncrementAsync(string key, double value, CommandFlags flag = CommandFlags.None)
+        public async Task<double> IncrementAsync(string key, double value = 1.0, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
@@ -218,7 +224,7 @@ namespace JfYu.Redis.Implementation
         }
 
         /// <inheritdoc/>
-        public async Task<double> DecrementAsync(string key, double value, CommandFlags flag = CommandFlags.None)
+        public async Task<double> DecrementAsync(string key, double value = 1.0, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
@@ -260,10 +266,15 @@ namespace JfYu.Redis.Implementation
             if (keys == null || keys.Count == 0)
                 throw new ArgumentException("The parameter 'keys' cannot be null or empty.", nameof(keys));
 
-            var redisKeys = keys.Select(k => (RedisKey)k).ToArray();
+            var redisKeys = new RedisKey[keys.Count];
+            for (int i = 0; i < keys.Count; i++)
+            {
+                redisKeys[i] = keys[i];
+            }
+
             var values = await _database.StringGetAsync(redisKeys, flag).ConfigureAwait(false);
 
-            var result = new Dictionary<string, T?>();
+            var result = new Dictionary<string, T?>(keys.Count);
             for (int i = 0; i < keys.Count; i++)
             {
                 result[keys[i]] = values[i].HasValue ? Serializer.Deserialize<T>(values[i]!) : default;
@@ -282,15 +293,17 @@ namespace JfYu.Redis.Implementation
 
             Log(nameof(AddBatchAsync), string.Join(", ", keyValues.Keys));
 
-            var tasks = keyValues.Select(async kv =>
+            var tasks = new Task<bool>[keyValues.Count];
+            int index = 0;
+            foreach (var kv in keyValues)
             {
                 var serializedValue = _serializer.Serialize(kv.Value);
-                return await _database.StringSetAsync(kv.Key, serializedValue, expiresIn, When.Always, flag).ConfigureAwait(false);
-            });
+                tasks[index++] = _database.StringSetAsync(kv.Key, serializedValue, expiresIn, When.Always, flag);
+            }
 
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            return results.All(r => r);
+            return Array.TrueForAll(results, r => r);
         }
 
         /// <inheritdoc/>

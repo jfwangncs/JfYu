@@ -45,9 +45,14 @@ namespace JfYu.Redis.Implementation
 #endif
             values.ThrowIfNullOrEmpty();
             Log(nameof(SetAddAllAsync), key);
-            return await _database.SetAddAsync(key, [.. values
-                    .Select(item => Serializer.Serialize(item))
-                    .Select(x => (RedisValue)x)], flag).ConfigureAwait(false);
+            
+            var redisValues = new RedisValue[values.Count];
+            for (int i = 0; i < values.Count; i++)
+            {
+                redisValues[i] = Serializer.Serialize(values[i]);
+            }
+            
+            return await _database.SetAddAsync(key, redisValues, flag).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -71,16 +76,27 @@ namespace JfYu.Redis.Implementation
             values.ThrowIfNullOrEmpty();
 #if NETSTANDARD2_0
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
-            values.ForEach(value => ArgumentNullExceptionExtension.ThrowIfNull(value));
+            for (int i = 0; i < values.Count; i++)
+            {
+                ArgumentNullExceptionExtension.ThrowIfNull(values[i]);
+            }
 #else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            values.ForEach(value => ArgumentNullException.ThrowIfNull(value));
+            for (int i = 0; i < values.Count; i++)
+            {
+                ArgumentNullException.ThrowIfNull(values[i]);
+            }
 #endif            
 
             Log(nameof(SetRemoveAllAsync), key);
-            return await _database.SetRemoveAsync(key, [.. values
-                   .Select(item => Serializer.Serialize(item))
-                   .Select(x => (RedisValue)x)], flag).ConfigureAwait(false);
+            
+            var redisValues = new RedisValue[values.Count];
+            for (int i = 0; i < values.Count; i++)
+            {
+                redisValues[i] = Serializer.Serialize(values[i]);
+            }
+            
+            return await _database.SetRemoveAsync(key, redisValues, flag).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>

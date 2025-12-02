@@ -1,4 +1,4 @@
-﻿using JfYu.Data.Context;
+using JfYu.Data.Context;
 using JfYu.Data.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -35,7 +35,11 @@ namespace JfYu.Data.Service
         /// <inheritdoc/>
         public virtual async Task<int> AddAsync(List<T> list, CancellationToken cancellationToken = default)
         {
-            list.ForEach(entity => { entity.CreatedTime = entity.UpdatedTime = DateTime.UtcNow; });
+            var now = DateTime.UtcNow;
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i].CreatedTime = list[i].UpdatedTime = now;
+            }
             await Context.AddRangeAsync(list, cancellationToken).ConfigureAwait(false);
             return await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -52,10 +56,11 @@ namespace JfYu.Data.Service
         /// <inheritdoc/>
         public virtual async Task<int> UpdateAsync(List<T> list, CancellationToken cancellationToken = default)
         {
-            list.ForEach(entity =>
+            var now = DateTime.UtcNow;
+            for (int i = 0; i < list.Count; i++)
             {
-                entity.UpdatedTime = DateTime.UtcNow;
-            });
+                list[i].UpdatedTime = now;
+            }
             Context.UpdateRange(list);
             int saveChanges = await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return saveChanges;
@@ -67,10 +72,11 @@ namespace JfYu.Data.Service
             if (predicate == null || selector == null)
                 return 0;
             var data = await Context.Set<T>().Where(predicate).ToListAsync(cancellationToken).ConfigureAwait(false);
+            var now = DateTime.UtcNow;
             for (int i = 0; i < data.Count; i++)
             {
                 selector(i, data[i]);
-                data[i].UpdatedTime = DateTime.UtcNow;
+                data[i].UpdatedTime = now;
             }
 
             return await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -82,11 +88,12 @@ namespace JfYu.Data.Service
             if (predicate == null)
                 return 0;
             var list = await GetListAsync(predicate, cancellationToken).ConfigureAwait(false);
-            foreach (var entity in list)
+            var now = DateTime.UtcNow;
+            for (int i = 0; i < list.Count; i++)
             {
-                entity.UpdatedTime = DateTime.UtcNow;
-                entity.Status = (int)DataStatus.Disable;
-                Context.Update(entity);
+                list[i].UpdatedTime = now;
+                list[i].Status = (int)DataStatus.Disable;
+                Context.Update(list[i]);
             }
             return await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -98,9 +105,9 @@ namespace JfYu.Data.Service
                 return 0;
 
             var lists = await GetListAsync(predicate, cancellationToken).ConfigureAwait(false);
-            foreach (var entity in lists)
+            for (int i = 0; i < lists.Count; i++)
             {
-                Context.Remove(entity);
+                Context.Remove(lists[i]);
             }
             return await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
