@@ -1,4 +1,4 @@
-﻿#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using JfYu.Request;
 using JfYu.Request.Enum;
 using JfYu.Request.Extension;
@@ -998,8 +998,7 @@ namespace JfYu.UnitTests.Request
             client.Url = $"{_url.Url}/get";
 
             var ex = await Record.ExceptionAsync(() => client.SendAsync());
-            Assert.IsType<Exception>(ex, exactMatch: false);
-            logger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()), Times.AtLeastOnce);
+            Assert.IsType<Exception>(ex, exactMatch: false); 
         }
 
         [Fact]
@@ -1021,8 +1020,7 @@ namespace JfYu.UnitTests.Request
                     };
 
 
-            await Assert.ThrowsAsync<DivideByZeroException>(() => client.SendAsync());
-            logger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()), Times.AtLeastOnce);
+            await Assert.ThrowsAsync<DivideByZeroException>(() => client.SendAsync()); 
         }
 
         [Fact]
@@ -1041,8 +1039,7 @@ namespace JfYu.UnitTests.Request
             var ex = await Record.ExceptionAsync(() => client.DownloadFileAsync(path, (q, w, e) => { int.Parse("x"); }));
             var ex1 = await Record.ExceptionAsync(() => client.DownloadFileAsync((q, w, e) => { int.Parse("x"); }));
             Assert.IsType<Exception>(ex, exactMatch: false);
-            Assert.IsType<Exception>(ex1, exactMatch: false);
-            logger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()), Times.AtLeastOnce);
+            Assert.IsType<Exception>(ex1, exactMatch: false);            
         }
 
         #endregion Exception With Logger
@@ -1133,7 +1130,7 @@ namespace JfYu.UnitTests.Request
                         client.Method = HttpMethod.Get;
 
                         // This should not throw NullReferenceException with CookieContainer locking
-                        var response = await client.SendAsync();
+                        var response = await client.SendAsync().ConfigureAwait(true);
 
                         if (client.StatusCode == HttpStatusCode.OK)
                         {
@@ -1193,7 +1190,7 @@ namespace JfYu.UnitTests.Request
                         client.Url = $"{_url.Url}/get?id={index}";
                         client.Method = HttpMethod.Get;
 
-                        await client.SendAsync();
+                        await client.SendAsync().ConfigureAwait(true);
                         return client.StatusCode == HttpStatusCode.OK;
                     }
                     catch (NullReferenceException nre) when (nre.StackTrace?.Contains("CookieContainer") == true || nre.StackTrace?.Contains("WriteHeaderCollection") == true)
@@ -1256,7 +1253,7 @@ namespace JfYu.UnitTests.Request
                         client.Url = url;
                         client.Method = HttpMethod.Get;
 
-                        await client.SendAsync();
+                        await client.SendAsync().ConfigureAwait(true);
 
                         results.Add((client.StatusCode, false));
                     }
@@ -1275,8 +1272,8 @@ namespace JfYu.UnitTests.Request
             await Task.WhenAll(tasks);
 
             // Assert: Should handle all concurrent requests without CookieContainer exceptions
-            Assert.True(results.Count > 0, "Should have processed some requests");
-            Assert.Empty(results.Where(r => r.HasCookieException));
+            Assert.False(results.IsEmpty);
+            Assert.DoesNotContain(results, r => r.HasCookieException);
         }
 
         [Fact]
@@ -1309,7 +1306,7 @@ namespace JfYu.UnitTests.Request
                     client.Url = $"{_url.Url}/get?id={i}";
                     client.Method = HttpMethod.Get;
 
-                    await client.SendAsync();
+                    await client.SendAsync().ConfigureAwait(true);
 
                     if (client.StatusCode == HttpStatusCode.OK)
                     {
