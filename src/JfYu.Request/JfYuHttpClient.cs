@@ -46,6 +46,11 @@ namespace JfYu.Request
         private readonly CookieContainer? _cookieContainer = cookieContainer;
 
         /// <summary>
+        /// Semaphore to protect concurrent access to CookieContainer
+        /// </summary>
+        private readonly SemaphoreSlim _cookieLock = new(1, 1);
+
+        /// <summary>
         /// The configuration containing the HttpClient name to use
         /// </summary>
         private readonly JfYuHttpClientConfiguration _configuration = configuration;
@@ -79,7 +84,17 @@ namespace JfYu.Request
                 if (!string.IsNullOrEmpty(Authorization))
                     _request.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthorizationScheme, Authorization.Replace($"{AuthorizationScheme} ", ""));
                 if (_cookieContainer is not null)
-                    RequestCookies?.GetCookies(new Uri(Url)).ToList().ForEach(x => _cookieContainer.SetCookies(new Uri(Url), $"{x.Name}={x.Value}"));
+                {
+                    _cookieLock.Wait();
+                    try
+                    {
+                        RequestCookies?.GetCookies(new Uri(Url)).ToList().ForEach(x => _cookieContainer.SetCookies(new Uri(Url), $"{x.Name}={x.Value}"));
+                    }
+                    finally
+                    {
+                        _cookieLock.Release();
+                    }
+                }
                 foreach (var item in RequestCustomHeaders)
                 {
                     _request.DefaultRequestHeaders.TryAddWithoutValidation(item.Key, item.Value);
@@ -108,7 +123,17 @@ namespace JfYu.Request
                 ResponseHeader = response.Headers.ToDictionary(header => header.Key, header => header.Value.ToList());
                 StatusCode = response.StatusCode;
                 if (_cookieContainer is not null)
-                    _cookieContainer.GetCookies(new Uri(Url)).ToList().ForEach(ResponseCookies.Add);
+                {
+                    await _cookieLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        _cookieContainer.GetCookies(new Uri(Url)).ToList().ForEach(ResponseCookies.Add);
+                    }
+                    finally
+                    {
+                        _cookieLock.Release();
+                    }
+                }
                 string content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 html = RequestEncoding.GetString(RequestEncoding.GetBytes(content));
                 if (_logFilter.LoggingFields != JfYuLoggingFields.None)

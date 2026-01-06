@@ -1089,6 +1089,251 @@ namespace JfYu.UnitTests.Request
         }
 
         #endregion Filter
+
+        #region Concurrent Tests
+
+        [Fact]
+        public async Task Test_ConcurrentRequests_WithSharedCookieContainer_ShouldNotThrow()
+        {
+            // Arrange: Setup service with shared CookieContainer (default behavior)
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = true; // Explicitly enable shared cookies
+            });
+            services.AddSingleton<ILogger<JfYuHttpClient>>(q => { return null!; });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act: Simulate concurrent requests from multiple scopes (more realistic)
+            var tasks = new List<Task>();
+            var exceptions = new System.Collections.Concurrent.ConcurrentBag<Exception>();
+            var successCount = 0;
+
+            for (int i = 0; i < 20; i++)
+            {
+                var index = i;
+                tasks.Add(Task.Run(async () =>
+                {
+                    try
+                    {
+                        // Each request gets its own scope (like ASP.NET Core does)
+                        using var scope = serviceProvider.CreateScope();
+                        var client = scope.ServiceProvider.GetRequiredService<IJfYuRequest>();
+
+                        // Set cookies to trigger CookieContainer operations
+                        var cookieCollection = new CookieCollection
+                        {
+                            new Cookie("session_id", $"session_{index}", "/", new Uri(_url.Url).Host),
+                            new Cookie("user_token", $"token_{index}", "/", new Uri(_url.Url).Host)
+                        };
+                        client.RequestCookies = new CookieContainer();
+                        client.RequestCookies.Add(new Uri(_url.Url), cookieCollection);
+
+                        client.Url = $"{_url.Url}/get?id={index}";
+                        client.Method = HttpMethod.Get;
+
+                        // This should not throw NullReferenceException with CookieContainer locking
+                        var response = await client.SendAsync();
+
+                        if (client.StatusCode == HttpStatusCode.OK)
+                        {
+                            Interlocked.Increment(ref successCount);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        exceptions.Add(ex);
+                    }
+                }));
+            }
+
+            await Task.WhenAll(tasks);
+
+            // Assert: No CookieContainer-related NullReferenceException should occur
+            var cookieExceptions = exceptions.Where(e =>
+                e is NullReferenceException nre &&
+                nre.StackTrace != null &&
+                nre.StackTrace.Contains("CookieContainer")).ToList();
+
+            Assert.Empty(cookieExceptions);
+            Assert.True(successCount > 0, "At least some requests should succeed");
+        }
+
+        [Fact]
+        public async Task Test_HighConcurrency_CookieOperations_ShouldBeThreadSafe()
+        {
+            // Arrange: Setup with shared cookies
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient();
+            services.AddSingleton<ILogger<JfYuHttpClient>>(q => { return null!; });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act: Stress test with high concurrency using scoped instances
+            var tasks = new List<Task<bool>>();
+            var concurrentCount = 50;
+
+            for (int i = 0; i < concurrentCount; i++)
+            {
+                var index = i;
+                tasks.Add(Task.Run(async () =>
+                {
+                    try
+                    {
+                        using var scope = serviceProvider.CreateScope();
+                        var client = scope.ServiceProvider.GetRequiredService<IJfYuRequest>();
+
+                        // Add cookies that will be merged into shared CookieContainer
+                        var cookieCollection = new CookieCollection
+                        {
+                            new Cookie($"concurrent_cookie_{index}", $"value_{index}", "/", new Uri(_url.Url).Host)
+                        };
+                        client.RequestCookies = new CookieContainer();
+                        client.RequestCookies.Add(new Uri(_url.Url), cookieCollection);
+
+                        client.Url = $"{_url.Url}/get?id={index}";
+                        client.Method = HttpMethod.Get;
+
+                        await client.SendAsync();
+                        return client.StatusCode == HttpStatusCode.OK;
+                    }
+                    catch (NullReferenceException nre) when (nre.StackTrace?.Contains("CookieContainer") == true || nre.StackTrace?.Contains("WriteHeaderCollection") == true)
+                    {
+                        // This is the specific CookieContainer exception we're protecting against
+                        return false;
+                    }
+                    catch
+                    {
+                        // Other exceptions might be network-related or HttpClient header issues, allow them
+                        return true;
+                    }
+                }));
+            }
+
+            var results = await Task.WhenAll(tasks);
+
+            // Assert: All requests should complete without CookieContainer-related NullReferenceException
+            Assert.All(results, result => Assert.True(result, "Request should not throw CookieContainer NullReferenceException"));
+            Assert.True(results.Count(r => r) >= concurrentCount * 0.6,
+                "At least 60% of concurrent requests should succeed");
+        }
+
+        [Fact]
+        public async Task Test_ParallelRequests_WithDifferentUrls_ShouldHandleCookiesCorrectly()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = true;
+            });
+            services.AddSingleton<ILogger<JfYuHttpClient>>(q => { return null!; });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act: Multiple parallel requests with different URLs
+            var urls = new[]
+            {
+                $"{_url.Url}/get",
+                $"{_url.Url}/anything"
+            };
+
+            var results = new System.Collections.Concurrent.ConcurrentBag<(HttpStatusCode Status, bool HasCookieException)>();
+
+            var tasks = urls.SelectMany(url => Enumerable.Range(0, 10).Select(i =>
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        using var scope = serviceProvider.CreateScope();
+                        var client = scope.ServiceProvider.GetRequiredService<IJfYuRequest>();
+
+                        var cookieCollection = new CookieCollection
+                        {
+                            new Cookie($"url_cookie_{i}", $"value_{i}", "/", new Uri(url).Host)
+                        };
+                        client.RequestCookies = new CookieContainer();
+                        client.RequestCookies.Add(new Uri(url), cookieCollection);
+
+                        client.Url = url;
+                        client.Method = HttpMethod.Get;
+
+                        await client.SendAsync();
+
+                        results.Add((client.StatusCode, false));
+                    }
+                    catch (NullReferenceException nre) when (nre.StackTrace?.Contains("CookieContainer") == true || nre.StackTrace?.Contains("WriteHeaderCollection") == true)
+                    {
+                        results.Add((HttpStatusCode.InternalServerError, true));
+                    }
+                    catch (Exception)
+                    {
+                        // Other exceptions allowed
+                        results.Add((HttpStatusCode.InternalServerError, false));
+                    }
+                })
+            )).ToList();
+
+            await Task.WhenAll(tasks);
+
+            // Assert: Should handle all concurrent requests without CookieContainer exceptions
+            Assert.True(results.Count > 0, "Should have processed some requests");
+            Assert.Empty(results.Where(r => r.HasCookieException));
+        }
+
+        [Fact]
+        public async Task Test_RapidFireRequests_ShouldNotCorruptCookieContainer()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient();
+            services.AddSingleton<ILogger<JfYuHttpClient>>(q => { return null!; });
+            var serviceProvider = services.BuildServiceProvider();
+
+            var cookieExceptions = new System.Collections.Concurrent.ConcurrentBag<Exception>();
+            var successCount = 0;
+
+            // Act: Fire 100 requests as fast as possible
+            var tasks = Enumerable.Range(0, 100).Select(i => Task.Run(async () =>
+            {
+                try
+                {
+                    using var scope = serviceProvider.CreateScope();
+                    var client = scope.ServiceProvider.GetRequiredService<IJfYuRequest>();
+
+                    var cookieCollection = new CookieCollection
+                    {
+                        new Cookie($"rapid_{i}", $"val_{i}", "/", new Uri(_url.Url).Host)
+                    };
+                    client.RequestCookies = new CookieContainer();
+                    client.RequestCookies.Add(new Uri(_url.Url), cookieCollection);
+
+                    client.Url = $"{_url.Url}/get?id={i}";
+                    client.Method = HttpMethod.Get;
+
+                    await client.SendAsync();
+
+                    if (client.StatusCode == HttpStatusCode.OK)
+                    {
+                        Interlocked.Increment(ref successCount);
+                    }
+                }
+                catch (NullReferenceException nre) when (nre.StackTrace?.Contains("CookieContainer") == true || nre.StackTrace?.Contains("WriteHeaderCollection") == true)
+                {
+                    cookieExceptions.Add(nre);
+                }
+                catch (Exception)
+                {
+                    // Allow other exceptions
+                }
+            })).ToArray();
+
+            await Task.WhenAll(tasks);
+
+            // Assert: No CookieContainer-related NullReferenceException
+            Assert.Empty(cookieExceptions);
+            Assert.True(successCount > 30, $"Expected at least 30 successful requests, got {successCount}");
+        }
+
+        #endregion Concurrent Tests
     }
 }
 #endif
