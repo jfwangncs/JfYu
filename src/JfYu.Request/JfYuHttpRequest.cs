@@ -1,4 +1,4 @@
-﻿using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using JfYu.Request.Enum;
 using JfYu.Request.Logs;
 using Microsoft.Extensions.Logging;
@@ -58,35 +58,27 @@ namespace JfYu.Request
             _request = (HttpWebRequest)WebRequest.Create(Url);
             _request.Method = Method.ToString().ToUpper();
 
-            try
+            SetupHeaders(_request);
+
+            CustomInit?.Invoke(_request);
+
+            if (!Method.Equals(HttpMethod.Get))
             {
-                SetupHeaders(_request);
-
-                CustomInit?.Invoke(_request);
-
-                if (!Method.Equals(HttpMethod.Get))
+                if (string.Compare(ContentType, RequestContentType.FormData, StringComparison.Ordinal) == 0)
+                    WriteFormData(_request);
+                else
                 {
-                    if (string.Compare(ContentType, RequestContentType.FormData, StringComparison.Ordinal) == 0)
-                        WriteFormData(_request);
-                    else
+                    _request.ContentType = ContentType;
+                    if (!string.IsNullOrEmpty(RequestData))
                     {
-                        _request.ContentType = ContentType;
-                        if (!string.IsNullOrEmpty(RequestData))
-                        {
-                            var data = RequestEncoding.GetBytes(RequestData);
-                            _request.ContentLength = data.Length;
-                            using var requestStream = _request.GetRequestStream();
-                            requestStream.Write(data, 0, data.Length);
-                        }
+                        var data = RequestEncoding.GetBytes(RequestData);
+                        _request.ContentLength = data.Length;
+                        using var requestStream = _request.GetRequestStream();
+                        requestStream.Write(data, 0, data.Length);
                     }
                 }
-                SetupCertificate(_request);
             }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "An error occurred while initialize.");
-                throw;
-            }
+            SetupCertificate(_request);
         }
 
         /// <summary>
@@ -251,14 +243,8 @@ namespace JfYu.Request
                 }
                 else
                 {
-                    _logger?.LogError(e, "An error occurred while sending request.");
                     throw;
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "An error occurred while sending request.");
-                throw;
             }
             finally
             {
@@ -294,11 +280,6 @@ namespace JfYu.Request
                 await DownloadFileInternalAsync(fileStream, responseStream, filesize, progress, cancellationToken).ConfigureAwait(false);
                 return File.Exists(path);
             }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "An error occurred while downloading the file.");
-                throw;
-            }
             finally
             {
                 ServicePointManager.ServerCertificateValidationCallback = _oldCallback;
@@ -325,11 +306,6 @@ namespace JfYu.Request
                 await DownloadFileInternalAsync(memoryStream, responseStream, filesize, progress, cancellationToken).ConfigureAwait(false);
                 memoryStream.Position = 0;
                 return memoryStream;
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "An error occurred while downloading the file.");
-                throw;
             }
             finally
             {

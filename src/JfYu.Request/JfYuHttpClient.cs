@@ -1,4 +1,4 @@
-﻿#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using JfYu.Request.Enum;
 using JfYu.Request.Logs;
 using Microsoft.Extensions.Logging;
@@ -46,80 +46,89 @@ namespace JfYu.Request
         private readonly CookieContainer? _cookieContainer = cookieContainer;
 
         /// <summary>
+        /// Semaphore to protect concurrent access to CookieContainer
+        /// </summary>
+        private readonly SemaphoreSlim _cookieLock = new(1, 1);
+
+        /// <summary>
         /// The configuration containing the HttpClient name to use
         /// </summary>
         private readonly JfYuHttpClientConfiguration _configuration = configuration;
 
         /// <inheritdoc/>
-        private void Initialize()
+        private async Task InitializeAsync(CancellationToken cancellationToken = default)
         {
-            try
-            {
-                _request = factory.CreateClient(_configuration.HttpClientName);
-                _request.Timeout = TimeSpan.FromSeconds(Timeout);
-                if (!string.IsNullOrEmpty(RequestHeader.UserAgent))
-                    _request.DefaultRequestHeaders.UserAgent.ParseAdd(RequestHeader.UserAgent);
-                if (!string.IsNullOrEmpty(RequestHeader.AcceptEncoding))
-                    _request.DefaultRequestHeaders.AcceptEncoding.ParseAdd(RequestHeader.AcceptEncoding);
-                if (!string.IsNullOrEmpty(RequestHeader.AcceptLanguage))
-                    _request.DefaultRequestHeaders.AcceptLanguage.ParseAdd(RequestHeader.AcceptLanguage);
-                if (!string.IsNullOrEmpty(RequestHeader.CacheControl))
-                    _request.DefaultRequestHeaders.Add("Cache-Control", RequestHeader.CacheControl);
-                if (!string.IsNullOrEmpty(RequestHeader.Pragma))
-                    _request.DefaultRequestHeaders.Pragma.ParseAdd(RequestHeader.Pragma);
-                if ("keep-alive".Equals(RequestHeader.Connection))
-                    _request.DefaultRequestHeaders.ConnectionClose = false;
-                if (!string.IsNullOrEmpty(RequestHeader.Host))
-                    _request.DefaultRequestHeaders.Host = RequestHeader.Host.Replace("https://", "").Replace("http://", "");
-                if (!string.IsNullOrEmpty(RequestHeader.Referer))
-                    _request.DefaultRequestHeaders.Referrer = new Uri(RequestHeader.Referer);
-                if (!string.IsNullOrEmpty(RequestHeader.Accept))
-                    _request.DefaultRequestHeaders.Accept.ParseAdd(RequestHeader.Accept);
+            _request = factory.CreateClient(_configuration.HttpClientName);
+            _request.Timeout = TimeSpan.FromSeconds(Timeout);
+            if (!string.IsNullOrEmpty(RequestHeader.UserAgent))
+                _request.DefaultRequestHeaders.UserAgent.ParseAdd(RequestHeader.UserAgent);
+            if (!string.IsNullOrEmpty(RequestHeader.AcceptEncoding))
+                _request.DefaultRequestHeaders.AcceptEncoding.ParseAdd(RequestHeader.AcceptEncoding);
+            if (!string.IsNullOrEmpty(RequestHeader.AcceptLanguage))
+                _request.DefaultRequestHeaders.AcceptLanguage.ParseAdd(RequestHeader.AcceptLanguage);
+            if (!string.IsNullOrEmpty(RequestHeader.CacheControl))
+                _request.DefaultRequestHeaders.Add("Cache-Control", RequestHeader.CacheControl);
+            if (!string.IsNullOrEmpty(RequestHeader.Pragma))
+                _request.DefaultRequestHeaders.Pragma.ParseAdd(RequestHeader.Pragma);
+            if ("keep-alive".Equals(RequestHeader.Connection))
+                _request.DefaultRequestHeaders.ConnectionClose = false;
+            if (!string.IsNullOrEmpty(RequestHeader.Host))
+                _request.DefaultRequestHeaders.Host = RequestHeader.Host.Replace("https://", "").Replace("http://", "");
+            if (!string.IsNullOrEmpty(RequestHeader.Referer))
+                _request.DefaultRequestHeaders.Referrer = new Uri(RequestHeader.Referer);
+            if (!string.IsNullOrEmpty(RequestHeader.Accept))
+                _request.DefaultRequestHeaders.Accept.ParseAdd(RequestHeader.Accept);
 
-                if (!string.IsNullOrEmpty(Authorization))
-                    _request.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthorizationScheme, Authorization.Replace($"{AuthorizationScheme} ", ""));
-                if (_cookieContainer is not null)
-                    RequestCookies?.GetCookies(new Uri(Url)).ToList().ForEach(x => _cookieContainer.SetCookies(new Uri(Url), $"{x.Name}={x.Value}"));
-                foreach (var item in RequestCustomHeaders)
+            if (!string.IsNullOrEmpty(Authorization))
+                _request.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthorizationScheme, Authorization.Replace($"{AuthorizationScheme} ", ""));
+            if (_cookieContainer is not null)
+            {
+                await _cookieLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+                try
                 {
-                    _request.DefaultRequestHeaders.TryAddWithoutValidation(item.Key, item.Value);
+                    RequestCookies?.GetCookies(new Uri(Url)).ToList().ForEach(x => _cookieContainer.SetCookies(new Uri(Url), $"{x.Name}={x.Value}"));
                 }
-
-                CustomInit?.Invoke(_request);
+                finally
+                {
+                    _cookieLock.Release();
+                }
             }
-            catch (Exception ex)
+            foreach (var item in RequestCustomHeaders)
             {
-                _logger?.LogError(ex, "An error occurred while initialize.");
-                throw;
+                _request.DefaultRequestHeaders.TryAddWithoutValidation(item.Key, item.Value);
             }
+
+            CustomInit?.Invoke(_request);
         }
 
         /// <inheritdoc/>        
         public override async Task<string> SendAsync(CancellationToken cancellationToken = default)
         {
-            Initialize();
+            await InitializeAsync(cancellationToken).ConfigureAwait(false);
             var requestId = Guid.NewGuid().ToString();
-            try
+            string html = string.Empty;
+            if (_logFilter.LoggingFields != JfYuLoggingFields.None)
+                _logger?.LogRequestWithFilter(_logFilter.LoggingFields, requestId, Url, Method.ToString(), JsonConvert.SerializeObject(_request!.DefaultRequestHeaders.ToDictionary(header => header.Key, header => header.Value.ToList())), _logFilter.RequestFilter.Invoke(RequestData));
+            var response = await SendHttpRequestAsync(cancellationToken).ConfigureAwait(false);
+            ResponseHeader = response.Headers.ToDictionary(header => header.Key, header => header.Value.ToList());
+            StatusCode = response.StatusCode;
+            if (_cookieContainer is not null)
             {
-                string html = string.Empty;
-                if (_logFilter.LoggingFields != JfYuLoggingFields.None)
-                    _logger?.LogRequestWithFilter(_logFilter.LoggingFields, requestId, Url, Method.ToString(), JsonConvert.SerializeObject(_request!.DefaultRequestHeaders.ToDictionary(header => header.Key, header => header.Value.ToList())), _logFilter.RequestFilter.Invoke(RequestData));
-                var response = await SendHttpRequestAsync(cancellationToken).ConfigureAwait(false);
-                ResponseHeader = response.Headers.ToDictionary(header => header.Key, header => header.Value.ToList());
-                StatusCode = response.StatusCode;
-                if (_cookieContainer is not null)
+                await _cookieLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+                try
+                {
                     _cookieContainer.GetCookies(new Uri(Url)).ToList().ForEach(ResponseCookies.Add);
-                string content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-                html = RequestEncoding.GetString(RequestEncoding.GetBytes(content));
-                if (_logFilter.LoggingFields != JfYuLoggingFields.None)
-                    _logger?.LogResponseWithFilter(_logFilter.LoggingFields, requestId, StatusCode.ToString(), _logFilter.ResponseFilter.Invoke(html));
-                return html;
+                }
+                finally
+                {
+                    _cookieLock.Release();
+                }
             }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "An error occurred while sending request.");
-                throw;
-            }
+            string content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            html = RequestEncoding.GetString(RequestEncoding.GetBytes(content));
+            if (_logFilter.LoggingFields != JfYuLoggingFields.None)
+                _logger?.LogResponseWithFilter(_logFilter.LoggingFields, requestId, StatusCode.ToString(), _logFilter.ResponseFilter.Invoke(html));
+            return html;
         }
 
         /// <inheritdoc/>
@@ -127,51 +136,35 @@ namespace JfYu.Request
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException(nameof(path));
-            Initialize();
+            await InitializeAsync(cancellationToken).ConfigureAwait(false);
 
-            try
-            {
-                var dir = Path.GetDirectoryName(path);
-                if (!string.IsNullOrEmpty(dir))
-                    Directory.CreateDirectory(dir);
-                using var response = await _request!.GetAsync(Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-                StatusCode = response.StatusCode;
-                if (!response.IsSuccessStatusCode)
-                    return false;
-                var filesize = (decimal?)response.Content.Headers.ContentLength ?? 0M;
-                using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-                using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, DefaultBufferSize, FileOptions.Asynchronous);
-                await DownloadFileInternalAsync(fileStream, responseStream, filesize, progress, cancellationToken).ConfigureAwait(false);
-                return File.Exists(path);
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "An error occurred while downloading the file.");
-                throw;
-            }
+            var dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
+            using var response = await _request!.GetAsync(Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            StatusCode = response.StatusCode;
+            if (!response.IsSuccessStatusCode)
+                return false;
+            var filesize = (decimal?)response.Content.Headers.ContentLength ?? 0M;
+            using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, DefaultBufferSize, FileOptions.Asynchronous);
+            await DownloadFileInternalAsync(fileStream, responseStream, filesize, progress, cancellationToken).ConfigureAwait(false);
+            return File.Exists(path);
         }
 
         /// <inheritdoc/>
         public override async Task<MemoryStream?> DownloadFileAsync(Action<decimal, decimal, decimal>? progress = null, CancellationToken cancellationToken = default)
         {
-            Initialize();
-            try
-            {
-                using var response = await _request!.GetAsync(Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-                if (!response.IsSuccessStatusCode)
-                    return default;
-                var filesize = (decimal?)response.Content.Headers.ContentLength ?? 0M;
-                using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-                var memoryStream = new MemoryStream();
-                await DownloadFileInternalAsync(memoryStream, responseStream, filesize, progress, cancellationToken).ConfigureAwait(false);
-                memoryStream.Position = 0;
-                return memoryStream;
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "An error occurred while downloading the file.");
-                throw;
-            }
+            await InitializeAsync(cancellationToken).ConfigureAwait(false);
+            using var response = await _request!.GetAsync(Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+                return default;
+            var filesize = (decimal?)response.Content.Headers.ContentLength ?? 0M;
+            using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            var memoryStream = new MemoryStream();
+            await DownloadFileInternalAsync(memoryStream, responseStream, filesize, progress, cancellationToken).ConfigureAwait(false);
+            memoryStream.Position = 0;
+            return memoryStream;
         }
 
         /// <summary>
