@@ -56,7 +56,7 @@ namespace JfYu.Request
         private readonly JfYuHttpClientConfiguration _configuration = configuration;
 
         /// <inheritdoc/>
-        private void Initialize()
+        private async Task InitializeAsync(CancellationToken cancellationToken = default)
         {
             _request = factory.CreateClient(_configuration.HttpClientName);
             _request.Timeout = TimeSpan.FromSeconds(Timeout);
@@ -83,7 +83,7 @@ namespace JfYu.Request
                 _request.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthorizationScheme, Authorization.Replace($"{AuthorizationScheme} ", ""));
             if (_cookieContainer is not null)
             {
-                _cookieLock.Wait();
+                await _cookieLock.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
                     RequestCookies?.GetCookies(new Uri(Url)).ToList().ForEach(x => _cookieContainer.SetCookies(new Uri(Url), $"{x.Name}={x.Value}"));
@@ -104,7 +104,7 @@ namespace JfYu.Request
         /// <inheritdoc/>        
         public override async Task<string> SendAsync(CancellationToken cancellationToken = default)
         {
-            Initialize();
+            await InitializeAsync(cancellationToken).ConfigureAwait(false);
             var requestId = Guid.NewGuid().ToString();
             string html = string.Empty;
             if (_logFilter.LoggingFields != JfYuLoggingFields.None)
@@ -136,7 +136,7 @@ namespace JfYu.Request
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException(nameof(path));
-            Initialize();
+            await InitializeAsync(cancellationToken).ConfigureAwait(false);
 
             var dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir))
@@ -155,7 +155,7 @@ namespace JfYu.Request
         /// <inheritdoc/>
         public override async Task<MemoryStream?> DownloadFileAsync(Action<decimal, decimal, decimal>? progress = null, CancellationToken cancellationToken = default)
         {
-            Initialize();
+            await InitializeAsync(cancellationToken).ConfigureAwait(false);
             using var response = await _request!.GetAsync(Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
                 return default;
