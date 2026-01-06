@@ -80,13 +80,21 @@ namespace JfYu.Request
                 _request.DefaultRequestHeaders.Accept.ParseAdd(RequestHeader.Accept);
 
             if (!string.IsNullOrEmpty(Authorization))
-                _request.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthorizationScheme, Authorization.Replace($"{AuthorizationScheme} ", ""));
+            {
+                var authValue = Authorization.Replace($"{AuthorizationScheme} ", "");
+                if (!string.IsNullOrWhiteSpace(authValue))
+                    _request.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthorizationScheme, authValue);
+            }
             if (_cookieContainer is not null)
             {
                 await _cookieLock.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    RequestCookies?.GetCookies(new Uri(Url)).ToList().ForEach(x => _cookieContainer.SetCookies(new Uri(Url), $"{x.Name}={x.Value}"));
+                    RequestCookies?.GetCookies(new Uri(Url)).ToList().ForEach(x =>
+                    {
+                        if (!string.IsNullOrEmpty(x.Name) && x.Value != null)
+                            _cookieContainer.SetCookies(new Uri(Url), $"{x.Name}={x.Value}");
+                    });
                 }
                 finally
                 {
@@ -95,7 +103,8 @@ namespace JfYu.Request
             }
             foreach (var item in RequestCustomHeaders)
             {
-                _request.DefaultRequestHeaders.TryAddWithoutValidation(item.Key, item.Value);
+                if (!string.IsNullOrEmpty(item.Key) && item.Value != null)
+                    _request.DefaultRequestHeaders.TryAddWithoutValidation(item.Key, item.Value);
             }
 
             CustomInit?.Invoke(_request);

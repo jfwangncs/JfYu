@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks> 
-		<Version>8.3.2</Version>
+		<Version>8.3.3</Version>
 		<Description>HTTP request abstraction with `HttpClient`, rich headers, logging filters, cookies, proxy, SSL, file download, and multipart upload. Supports multiple named HttpClients for multi-tenant or multi-configuration scenarios</Description>
 	</PropertyGroup>
 	
