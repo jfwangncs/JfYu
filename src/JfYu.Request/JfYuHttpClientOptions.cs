@@ -63,9 +63,14 @@ namespace JfYu.Request
 
         /// <summary>
         /// Gets or sets whether to use a shared singleton CookieContainer across all requests.
-        /// Default is true. Set to false if you want isolated cookie management per request.
+        /// Default is false for thread safety. Set to true only if you need cookie sharing across requests
+        /// and ensure proper synchronization in multi-threaded scenarios.
         /// </summary>
-        public bool UseSharedCookieContainer { get; set; } = true;
+        /// <remarks>
+        /// WARNING: When set to true, the shared CookieContainer is NOT thread-safe.
+        /// Concurrent requests may lead to race conditions. Use with caution in multi-threaded environments.
+        /// </remarks>
+        public bool UseSharedCookieContainer { get; set; } = false;
     }
 }
 #endif
