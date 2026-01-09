@@ -54,12 +54,12 @@ namespace JfYu.RabbitMQ
         }
 
         /// <inheritdoc/>
-        public async Task SendAsync<T>(string exchangeName, T message, string routingKey = "", IDictionary<string, object?>? headers = null, CancellationToken cancellationToken = default) => await SendInternalAsync(exchangeName, routingKey, headers, cancellationToken, message).ConfigureAwait(false);
+        public async Task SendAsync<T>(string exchangeName, T message, string routingKey = "", IDictionary<string, object?>? headers = null, CancellationToken cancellationToken = default) => await SendInternalAsync(exchangeName, routingKey, headers, [message], cancellationToken).ConfigureAwait(false);
 
         /// <inheritdoc/>
-        public async Task SendBatchAsync<T>(string exchangeName, IList<T> messages, string routingKey = "", IDictionary<string, object?>? headers = null, CancellationToken cancellationToken = default) => await SendInternalAsync(exchangeName, routingKey, headers, cancellationToken, messages.ToArray()).ConfigureAwait(false);
+        public async Task SendBatchAsync<T>(string exchangeName, IList<T> messages, string routingKey = "", IDictionary<string, object?>? headers = null, CancellationToken cancellationToken = default) => await SendInternalAsync(exchangeName, routingKey, headers, messages, cancellationToken).ConfigureAwait(false);
 
-        private async Task SendInternalAsync<T>(string exchangeName, string routingKey = "", IDictionary<string, object?>? headers = null, CancellationToken cancellationToken = default, params T[] messages)
+        private async Task SendInternalAsync<T>(string exchangeName, string routingKey, IDictionary<string, object?>? headers, IEnumerable<T> messages, CancellationToken cancellationToken = default)
         {
             using var limiter = new ThrottlingRateLimiter(_messageOption.MaxOutstandingConfirms);
             var channelOpts = new CreateChannelOptions(true, true, limiter);
@@ -75,10 +75,9 @@ namespace JfYu.RabbitMQ
             };
             var publishTasks = new List<ValueTask>();
 
-            for (int i = 0; i < messages.Length; i++)
+            foreach (var msg in messages)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var msg = messages[i];
                 byte[] payload;
                 if (msg is null)
                     payload = [];
