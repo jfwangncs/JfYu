@@ -208,47 +208,139 @@ namespace JfYu.UnitTests.RabbitMQ
         }
 
         [Fact]
-        public async Task ReceiveAsync_AutoAck_WithCancellationToken_Cancelled()
+        public async Task ReceiveAsync_WithCancellationToken_Cancelled()
         {
-            string exchangeName = $"{nameof(ReceiveAsync_AutoAck_WithCancellationToken_Cancelled)}";
-            string queueName = $"{nameof(ReceiveAsync_AutoAck_WithCancellationToken_Cancelled)}";
+            string exchangeName = $"{nameof(ReceiveAsync_WithCancellationToken_Cancelled)}";
+            string queueName = $"{nameof(ReceiveAsync_WithCancellationToken_Cancelled)}";
 
-            var tempChannel = await _rabbitMQService.Connection.CreateChannelAsync();
-            await tempChannel.QueueDeclareAsync(queueName, true, false, false, header);
-            await tempChannel.ExchangeDeclareAsync(exchangeName, ExchangeType.Direct, true);
-            await tempChannel.QueueBindAsync(queueName, exchangeName, "", null);
+            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", header);
 
             using var cts = new CancellationTokenSource();
-            var receivedMessages = new List<string>();
+            var processingCount = 0;
 
             var channel = await _rabbitMQService.ReceiveAsync<string>(queueName, async message =>
             {
-                receivedMessages.Add(message!);
+                Interlocked.Increment(ref processingCount);
+                await Task.Delay(10000).ConfigureAwait(true);
                 return await Task.FromResult(true).ConfigureAwait(true);
-            }, autoAck: true, cancellationToken: cts.Token);
+            }, prefetchCount: 1, autoAck: true, cancellationToken: cts.Token);
 
-            await _rabbitMQService.SendAsync(exchangeName, "Message 1");
+            // Send some messages
+            for (int i = 0; i < 10; i++)
+            {
+                await _rabbitMQService.SendAsync(exchangeName, $"Message {i}");
+            }
+
+#if NET8_0_OR_GREATER
+            await cts.CancelAsync().ConfigureAwait(true);
+#else
+            cts.Cancel();
+#endif
+            await Task.Delay(1000);
+            // Should process some messages before cancellation
+            Assert.True(processingCount > 0);
+            Assert.True(processingCount < 10);
+            Assert.True(channel.IsClosed);
+
+            var channel1 = await _rabbitMQService.Connection.CreateChannelAsync();
+            await channel1.QueueDeleteAsync(queueName);
+            await channel1.ExchangeDeleteAsync(exchangeName);
+            await channel1.CloseAsync();
+        }
+
+        [Fact]
+        public async Task ReceiveAsync_WithCancellationToken10_Cancelled()
+        {
+            string exchangeName = $"{nameof(ReceiveAsync_WithCancellationToken10_Cancelled)}";
+            string queueName = $"{nameof(ReceiveAsync_WithCancellationToken10_Cancelled)}";
+
+            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", header);
+
+            using var cts = new CancellationTokenSource();
+            var processingCount = 0;
+            // Send some messages
+            for (int i = 0; i < 10; i++)
+            {
+                await _rabbitMQService.SendAsync(exchangeName, $"Message {i}");
+            }
+            var channel = await _rabbitMQService.ReceiveAsync<string>(queueName, async message =>
+            {
+                Interlocked.Increment(ref processingCount);
+#if NET8_0_OR_GREATER
+                await cts.CancelAsync().ConfigureAwait(true);
+#else
+                cts.Cancel();
+#endif
+                return await Task.FromResult(true).ConfigureAwait(true);
+            }, 10, autoAck: true, cancellationToken: cts.Token);
+            await Task.Delay(400);
+            // Should process some messages before cancellation
+            Assert.True(processingCount > 0);
+            Assert.True(processingCount < 10);
+            Assert.True(channel.IsClosed);
+
+            var channel1 = await _rabbitMQService.Connection.CreateChannelAsync();
+            await channel1.QueueDeleteAsync(queueName);
+            await channel1.ExchangeDeleteAsync(exchangeName);
+            await channel1.CloseAsync();
+        }
+        [Fact]
+        public async Task ReceiveAsync_CancelledBeforeStart_Throws()
+        {
+            using var cts = new CancellationTokenSource();
+#if NET8_0_OR_GREATER
+            await cts.CancelAsync().ConfigureAwait(true);
+#else
+            cts.Cancel();
+#endif
+            await Assert.ThrowsAnyAsync<Exception>(async () =>
+            {
+                await _rabbitMQService.ReceiveAsync<string>("queue_not_used", async _ => await Task.FromResult(true).ConfigureAwait(true), prefetchCount: 1, autoAck: true, cancellationToken: cts.Token).ConfigureAwait(true);
+            });
+        }
+
+        [Fact]
+        public async Task ReceiveAsync_CancelledBeforeDelivery_DoesNotProcess()
+        {
+            string exchangeName = $"{nameof(ReceiveAsync_CancelledBeforeDelivery_DoesNotProcess)}";
+            string queueName = $"{nameof(ReceiveAsync_CancelledBeforeDelivery_DoesNotProcess)}";
+
+            await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", header);
+
+            using var cts = new CancellationTokenSource();
+            var processed = 0;
+
+            var channel = await _rabbitMQService.ReceiveAsync<string>(queueName, async message =>
+            {
+                Interlocked.Increment(ref processed);
+                return await Task.FromResult(true).ConfigureAwait(true);
+            }, prefetchCount: 1, autoAck: true, cancellationToken: cts.Token);
+
+            // Cancel immediately to trigger early return in consumer
+#if NET8_0_OR_GREATER
+            await cts.CancelAsync().ConfigureAwait(true);
+#else
+            cts.Cancel();
+#endif
+
+            // Send a message after cancellation
+            await _rabbitMQService.SendAsync(exchangeName, "after cancel");
             await Task.Delay(500);
 
-            // Cancel the consumer
-            cts.Cancel();
-            await Task.Delay(1000); // Wait longer for cancellation to take effect
+            // No processing should have happened
+            Assert.Equal(0, processed);
 
-            var initialCount = receivedMessages.Count;
+            // Message should still be in queue (not acked)
+            var q = await _rabbitMQService.QueueDeclareAsync(queueName, exchangeName, ExchangeType.Direct, "", header);
+            Assert.True(q.MessageCount >= 1);
 
-            // Send more messages after cancellation
-            await _rabbitMQService.SendAsync(exchangeName, "Message 2");
-            await Task.Delay(1000);
-
-            // After cancellation, no more messages should be received
-            Assert.Equal(initialCount, receivedMessages.Count);
-            Assert.Contains("Message 1", receivedMessages);
-
-            // Clean up using tempChannel since the consumer channel is disposed
-            await tempChannel.QueueDeleteAsync(queueName);
-            await tempChannel.ExchangeDeleteAsync(exchangeName);
-            await tempChannel.CloseAsync();
-            await tempChannel.DisposeAsync();
+            var cleanup = await _rabbitMQService.Connection.CreateChannelAsync();
+            await cleanup.QueuePurgeAsync(queueName);
+            await cleanup.QueueDeleteAsync(queueName);
+            await cleanup.ExchangeDeleteAsync(exchangeName);
+            await cleanup.CloseAsync();
+            await channel.DisposeAsync();
         }
+
     }
 }
