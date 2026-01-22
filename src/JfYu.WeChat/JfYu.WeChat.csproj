@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
 		<Version>8.0.1</Version>
-		<Description></Description>
+		<Description>Multi-targeted .NET library for WeChat Mini Program integration. Provides typed APIs for authentication, access token management, phone number retrieval, and secure communication. Supports dependency injection, configuration binding, and extensible HTTP request handling. Designed for use in modern .NET applications and compatible with JfYu.Request.</Description>
 	</PropertyGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\JfYu.Request\JfYu.Request.csproj" />

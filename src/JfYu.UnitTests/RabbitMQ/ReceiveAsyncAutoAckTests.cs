@@ -158,7 +158,7 @@ namespace JfYu.UnitTests.RabbitMQ
             var channel = await _rabbitMQService.ReceiveAsync<string>(queueName, async message =>
             {
                 processingAttempts++;
-                await Task.CompletedTask;
+                await Task.CompletedTask.ConfigureAwait(true);
                 throw new InvalidOperationException("Test exception");
             }, autoAck: true);
 

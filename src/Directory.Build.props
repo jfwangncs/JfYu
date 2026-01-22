@@ -8,7 +8,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/jfwangncs/jfYu</RepositoryUrl>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>	
+		<GenerateDocumentationFile>true</GenerateDocumentationFile> 
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(IsPackable)' != 'false'">
