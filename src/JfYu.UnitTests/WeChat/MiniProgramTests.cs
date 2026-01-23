@@ -29,7 +29,7 @@ namespace JfYu.UnitTests.WeChat
             _options = new MiniProgramOptions
             {
                 AppId = "wx1234567890abcdef",
-                Secret = "test_secret_key_12345678"
+                Secret = "test_secret_key_12345678"// gitleaks:allow
             };
             var optionsWrapper = Options.Create(_options);
             _miniProgram = new MiniProgram(_mockRequest.Object, optionsWrapper);
@@ -48,7 +48,7 @@ namespace JfYu.UnitTests.WeChat
                 ErrorMessage = "ok",
                 OpenId = "test_openid_123",
                 UnionId = "test_unionid_456",
-                SessionKey = "test_session_key_789"
+                SessionKey = "test_session_key_789"// gitleaks:allow
             };
 
             var responseJson = JsonConvert.SerializeObject(expectedResponse);

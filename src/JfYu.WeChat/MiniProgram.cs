@@ -57,9 +57,15 @@ namespace JfYu.WeChat
         /// <returns>Phone number information including country code and watermark</returns>
         public async Task<GetPhoneResponse?> GetPhoneAsync(string code)
         {
+            if (string.IsNullOrEmpty(code))
+                throw new ArgumentNullException(nameof(code));
+
             var accessToken = await GetAccessTokenAsync().ConfigureAwait(false);
 
-            _jfYuRequest.Url = $"{MiniProgramConstant.Url}/{MiniProgramConstant.GetPhoneUrl}?access_token={accessToken?.AccessToken}";
+            if (accessToken == null || string.IsNullOrEmpty(accessToken.AccessToken))
+                throw new InvalidOperationException("Failed to retrieve a valid access token for phone number request.");
+
+            _jfYuRequest.Url = $"{MiniProgramConstant.Url}/{MiniProgramConstant.GetPhoneUrl}?access_token={accessToken.AccessToken}";
             _jfYuRequest.Method = HttpMethod.Post;
             _jfYuRequest.RequestData = JsonConvert.SerializeObject(new { code });
             var response = await _jfYuRequest.SendAsync().ConfigureAwait(false);

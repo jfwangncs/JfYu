@@ -93,7 +93,7 @@ namespace JfYu.UnitTests.WeChat
             // Arrange
             var services = new ServiceCollection();
             var expectedAppId = "wx1234567890abcdef";
-            var expectedSecret = "my_secret_key_123456";
+            var expectedSecret = "my_secret_key_123456";// gitleaks:allow
 
             // Act
             services.AddMiniProgram(options =>

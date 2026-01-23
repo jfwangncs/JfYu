@@ -41,7 +41,7 @@ namespace JfYu.UnitTests.WeChat
         {
             // Arrange
             var options = new MiniProgramOptions();
-            var expectedSecret = "my_secret_key_123456";
+            var expectedSecret = "my_secret_key_123456";// gitleaks:allow
 
             // Act
             options.Secret = expectedSecret;
@@ -56,7 +56,7 @@ namespace JfYu.UnitTests.WeChat
             // Arrange
             var options = new MiniProgramOptions();
             var expectedAppId = "wx9876543210fedcba";
-            var expectedSecret = "another_secret_key";
+            var expectedSecret = "another_secret_key";// gitleaks:allow
 
             // Act
             options.AppId = expectedAppId;

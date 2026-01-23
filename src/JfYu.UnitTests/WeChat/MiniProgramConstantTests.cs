@@ -38,7 +38,7 @@ namespace JfYu.UnitTests.WeChat
         }
 
         [Fact]
-        public void GetPhonenUrl_IsCorrectEndpoint()
+        public void GetPhoneUrl_IsCorrectEndpoint()
         {
             // Assert
             Assert.Equal("wxa/business/getuserphonenumber", MiniProgramConstant.GetPhoneUrl);

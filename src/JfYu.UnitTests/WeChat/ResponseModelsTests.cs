@@ -204,7 +204,7 @@ namespace JfYu.UnitTests.WeChat
             // Arrange
             var json = @"{
                 ""openid"": ""o6_bmjrPTlm6_2sgVt7hMZOPfL2M"",
-                ""session_key"": ""tiihtNczf5v6AKRyjwEUhQ=="",
+                ""session_key"": ""tiihtNczf5v6AKRyjwEUhQ=="",// gitleaks:allow
                 ""unionid"": ""oGZUI0egBJY1zhBYw2KhdUfwVJJE"",
                 ""errcode"": 0,
                 ""errmsg"": ""ok""

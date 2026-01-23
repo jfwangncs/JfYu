@@ -10,16 +10,22 @@ namespace JfYu.WeChat
     /// </summary>
     public static class ContainerBuilderExtensions
     {
+ 
         /// <summary>
-        /// Registers WeChat Mini Program services with dependency injection container
+        /// Adds MiniProgram services and configuration to the specified service collection.
         /// </summary>
-        /// <param name="services">The service collection</param>
-        /// <param name="setupAction">Configuration action for Mini Program options (AppId, Secret)</param>
-        public static void AddMiniProgram(this IServiceCollection services, Action<MiniProgramOptions>? setupAction)
+        /// <remarks>This method registers the <see cref="IMiniProgram"/> service with scoped lifetime and
+        /// configures MiniProgram options. Call this method during application startup to enable MiniProgram
+        /// functionality.</remarks>
+        /// <param name="services">The service collection to which the MiniProgram services will be added. Cannot be null.</param>
+        /// <param name="setupAction">An optional action to configure the MiniProgram options. If null, default options are used.</param>
+        /// <returns>The original <see cref="IServiceCollection"/> instance with MiniProgram services registered.</returns>
+        public static IServiceCollection AddMiniProgram(this IServiceCollection services, Action<MiniProgramOptions>? setupAction)
         {
             services.Configure<MiniProgramOptions>(opts => setupAction?.Invoke(opts));
             services.AddScoped<IMiniProgram, MiniProgram>();
             services.AddJfYuHttpRequest();
+            return services;
         }
     }
 }

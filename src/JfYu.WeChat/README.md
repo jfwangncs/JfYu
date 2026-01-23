@@ -79,24 +79,7 @@ public class UserController : ControllerBase
 
         return BadRequest(phoneResult?.ErrorMessage);
     }
-
-    // Get access token for server API calls
-    [HttpGet("token")]
-    public async Task<IActionResult> GetAccessToken()
-    {
-        var tokenResult = await _miniProgram.GetAccessTokenAsync();
-
-        if (tokenResult != null)
-        {
-            return Ok(new
-            {
-                token = tokenResult.AccessToken,
-                expiresIn = tokenResult.Expires
-            });
-        }
-
-        return StatusCode(500, "Failed to retrieve access token");
-    }
+   
 }
 ```
 
