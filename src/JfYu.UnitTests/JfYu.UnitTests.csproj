@@ -29,6 +29,7 @@
 		<ProjectReference Include="..\JfYu.RabbitMQ\JfYu.RabbitMQ.csproj" />
 		<ProjectReference Include="..\JfYu.Redis\JfYu.Redis.csproj" Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'" />
 		<ProjectReference Include="..\JfYu.Request\JfYu.Request.csproj" />
+		<ProjectReference Include="..\JfYu.WeChat\JfYu.WeChat.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
