@@ -14,6 +14,8 @@ Welcome to the project! This is an all-in-one toolkit designed for developers, i
 
 - [**Office Documents**][Github.Office] - Comprehensive Excel and Word document manipulation library supporting multiple data sources, template-based generation, and high-performance streaming.
 
+- [**WeChat Integration**][Github.WeChat] - Multi-targeted library for WeChat Mini Program integration with typed APIs for authentication, access token management, phone number retrieval, and secure communication.
+
 ## Nuget Packages
 
 | Package Name                    |
@@ -23,6 +25,7 @@ Welcome to the project! This is an all-in-one toolkit designed for developers, i
 | [JfYu.RabbitMQ][Nuget.RabbitMQ] |
 | [JfYu.Redis][Nuget.Redis]       |
 | [JfYu.Office][Nuget.Office]     |
+| [JfYu.WeChat][Nuget.WeChat]     |
 
 ## Usage
 
@@ -37,9 +40,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [Github.RabbitMQ]: https://github.com/jfwangncs/JfYu/tree/master/src/JfYu.RabbitMQ
 [Github.Redis]: https://github.com/jfwangncs/JfYu/tree/master/src/JfYu.Redis
 [Github.Office]: https://github.com/jfwangncs/JfYu/tree/master/src/JfYu.Office
+[Github.WeChat]: https://github.com/jfwangncs/JfYu/tree/master/src/JfYu.WeChat
 [Nuget.Data]: https://www.nuget.org/packages/JfYu.Data
 [Nuget.Request]: https://www.nuget.org/packages/JfYu.Request
 [Nuget.RabbitMQ]: https://www.nuget.org/packages/JfYu.RabbitMQ
 [Nuget.Redis]: https://www.nuget.org/packages/JfYu.Redis
 [Nuget.Office]: https://www.nuget.org/packages/JfYu.Office
+[Nuget.WeChat]: https://www.nuget.org/packages/JfYu.WeChat
 [LICENSE]: https://github.com/jfwangncs/JfYu/blob/master/LICENSE

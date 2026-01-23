@@ -11,12 +11,14 @@ Multi-targeted .NET toolkit library providing reusable components for data acces
 - **JfYu.Data**: EF Core read-write separation with multi-database support (SqlServer, MySql, Sqlite, InMemory)
 - **JfYu.Request**: HTTP request abstraction supporting HttpClient/HttpWebRequest with configurable logging
 - **JfYu.RabbitMQ**: RabbitMQ client wrapper with async message publishing/consuming, automatic retry, and dead letter queue support
+- **JfYu.WeChat**: WeChat Mini Program integration with typed APIs for authentication, access token management, and phone number retrieval
 - **JfYu.UnitTests**: Multi-framework tests (net481, net8.0, net9.0) with xUnit
 
 ### Multi-Targeting Strategy
 
 - **JfYu.Request**: `netstandard2.0;net8.0` for broad compatibility
 - **JfYu.RabbitMQ**: `netstandard2.0;net8.0` for broad compatibility
+- **JfYu.WeChat**: `netstandard2.0;net8.0` for broad compatibility
 - **JfYu.Data**: `net8.0` only (requires modern EF Core features)
 - **JfYu.UnitTests**: `net481;net8.0;net9.0` for comprehensive testing
 - Use `#if NET8_0_OR_GREATER` preprocessor directives to conditionally compile Data-dependent code
@@ -54,6 +56,12 @@ services.AddRabbitMQ((factory, options) => {
     options.RetryDelayMilliseconds = 5000;
     options.MaxOutstandingConfirms = 1000;
     options.BatchSize = 20;
+});
+
+// JfYu.WeChat - WeChat Mini Program integration
+services.AddWeChat(q => {
+    q.AppId = "wx1234567890abcdef";      // Mini Program AppId
+    q.AppSecret = "secret123...";;       // Mini Program AppSecret
 });
 ```
 
@@ -112,7 +120,7 @@ Triggered on master branch push. Automatically publishes all `*.nupkg` files to 
 
 ### Test Organization
 
-- Collections: Use `[Collection("Data")]`, `[Collection("JfYuRequest")]`, and `[Collection("RabbitMQ")]` to prevent parallel test conflicts
+- Collections: Use `[Collection("Data")]`, `[Collection("JfYuRequest")]`, `[Collection("RabbitMQ")]`, and `[Collection("WeChat")]` to prevent parallel test conflicts
 - Conditional compilation: Wrap Data tests in `#if NET8_0_OR_GREATER`
 - Test database isolation: Use `DataContext.Clear<T>()` extension method or unique in-memory DB names
 - RabbitMQ tests: Use unique queue/exchange names to avoid conflicts
@@ -134,8 +142,9 @@ JfYu.Request provides `LogFilter` with:
 
 ## Project Files Reference
 
-- Service registration: `src/JfYu.Data/Extension/ContainerBuilderExtensions.cs`, `src/JfYu.Request/Extension/ContainerBuilderExtensions.cs`, `src/JfYu.RabbitMQ/ContainerBuilderExtensions.cs`
+- Service registration: `src/JfYu.Data/Extension/ContainerBuilderExtensions.cs`, `src/JfYu.Request/Extension/ContainerBuilderExtensions.cs`, `src/JfYu.RabbitMQ/ContainerBuilderExtensions.cs`, `src/JfYu.WeChat/ContainerBuilderExtensions.cs`
 - Core service: `src/JfYu.Data/Service/Service.cs`
 - RabbitMQ service: `src/JfYu.RabbitMQ/RabbitMQService.cs`
+- WeChat service: `src/JfYu.WeChat/MiniProgram.cs`
 - Test utilities: `src/JfYu.UnitTests/Common.cs`
 - CI workflows: `.github/workflows/gate.yml`, `.github/workflows/deploy.yml`
