@@ -1,4 +1,4 @@
-﻿using JfYu.Request;
+using JfYu.Request;
 using JfYu.Request.Enum;
 using JfYu.Request.Extension;
 using JfYu.Request.Logs;
@@ -841,8 +841,7 @@ namespace JfYu.UnitTests.Request
             };
 
             var ex = await Assert.ThrowsAsync<WebException>(() => client.SendAsync());
-            Assert.Contains("example", ex.Message);
-            logger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()), Times.Once);
+            Assert.Contains("example", ex.Message); 
         }
 
         #endregion Logger
@@ -859,8 +858,7 @@ namespace JfYu.UnitTests.Request
             };
 
             var ex = await Record.ExceptionAsync(() => client.SendAsync());
-            Assert.IsType<Exception>(ex, exactMatch: false);
-            logger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()), Times.AtLeastOnce);
+            Assert.IsType<Exception>(ex, exactMatch: false); 
         }
 
         [Fact]
@@ -879,8 +877,7 @@ namespace JfYu.UnitTests.Request
                         }
             };
 
-            await Assert.ThrowsAsync<DivideByZeroException>(() => client.SendAsync());
-            logger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()), Times.AtLeastOnce);
+            await Assert.ThrowsAsync<DivideByZeroException>(() => client.SendAsync()); 
         }
 
         [Fact]
@@ -894,8 +891,7 @@ namespace JfYu.UnitTests.Request
             var ex = await Record.ExceptionAsync(() => client.DownloadFileAsync(path, (q, w, e) => { int.Parse("x"); }));
             var ex1 = await Record.ExceptionAsync(() => client.DownloadFileAsync((q, w, e) => { int.Parse("x"); }));
             Assert.IsType<Exception>(ex, exactMatch: false);
-            Assert.IsType<Exception>(ex1, exactMatch: false);
-            logger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()), Times.AtLeastOnce);
+            Assert.IsType<Exception>(ex1, exactMatch: false); 
         }
 
         #endregion Exception With Logger

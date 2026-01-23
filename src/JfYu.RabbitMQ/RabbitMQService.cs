@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -108,7 +108,7 @@ namespace JfYu.RabbitMQ
         }
 
         /// <inheritdoc/>
-        public async Task<IChannel> ReceiveAsync<T>(string queueName, Func<T?, Task<bool>> func, ushort prefetchCount = 1, CancellationToken cancellationToken = default)
+        public async Task<IChannel> ReceiveAsync<T>(string queueName, Func<T?, Task<bool>> func, ushort prefetchCount = 1, bool autoAck = false, CancellationToken cancellationToken = default)
         {
             var _channel = await Connection.CreateChannelAsync(null, cancellationToken).ConfigureAwait(false);
             await _channel.BasicQosAsync(0, prefetchCount, false, cancellationToken).ConfigureAwait(false);
@@ -120,25 +120,41 @@ namespace JfYu.RabbitMQ
                     await _channel.BasicCancelAsync(consumerTag).ConfigureAwait(false);
                 _channel.Dispose();
             });
-            consumer.ReceivedAsync += async (ch, ea) =>
+
+            if (autoAck)
             {
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-                string message = Encoding.UTF8.GetString(ea.Body.ToArray());
-                try
+                // Auto acknowledgement mode: messages are ACKed immediately, no retry logic
+                consumer.ReceivedAsync += async (ch, ea) =>
                 {
-                    if (await func(ParsePayload<T>(ea.Body, message)).ConfigureAwait(false))
-                        await _channel.BasicAckAsync(ea.DeliveryTag, false).ConfigureAwait(false);
-                    else
+                    if (cancellationToken.IsCancellationRequested)
+                        return;
+                    await func(ParsePayload<T>(ea.Body, Encoding.UTF8.GetString(ea.Body.ToArray()))).ConfigureAwait(false);
+                };
+            }
+            else
+            {
+                // Manual acknowledgement mode: messages must be ACKed/NACKed, with retry logic
+                consumer.ReceivedAsync += async (ch, ea) =>
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                        return;
+                    string message = Encoding.UTF8.GetString(ea.Body.ToArray());
+                    try
+                    {
+                        if (await func(ParsePayload<T>(ea.Body, message)).ConfigureAwait(false))
+                            await _channel.BasicAckAsync(ea.DeliveryTag, false).ConfigureAwait(false);
+                        else
+                            await TryToMoveToDeadLetterQueue(ea, _channel, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogError(ex, string.Format("Receive message have error.message:{0}", message));
                         await TryToMoveToDeadLetterQueue(ea, _channel, cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _logger?.LogError(ex, string.Format("Receive message have error.message:{0}", message));
-                    await TryToMoveToDeadLetterQueue(ea, _channel, cancellationToken).ConfigureAwait(false);
-                }
-            };
-            consumerTag = await _channel.BasicConsumeAsync(queueName, false, consumer, cancellationToken).ConfigureAwait(false);
+                    }
+                };
+            }
+
+            consumerTag = await _channel.BasicConsumeAsync(queueName, autoAck, consumer, cancellationToken).ConfigureAwait(false);
             return _channel;
         }
         private static T? ParsePayload<T>(ReadOnlyMemory<byte> body, string message)

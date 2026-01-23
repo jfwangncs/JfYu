@@ -35,6 +35,7 @@
 		<ProjectReference Include="..\JfYu.RabbitMQ\JfYu.RabbitMQ.csproj" />
 		<ProjectReference Include="..\JfYu.Redis\JfYu.Redis.csproj" />
 		<ProjectReference Include="..\JfYu.Request\JfYu.Request.csproj" />
+		<ProjectReference Include="..\JfYu.WeChat\JfYu.WeChat.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -28,7 +28,7 @@ namespace JfYu.RabbitMQ
         /// <param name="routingKey">Optional routing key for Direct and Topic exchanges. Empty for Fanout.</param>
         /// <param name="headers">Optional headers for Headers exchange type. Must be provided if exchangeType is "headers".</param>
         /// <returns>A task that completes when the binding is established.</returns>
-        Task ExchangeBindAsync(string destination, string source, string exchangeType= ExchangeType.Direct, string routingKey = "", IDictionary<string, object?>? headers = null);
+        Task ExchangeBindAsync(string destination, string source, string exchangeType = ExchangeType.Direct, string routingKey = "", IDictionary<string, object?>? headers = null);
 
         /// <summary>
         /// Declares a queue and optionally binds it to an exchange.
@@ -85,7 +85,7 @@ namespace JfYu.RabbitMQ
         Task SendBatchAsync<T>(string exchangeName, IList<T> messages, string routingKey = "", IDictionary<string, object?>? headers = null, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Starts an asynchronous consumer for the specified queue with automatic acknowledgement and retry handling.
+        /// Starts an asynchronous consumer for the specified queue with configurable acknowledgement and retry handling.
         /// Messages are processed by the provided async function, with automatic retry on failure up to MaxRetryCount.
         /// Failed messages beyond retry limit are sent to dead letter queue if configured.
         /// </summary>
@@ -93,10 +93,15 @@ namespace JfYu.RabbitMQ
         /// <param name="queueName">The queue name to consume from.</param>
         /// <param name="func">Async function to process each message. Return true to ACK, false to trigger retry/DLQ logic.</param>
         /// <param name="prefetchCount">Number of unacknowledged messages the consumer can have (QoS setting). Higher values increase throughput but use more memory.</param>
+        /// <param name="autoAck">If true, messages are automatically acknowledged upon delivery (no manual ACK required). If false (default), messages must be manually acknowledged by returning true from func.</param>
         /// <param name="cancellationToken">Cancellation token to stop the consumer and dispose the channel gracefully.</param>
         /// <returns>The IChannel used for consuming. Dispose or cancel the token to stop consuming.</returns>
         /// <remarks>
-        /// Retry behavior:
+        /// Acknowledgement modes:
+        /// - autoAck=false (default): Manual acknowledgement. Return true from func to ACK, false to trigger retry/DLQ logic. Exceptions also trigger retry/DLQ.
+        /// - autoAck=true: Automatic acknowledgement. Messages are ACKed immediately upon delivery regardless of func return value or exceptions. No retry logic.
+        /// 
+        /// Retry behavior (only applies when autoAck=false):
         /// - Messages are retried up to MessageOptions.MaxRetryCount times
         /// - Retry delay is MessageOptions.RetryDelayMilliseconds between attempts
         /// - Retry count is tracked in x-retry-count header
@@ -105,7 +110,7 @@ namespace JfYu.RabbitMQ
         /// 
         /// The consumer continues until cancellationToken is triggered or the channel is disposed.
         /// </remarks>
-        Task<IChannel> ReceiveAsync<T>(string queueName, Func<T?, Task<bool>> func, ushort prefetchCount = 1, CancellationToken cancellationToken = default);
+        Task<IChannel> ReceiveAsync<T>(string queueName, Func<T?, Task<bool>> func, ushort prefetchCount = 1, bool autoAck = false, CancellationToken cancellationToken = default);
 
     }
 }
