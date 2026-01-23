@@ -3,7 +3,7 @@ namespace JfYu.WeChat.Constant
     /// <summary>
     /// Constants for WeChat Mini Program API endpoints
     /// </summary>
-    public class MiniProgramConstant
+    public static class MiniProgramConstant
     {
         /// <summary>
         /// Base URL for WeChat API
