@@ -41,7 +41,7 @@ namespace JfYu.UnitTests.WeChat
         public void GetPhonenUrl_IsCorrectEndpoint()
         {
             // Assert
-            Assert.Equal("wxa/business/getuserphonenumber", MiniProgramConstant.GetPhonenUrl);
+            Assert.Equal("wxa/business/getuserphonenumber", MiniProgramConstant.GetPhoneUrl);
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace JfYu.UnitTests.WeChat
             Assert.False(string.IsNullOrEmpty(MiniProgramConstant.Url));
             Assert.False(string.IsNullOrEmpty(MiniProgramConstant.LoginUrl));
             Assert.False(string.IsNullOrEmpty(MiniProgramConstant.GetAccessTokenUrl));
-            Assert.False(string.IsNullOrEmpty(MiniProgramConstant.GetPhonenUrl));
+            Assert.False(string.IsNullOrEmpty(MiniProgramConstant.GetPhoneUrl));
         }       
 
         [Fact]
@@ -60,7 +60,7 @@ namespace JfYu.UnitTests.WeChat
             // Act
             var loginUrl = $"{MiniProgramConstant.Url}/{MiniProgramConstant.LoginUrl}";
             var tokenUrl = $"{MiniProgramConstant.Url}/{MiniProgramConstant.GetAccessTokenUrl}";
-            var phoneUrl = $"{MiniProgramConstant.Url}/{MiniProgramConstant.GetPhonenUrl}";
+            var phoneUrl = $"{MiniProgramConstant.Url}/{MiniProgramConstant.GetPhoneUrl}";
 
             // Assert
             Assert.DoesNotContain("//", loginUrl.Replace("https://", ""));
@@ -78,7 +78,7 @@ namespace JfYu.UnitTests.WeChat
             var urlField = typeof(MiniProgramConstant).GetField(nameof(MiniProgramConstant.Url));
             var loginUrlField = typeof(MiniProgramConstant).GetField(nameof(MiniProgramConstant.LoginUrl));
             var tokenUrlField = typeof(MiniProgramConstant).GetField(nameof(MiniProgramConstant.GetAccessTokenUrl));
-            var phoneUrlField = typeof(MiniProgramConstant).GetField(nameof(MiniProgramConstant.GetPhonenUrl));
+            var phoneUrlField = typeof(MiniProgramConstant).GetField(nameof(MiniProgramConstant.GetPhoneUrl));
 
             // Assert
             Assert.NotNull(urlField);
@@ -109,7 +109,7 @@ namespace JfYu.UnitTests.WeChat
         public void GetPhoneUrl_MatchesWeChatApiDocumentation()
         {
             // The official WeChat API documentation uses this endpoint  
-            Assert.Equal("wxa/business/getuserphonenumber", MiniProgramConstant.GetPhonenUrl);
+            Assert.Equal("wxa/business/getuserphonenumber", MiniProgramConstant.GetPhoneUrl);
         }
 
         [Fact]

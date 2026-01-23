@@ -59,7 +59,7 @@ namespace JfYu.WeChat
         {
             var accessToken = await GetAccessTokenAsync().ConfigureAwait(false);
 
-            _jfYuRequest.Url = $"{MiniProgramConstant.Url}/{MiniProgramConstant.GetPhonenUrl}?access_token={accessToken?.AccessToken}";
+            _jfYuRequest.Url = $"{MiniProgramConstant.Url}/{MiniProgramConstant.GetPhoneUrl}?access_token={accessToken?.AccessToken}";
             _jfYuRequest.Method = HttpMethod.Post;
             _jfYuRequest.RequestData = JsonConvert.SerializeObject(new { code });
             var response = await _jfYuRequest.SendAsync().ConfigureAwait(false);

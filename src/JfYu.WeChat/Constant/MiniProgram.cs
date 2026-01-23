@@ -23,6 +23,6 @@ namespace JfYu.WeChat.Constant
         /// <summary>
         /// Endpoint for retrieving user phone number
         /// </summary>
-        public static readonly string GetPhonenUrl = "wxa/business/getuserphonenumber";
+        public static readonly string GetPhoneUrl = "wxa/business/getuserphonenumber";
     }
 }

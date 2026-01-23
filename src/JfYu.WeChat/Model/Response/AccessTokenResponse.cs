@@ -11,7 +11,7 @@ namespace JfYu.WeChat.Model.Response
         /// Access token string for API authentication
         /// </summary>
         [JsonProperty(PropertyName = "access_token")]
-        public string AccessToken { get; set; } = null!;
+        public string? AccessToken { get; set; }
 
         /// <summary>
         /// Token expiration time in seconds (typically 7200 seconds = 2 hours)
