@@ -1,0 +1,12 @@
+title = "gitleaks config"
+
+[allowlist]
+description = "allow test"
+paths = [
+    '''src/JfYu\.UnitTests/''', 
+]
+
+regexes = [
+    '''test_secret_key_''',
+    '''wx1234567890abcdef''', 
+]
