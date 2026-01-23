@@ -30,8 +30,19 @@ services.AddMiniProgram(options =>
 {
     options.AppId = "your_mini_program_appid";
     options.Secret = "your_mini_program_secret";
+    
+    // Optional: Enable HTTP request/response logging for debugging
+    options.EnableHttpLogging = true;  // Default: false
 });
 ```
+
+**Configuration Options:**
+
+- `AppId`: WeChat Mini Program Application ID (required)
+- `Secret`: WeChat Mini Program Secret Key (required)
+- `EnableHttpLogging`: Enable HTTP request/response logging (optional, default: `false`)
+  - When `true`: Logs all HTTP requests and responses with full details
+  - When `false`: No HTTP logging (recommended for production)
 
 ### 2. Inject and Use
 
@@ -182,26 +193,7 @@ public class AccessTokenResponse
     public string AccessToken { get; set; }       // Access token string
     public int Expires { get; set; }              // Expiration time in seconds (7200)
 }
-```
-
-## Error Handling
-
-All responses inherit from `WechatBaseResponse` which includes error information:
-
-```csharp
-var result = await _miniProgram.LoginAsync(code);
-
-if (result?.ErrorCode != 0)
-{
-    // Handle error
-    Console.WriteLine($"Error {result.ErrorCode}: {result.ErrorMessage}");
-
-    // Common error codes:
-    // -1: System busy
-    // 40029: Invalid code
-    // 45011: API rate limit exceeded
-}
-```
+``` 
 
 ## Configuration Options
 

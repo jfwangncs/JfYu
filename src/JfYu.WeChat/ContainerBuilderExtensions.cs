@@ -1,3 +1,4 @@
+using JfYu.Request.Enum;
 using JfYu.Request.Extension;
 using JfYu.WeChat.Options;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,6 @@ namespace JfYu.WeChat
     /// </summary>
     public static class ContainerBuilderExtensions
     {
- 
         /// <summary>
         /// Adds MiniProgram services and configuration to the specified service collection.
         /// </summary>
@@ -22,9 +22,15 @@ namespace JfYu.WeChat
         /// <returns>The original <see cref="IServiceCollection"/> instance with MiniProgram services registered.</returns>
         public static IServiceCollection AddMiniProgram(this IServiceCollection services, Action<MiniProgramOptions>? setupAction)
         {
+            var options = new MiniProgramOptions();
+            setupAction?.Invoke(options);
+
             services.Configure<MiniProgramOptions>(opts => setupAction?.Invoke(opts));
             services.AddScoped<IMiniProgram, MiniProgram>();
-            services.AddJfYuHttpRequest();
+            services.AddJfYuHttpRequest(filter =>
+            {
+                filter.LoggingFields = options.EnableHttpLogging ? JfYuLoggingFields.All : JfYuLoggingFields.None;
+            });
             return services;
         }
     }

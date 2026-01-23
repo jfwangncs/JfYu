@@ -155,7 +155,7 @@ namespace JfYu.UnitTests.WeChat
 
             // Assert
             Assert.NotNull(deserialized);
-            Assert.Equal(5000, deserialized.AccessToken.Length);
+            Assert.Equal(5000, deserialized.AccessToken?.Length);
             Assert.Equal(longToken, deserialized.AccessToken);
         }
 

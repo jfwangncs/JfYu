@@ -1,3 +1,5 @@
+using JfYu.Request.Enum;
+using JfYu.Request.Logs;
 using JfYu.WeChat;
 using JfYu.WeChat.Options;
 using Microsoft.Extensions.DependencyInjection;
@@ -205,6 +207,72 @@ namespace JfYu.UnitTests.WeChat
             var options = serviceProvider.GetService<IOptions<MiniProgramOptions>>();
             Assert.NotNull(options);
             Assert.NotNull(options.Value);
+        }
+
+        [Fact]
+        public void AddMiniProgram_WithEnableHttpLoggingTrue_ConfiguresLoggingWithAllFields()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+
+            // Act
+            services.AddMiniProgram(options =>
+            {
+                options.AppId = "test";
+                options.Secret = "test";
+                options.EnableHttpLogging = true;
+            });
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Assert
+            var logFilter = serviceProvider.GetService<LogFilter>();
+            Assert.NotNull(logFilter);
+            Assert.Equal(JfYuLoggingFields.All, logFilter.LoggingFields);
+        }
+
+        [Fact]
+        public void AddMiniProgram_WithEnableHttpLoggingFalse_ConfiguresLoggingWithNone()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+
+            // Act
+            services.AddMiniProgram(options =>
+            {
+                options.AppId = "test";
+                options.Secret = "test";
+                options.EnableHttpLogging = false;
+            });
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Assert
+            var logFilter = serviceProvider.GetService<LogFilter>();
+            Assert.NotNull(logFilter);
+            Assert.Equal(JfYuLoggingFields.None, logFilter.LoggingFields);
+        }
+
+        [Fact]
+        public void AddMiniProgram_WithDefaultOptions_DisablesLogging()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+
+            // Act
+            services.AddMiniProgram(options =>
+            {
+                options.AppId = "test";
+                options.Secret = "test";
+                // EnableHttpLogging defaults to false
+            });
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Assert
+            var logFilter = serviceProvider.GetService<LogFilter>();
+            Assert.NotNull(logFilter);
+            Assert.Equal(JfYuLoggingFields.None, logFilter.LoggingFields);
         }
     }
 }

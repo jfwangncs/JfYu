@@ -3,12 +3,12 @@
 		<TargetFrameworks>net8.0</TargetFrameworks>
 		<LangVersion>12.0</LangVersion>
 		<Authors>jfwang</Authors>
-		<Nullable>enable</Nullable> 
+		<Nullable>enable</Nullable>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/jfwangncs/jfYu</RepositoryUrl>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile> 
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(IsPackable)' != 'false'">
@@ -24,5 +24,5 @@
 		<None Include="README.md" Pack="true" PackagePath="\" />
 		<None Include="..\..\LICENSE" Pack="true" PackagePath="" />
 	</ItemGroup>
- 
+
 </Project>

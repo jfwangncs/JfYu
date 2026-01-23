@@ -61,7 +61,7 @@ services.AddRabbitMQ((factory, options) => {
 // JfYu.WeChat - WeChat Mini Program integration
 services.AddMiniProgram(q => {
     q.AppId = "wx1234567890abcdef";      // Mini Program AppId
-    q.AppSecret = "secret123...";       // Mini Program AppSecret
+    q.Secret = "secret123...";       // Mini Program Secret
 });
 ```
 
