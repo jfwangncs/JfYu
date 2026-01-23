@@ -272,6 +272,32 @@ namespace JfYu.UnitTests.WeChat
         #region GetPhoneAsync Tests
 
         [Fact]
+        public async Task GetPhoneAsync_NullCode_ThrowsArgumentNullException()
+        {
+            // Arrange
+            string? code = null;
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await _miniProgram.GetPhoneAsync(code!).ConfigureAwait(false);
+            }).ConfigureAwait(true);
+        }
+
+        [Fact]
+        public async Task GetPhoneAsync_EmptyCode_ThrowsArgumentNullException()
+        {
+            // Arrange
+            string code = string.Empty;
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await _miniProgram.GetPhoneAsync(code).ConfigureAwait(false);
+            }).ConfigureAwait(true);
+        }
+
+        [Fact]
         public async Task GetPhoneAsync_ValidCode_ReturnsPhoneInfo()
         {
             // Arrange
@@ -453,7 +479,7 @@ namespace JfYu.UnitTests.WeChat
         }
 
         [Fact]
-        public async Task GetPhoneAsync_NullAccessToken_StillMakesRequest()
+        public async Task GetPhoneAsync_NullAccessToken_ThrowsInvalidOperationException()
         {
             // Arrange
             var code = "test_code";
@@ -463,60 +489,42 @@ namespace JfYu.UnitTests.WeChat
                 Expires = 0
             };
 
-            var phoneResponse = new GetPhoneResponse
-            {
-                ErrorCode = 40001,
-                ErrorMessage = "invalid access_token"
-            };
-
             var accessTokenJson = JsonConvert.SerializeObject(accessTokenResponse);
-            var phoneResponseJson = JsonConvert.SerializeObject(phoneResponse);
 
-            _mockRequest.SetupSequence(x => x.SendAsync(It.IsAny<CancellationToken>()))
-                .ReturnsAsync(accessTokenJson)
-                .ReturnsAsync(phoneResponseJson);
+            _mockRequest.Setup(x => x.SendAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(accessTokenJson);
 
             _mockRequest.SetupSet(x => x.Url = It.IsAny<string>()).Verifiable();
-            _mockRequest.SetupSet(x => x.Method = HttpMethod.Post).Verifiable();
-            _mockRequest.SetupSet(x => x.RequestData = It.IsAny<string>()).Verifiable();
 
-            // Act
-            var result = await _miniProgram.GetPhoneAsync(code).ConfigureAwait(true);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await _miniProgram.GetPhoneAsync(code).ConfigureAwait(false);
+            }).ConfigureAwait(true);
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(40001, result.ErrorCode);
+            Assert.Equal("Failed to retrieve a valid access token for phone number request.", exception.Message);
         }
         [Fact]
-        public async Task GetPhoneAsync_NullAccessTokenData_StillMakesRequest()
+        public async Task GetPhoneAsync_NullAccessTokenData_ThrowsInvalidOperationException()
         {
             // Arrange
             var code = "test_code";
             AccessTokenResponse accessTokenResponse = null!;
 
-            var phoneResponse = new GetPhoneResponse
-            {
-                ErrorCode = 40001,
-                ErrorMessage = "invalid access_token"
-            };
-
             var accessTokenJson = JsonConvert.SerializeObject(accessTokenResponse);
-            var phoneResponseJson = JsonConvert.SerializeObject(phoneResponse);
 
-            _mockRequest.SetupSequence(x => x.SendAsync(It.IsAny<CancellationToken>()))
-                .ReturnsAsync(accessTokenJson)
-                .ReturnsAsync(phoneResponseJson);
+            _mockRequest.Setup(x => x.SendAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(accessTokenJson);
 
             _mockRequest.SetupSet(x => x.Url = It.IsAny<string>()).Verifiable();
-            _mockRequest.SetupSet(x => x.Method = HttpMethod.Post).Verifiable();
-            _mockRequest.SetupSet(x => x.RequestData = It.IsAny<string>()).Verifiable();
 
-            // Act
-            var result = await _miniProgram.GetPhoneAsync(code).ConfigureAwait(true);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await _miniProgram.GetPhoneAsync(code).ConfigureAwait(false);
+            }).ConfigureAwait(true);
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(40001, result.ErrorCode);
+            Assert.Equal("Failed to retrieve a valid access token for phone number request.", exception.Message);
         }
         [Fact]
         public async Task GetPhoneAsync_WithWatermark_ReturnsCompleteInfo()
