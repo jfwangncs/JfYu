@@ -23,7 +23,7 @@ namespace JfYu.Request
     /// <param name="cookieContainer">The cookie container</param>
     /// <param name="logFilter">The log filter.</param>
     /// <param name="logger">The logger.</param>
-    public class JfYuHttpClient(IHttpClientFactory factory, JfYuHttpClientConfiguration configuration, CookieContainer? cookieContainer, LogFilter logFilter, ILogger<JfYuHttpClient>? logger = null) : JfYuBaseRequest
+    public class JfYuHttpClient(IHttpClientFactory factory, JfYuHttpClientConfiguration configuration,  LogFilter logFilter,CookieContainer? cookieContainer = null, ILogger<JfYuHttpClient>? logger = null) : JfYuBaseRequest
     {
         /// <summary>
         /// The HTTP web request.
