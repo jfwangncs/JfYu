@@ -2,67 +2,81 @@
 	<PropertyGroup>
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 	</PropertyGroup>
-	<ItemGroup>
-		<!--net8.0-->
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.22" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="8.0.22" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.22" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.22" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.22" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.22" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" Condition="'$(TargetFramework)' == 'net8.0'" />
-		
-		<!--net9.0-->
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.11" Condition="'$(TargetFramework)' == 'net9.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.11" Condition="'$(TargetFramework)' == 'net9.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.11" Condition="'$(TargetFramework)' == 'net9.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.11" Condition="'$(TargetFramework)' == 'net9.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.11" Condition="'$(TargetFramework)' == 'net9.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.11" Condition="'$(TargetFramework)' == 'net9.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.11" Condition="'$(TargetFramework)' == 'net9.0'" />
-		<PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'" />
-		
-		<!--net10.0--><!--
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />-->
-		
+	<!--net8.0-->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.24" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="8.0.24" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.24" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.24" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.24" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.24" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.24" />
+		<PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
+	</ItemGroup>
+	
+	<!--net9.0-->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.13"  />
+		<PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0"  />
+	</ItemGroup>
+
+	<!--net10.0-->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.13"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.13"  />
+		<PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0"  />
+
+		<!--<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.3"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.3"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.3"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.3"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.3"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3"  />
+		<PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0"  />-->
+	</ItemGroup>
+	
+	<ItemGroup>	
 		<PackageVersion Include="BenchmarkDotNet" Version="0.15.4" />
 		<PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.10" />
-		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />		
-		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.3" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
+		<PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.3" />
+		<PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.3" />
+		<PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.3" />
 		<PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageVersion Include="RabbitMQ.Client" Version="7.2.0" />
-		<PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
+		<PackageVersion Include="RabbitMQ.Client" Version="7.2.0" />		
 		<PackageVersion Include="Brotli.NET" Version="2.1.1" />
 		<PackageVersion Include="SharpZipLib" Version="1.4.2" />
 		<PackageVersion Include="Bogus" Version="35.6.5" />
 		<PackageVersion Include="xunit" Version="2.9.3" />
 		<PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
 		<PackageVersion Include="Moq" Version="4.20.72" />
-		<PackageVersion Include="coverlet.collector" Version="6.0.4" />
-		<PackageVersion Include="coverlet.msbuild" Version="6.0.4" />
-		<PackageVersion Include="EntityFramework" Version="6.5.1" />
-		<PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" />
+		<PackageVersion Include="coverlet.collector" Version="8.0.0" />
+		<PackageVersion Include="coverlet.msbuild" Version="8.0.0" />
+		<PackageVersion Include="EntityFramework" Version="6.5.1" />	
 		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
 		<PackageVersion Include="NPOI" Version="2.7.5" />
 		<PackageVersion Include="MessagePack" Version="3.1.4" />
-		<PackageVersion Include="StackExchange.Redis" Version="2.10.1" />
+		<PackageVersion Include="StackExchange.Redis" Version="2.11.3" />
 		<PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageVersion Include="System.Dynamic.Runtime" Version="4.3.0" />
-		<PackageVersion Include="System.Data.SQLite.Linq" Version="1.0.118" />
-		<PackageVersion Include="System.Data.SQLite" Version="1.0.118" />
-		<PackageVersion Include="System.Data.SQLite.EF6" Version="1.0.118" />
+		<PackageVersion Include="System.Data.SQLite.Linq" Version="1.0.119" />
+		<PackageVersion Include="System.Data.SQLite" Version="2.0.2" />
+		<PackageVersion Include="System.Data.SQLite.EF6" Version="2.0.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="xunit" PrivateAssets="all" />

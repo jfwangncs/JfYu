@@ -70,7 +70,7 @@ namespace JfYu.Request
         /// WARNING: When set to true, the shared CookieContainer is NOT thread-safe.
         /// Concurrent requests may lead to race conditions. Use with caution in multi-threaded environments.
         /// </remarks>
-        public bool UseSharedCookieContainer { get; set; } = false;
+        public bool UseSharedCookieContainer { get; set; }
     }
 }
 #endif

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
 		<Version>8.1.2</Version>
 		<Description>A powerful .NET library for Excel and Word document manipulation, supporting comprehensive read/write operations, multiple data sources, and template-based generation.</Description>
 
@@ -8,7 +8,6 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Options" />
 		<PackageReference Include="NPOI" />
-		<PackageReference Include="Microsoft.CSharp" />
-		<PackageReference Include="System.Dynamic.Runtime" />
+		<PackageReference Include="Microsoft.CSharp" /> 
 	</ItemGroup>
 </Project>
