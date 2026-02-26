@@ -5,6 +5,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     defaults:
       run:
         working-directory: src
@@ -25,4 +27,9 @@ jobs:
         run: |
           for file in $(find . -name "*.nupkg" ! -name "*.symbols.nupkg"); do
             dotnet nuget push "$file" -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate;
+          done
+      - name: Push to GitHub Packages
+        run: |
+          for file in $(find . -name "*.nupkg" ! -name "*.symbols.nupkg"); do
+            dotnet nuget push "$file" -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/jfwangncs/index.json --skip-duplicate;
           done
