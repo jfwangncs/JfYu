@@ -522,8 +522,8 @@ var request = provider.GetRequiredService<IJfYuRequest>();
 
 ## Performance
 
-- �?Uses `HttpClientFactory` for proper connection pooling
-- �?Handlers are reused across requests
-- �?Supports HTTP/2 and HTTP/3
-- �?Proper DNS refresh and connection lifecycle
-- �?No socket exhaustion issues
+- Uses `HttpClientFactory` for proper connection pooling
+- Handlers are reused across requests
+- Supports HTTP/2 and HTTP/3
+- Proper DNS refresh and connection lifecycle
+- No socket exhaustion issues
