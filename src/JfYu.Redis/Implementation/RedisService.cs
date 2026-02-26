@@ -57,7 +57,7 @@ namespace JfYu.Redis.Implementation
             else
                 _database = Client.GetDatabase(redisConfiguration.Value.DbIndex).WithKeyPrefix(redisConfiguration.Value.Prefix);
             _serializer = serializer;
-            _lockToken = $"{Environment.MachineName}_{Environment.CurrentManagedThreadId}_{Guid.NewGuid()}";
+            _lockToken = $"{Environment.MachineName}_{Guid.NewGuid()}";
         }
 
         [LoggerMessage(EventId = 1, Level = LogLevel.Trace, Message = "Redis {Method} - Key: {Key}, Value: {Value}")]
