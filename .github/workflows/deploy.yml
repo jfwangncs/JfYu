@@ -1,28 +1,28 @@
 name: Deploy
 on:
   push:
-    branches: [ "master" ] 
+    branches: ["master"]
 jobs:
   build:
-    runs-on: ubuntu-latest       
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: src
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: |
-          6.0.x
-          8.0.x
-          9.0.x  
-    - name: Clean old packages
-      run: dotnet clean 
-    - name: Build
-      run: dotnet build -c release 
-    - name: Push NuGet packages 
-      run: |
-        for file in $(find . -name "*.nupkg" ! -name "*.symbols.nupkg"); do
-          dotnet nuget push "$file" -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate;
-        done
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+      - name: Clean old packages
+        run: dotnet clean
+      - name: Build
+        run: dotnet build -c release
+      - name: Push NuGet packages
+        run: |
+          for file in $(find . -name "*.nupkg" ! -name "*.symbols.nupkg"); do
+            dotnet nuget push "$file" -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate;
+          done
