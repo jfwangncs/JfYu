@@ -125,7 +125,7 @@ namespace JfYu.Redis.Interface
         /// <param name="value">The value by which to increment the key's value. Default is 1.</param>
         /// <param name="flag">Optional command flags. Default is CommandFlags.None.</param>
         /// <returns>The new numeric value..</returns>
-        Task<double> IncrementAsync(string key, double value, CommandFlags flag = CommandFlags.None);
+        Task<double> IncrementAsync(string key, double value=1.0, CommandFlags flag = CommandFlags.None);
 
         /// <summary>
         /// Decrements the numeric value of a key by the specified value only support Serializer=NewtonsoftSerializer
@@ -143,7 +143,7 @@ namespace JfYu.Redis.Interface
         /// <param name="value">The value by which to increment the key's value. Default is 1.</param>
         /// <param name="flag">Optional command flags. Default is CommandFlags.None.</param>
         /// <returns>The new numeric value.</returns>
-        Task<double> DecrementAsync(string key, double value, CommandFlags flag = CommandFlags.None);
+        Task<double> DecrementAsync(string key, double value=1.0, CommandFlags flag = CommandFlags.None);
 
         /// <summary>
         /// Attempts to acquire a distributed lock.
