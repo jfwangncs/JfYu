@@ -198,7 +198,7 @@ namespace JfYu.Redis.Implementation
         }
 
         /// <inheritdoc/>
-        public async Task<double> IncrementAsync(string key, double value = 1.0, CommandFlags flag = CommandFlags.None)
+        public async Task<double> IncrementAsync(string key, double value, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
@@ -224,7 +224,7 @@ namespace JfYu.Redis.Implementation
         }
 
         /// <inheritdoc/>
-        public async Task<double> DecrementAsync(string key, double value = 1.0, CommandFlags flag = CommandFlags.None)
+        public async Task<double> DecrementAsync(string key, double value, CommandFlags flag = CommandFlags.None)
         {
 #if NETSTANDARD2_0
             ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
