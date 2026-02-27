@@ -1,16 +1,23 @@
-﻿#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using Microsoft.EntityFrameworkCore;
-
+#else
+using System.Data.Entity;
+using System.Data.SQLite;
+#endif
 namespace JfYu.UnitTests.Models.Entity
 {
-    public class TestDbContext : DbContext
+#if NET8_0_OR_GREATER
+    public class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(options)
     {
         public DbSet<TestModel> TestModels { get; set; }
         public DbSet<TestSubModel> TestSubModels { get; set; }
-
-        public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
-        {
-        }        
     }
-}
+#else
+    public class TestDbContext(string connectionString) : DbContext(new SQLiteConnection(connectionString), contextOwnsConnection: true)
+    {
+        public DbSet<TestModel> TestModels { get; set; } = null!;
+        public DbSet<TestSubModel> TestSubModels { get; set; } = null!;
+    }
 #endif
+}
+

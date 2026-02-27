@@ -25,10 +25,11 @@ namespace JfYu.Office.Excel.Write.Implementation
 
             if (source.GetType().GetGenericTypeDefinition().Name.StartsWith("Tuple"))
             {
-                var newData = (ITuple)source;
-                for (int i = 0; i < newData.Length; i++)
+                var tupleType = source.GetType();
+                var properties = tupleType.GetProperties();
+                for (int i = 0; i < properties.Length; i++)
                 {
-                    if (newData[i] is IList newItemData)
+                    if (properties[i].GetValue(source) is IList newItemData)
                     {
                         if (newItemData.Count > writeOperation.SheetMaxRecord)
                             throw new NotSupportedException($"For write multiple sheets each sheet count need less than SheetMaxRecord:{writeOperation.SheetMaxRecord}");
@@ -67,10 +68,9 @@ namespace JfYu.Office.Excel.Write.Implementation
         /// <param name="tType">The type of data.</param>
         /// <param name="writeOperation">Specifies the write operation to perform (e.g., None, Append).</param>
         /// <param name="titles">Optional dictionary of column titles.</param>        /// 
-        /// <param name="callback">Optional callback action to report progress.</param>
-        /// <param name="needAutoCreateSheet">Indicates whether to automatically create new sheets when the row limit is reached.</param>
+        /// <param name="callback">Optional callback action to report progress.</param> 
         /// <exception cref="InvalidOperationException">Thrown when a title's value cannot be found.</exception>
-        protected void Write(IQueryable data, IWorkbook workbook, Type tType, JfYuExcelOptions writeOperation, Dictionary<string, string>? titles, Action<int>? callback = null, bool needAutoCreateSheet = true)
+        protected void Write(IQueryable data, IWorkbook workbook, Type tType, JfYuExcelOptions writeOperation, Dictionary<string, string>? titles, Action<int>? callback = null)
         {
             if (tType.IsSimpleType())
                 titles ??= new Dictionary<string, string>() { { "A", "A" } };

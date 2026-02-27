@@ -4,6 +4,7 @@ using JfYu.Office.Excel.Write.Interface;
 using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace JfYu.Office.Excel.Write
@@ -67,10 +68,16 @@ namespace JfYu.Office.Excel.Write
                 //Store values in text format to ensure accuracy
                 case TypeCode.Int64:
                 case TypeCode.UInt64:
-                case TypeCode.Double:
-                case TypeCode.Single:
-                case TypeCode.Decimal:
                     cell.SetCellValue(value.ToString());
+                    break;
+                case TypeCode.Double:
+                    cell.SetCellValue(((double)value).ToString("G17", CultureInfo.InvariantCulture));
+                    break;
+                case TypeCode.Single:
+                    cell.SetCellValue(((float)value).ToString("G9", CultureInfo.InvariantCulture));
+                    break;
+                case TypeCode.Decimal:
+                    cell.SetCellValue(((decimal)value).ToString("G29", CultureInfo.InvariantCulture));
                     break;
 
                 case TypeCode.Boolean:

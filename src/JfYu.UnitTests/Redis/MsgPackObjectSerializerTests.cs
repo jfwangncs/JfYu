@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Redis.Serializer.MessagePack;
 using JfYu.UnitTests.Models;
 using MessagePack;
@@ -48,4 +47,3 @@ namespace JfYu.UnitTests.Redis
         }
     }
 }
-#endif

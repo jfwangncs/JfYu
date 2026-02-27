@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Redis.Extensions;
 using JfYu.Redis.Implementation;
 using JfYu.Redis.Interface;
@@ -591,4 +590,3 @@ namespace JfYu.UnitTests.Redis
         #endregion Logs
     }
 }
-#endif

@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
 using JfYu.UnitTests.Models;
@@ -268,7 +267,7 @@ namespace JfYu.UnitTests.Redis
         {
             string key = nameof(SetMembersAsync_ReturnCorrectly);
             var value = new TestModelFaker().Generate();
-            List<object> values = ["v1", 1, "v3", 423.442, value, new TestModelFaker().Generate(2), "", new TestModelSubFaker().Generate()];
+            List<object> values = ["v1", 1, "v3", 423.442, value, new TestModelFaker().Generate(2), "", new TestSubModelFaker().Generate()];
             await _redisService.SetAddAllAsync(key, values);
             var result = await _redisService.SetMembersAsync(key);
             Assert.Equal(values.Count, result.Count);
@@ -313,7 +312,7 @@ namespace JfYu.UnitTests.Redis
         public async Task SetLengthAsync_ReturnCorrectly()
         {
             string key = nameof(SetLengthAsync_ReturnCorrectly);
-            List<object> values = ["v1", 1, "v3", 423.442, new TestModelFaker().Generate(), new TestModelFaker().Generate(2), "", new TestModelSubFaker().Generate()];
+            List<object> values = ["v1", 1, "v3", 423.442, new TestModelFaker().Generate(), new TestModelFaker().Generate(2), "", new TestSubModelFaker().Generate()];
             await _redisService.SetAddAllAsync(key, values);
             var result = await _redisService.SetLengthAsync(key);
             Assert.Equal(values.Count, result);
@@ -432,4 +431,3 @@ namespace JfYu.UnitTests.Redis
         #endregion SetRandomMembersAsync
     }
 }
-#endif

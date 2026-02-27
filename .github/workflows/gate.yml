@@ -45,24 +45,19 @@ jobs:
           dotnet-version: |
             8.0.x
             9.0.x
+            10.0.x
       - name: Install dependencies
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
       - name: Test (8.0)
-        run: dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover --logger "trx;LogFileName=results8.trx"
+        run: dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results8.trx"
       - name: Upload test results (8.0)
         uses: actions/upload-artifact@v4
         with:
           name: test-results-linux8
           path: src/JfYu.UnitTests/TestResults/results8.trx
-
-      - name: Upload coverage results (8.0)
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-coverage8
-          path: src/JfYu.UnitTests/TestResults/coverage.net8.0.opencover.xml
 
       - name: Test (9.0)
         run: dotnet test --no-restore --verbosity normal -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results9.trx"
@@ -72,6 +67,19 @@ jobs:
           name: test-results-linux9
           path: src/JfYu.UnitTests/TestResults/results9.trx
 
+      - name: Test (10.0)
+        run: dotnet test --no-restore --verbosity normal -f net10.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover --logger "trx;LogFileName=results10.trx"
+      - name: Upload test results (10.0)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-linux10
+          path: src/JfYu.UnitTests/TestResults/results10.trx
+
+      - name: Upload coverage results (10.0)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-linux-coverage10
+          path: src/JfYu.UnitTests/TestResults/coverage.net10.0.opencover.xml
   win:
     runs-on: windows-latest
     permissions:
@@ -87,6 +95,7 @@ jobs:
           dotnet-version: |
             8.0.x
             9.0.x
+            10.0.x
       - name: Install dependencies
         run: dotnet restore
       - name: Build
@@ -117,6 +126,7 @@ jobs:
           dotnet test --no-restore --verbosity normal -f net481 --logger "trx;LogFileName=results4.trx"
           dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results8.trx"
           dotnet test --no-restore --verbosity normal -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results9.trx"
+          dotnet test --no-restore --verbosity normal -f net10.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results10.trx"
 
       - name: Upload test results (4.81)
         uses: actions/upload-artifact@v4
@@ -136,20 +146,11 @@ jobs:
           name: test-results-win9
           path: src/JfYu.UnitTests/TestResults/results9.trx
 
-      - name: Upload coverage results (9.0)
+      - name: Upload test results (10.0)
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-coverage9
-          path: src/JfYu.UnitTests/TestResults/coverage.net9.0.info
-
-      - name: Publish coverage report to coveralls.io (9.0)
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: src/JfYu.UnitTests/TestResults/coverage.net9.0.info
-          flag-name: win9
-          parallel: true
-
+          name: test-results-win10
+          path: src/JfYu.UnitTests/TestResults/results10.trx
   mac:
     runs-on: macos-latest
     permissions:
@@ -165,6 +166,7 @@ jobs:
           dotnet-version: |
             8.0.x
             9.0.x
+            10.0.x
       - name: Install dependencies
         run: dotnet restore
       - name: Build
@@ -207,7 +209,7 @@ jobs:
 
           dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results8.trx"
           dotnet test --no-restore --verbosity normal -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results9.trx"
-
+          dotnet test --no-restore --verbosity normal -f net10.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results10.trx"
       - name: Upload test results (8.0)
         uses: actions/upload-artifact@v4
         with:
@@ -220,15 +222,11 @@ jobs:
           name: test-results-mac9
           path: src/JfYu.UnitTests/TestResults/results9.trx
 
-  coverage:
-    needs: [win, ubuntu, mac]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@master
+      - name: Upload test results (10.0)
+        uses: actions/upload-artifact@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
+          name: test-results-mac10
+          path: src/JfYu.UnitTests/TestResults/results10.trx
 
   sonarcloud:
     needs: [win, ubuntu, mac]
@@ -248,18 +246,18 @@ jobs:
           run_id: ${{ github.run_id }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download test results (win9)
+      - name: Download test results (win10)
         uses: dawidd6/action-download-artifact@v9
         with:
-          name: test-results-win9
+          name: test-results-win10
           path: TestResults
           run_id: ${{ github.run_id }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download test results (coverage8)
+      - name: Download test results (coverage10)
         uses: dawidd6/action-download-artifact@v9
         with:
-          name: test-results-coverage8
+          name: test-results-linux-coverage10
           path: TestResults
           run_id: ${{ github.run_id }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -267,7 +265,7 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "9.0.x"
+          dotnet-version: "10.0.x"
       - name: Install SonarScanner for .NET
         run: dotnet tool install --global dotnet-sonarscanner
       - name: SonarCloud Begin
@@ -277,7 +275,7 @@ jobs:
             /o:"jfwang" \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.cs.vstest.reportsPaths=../TestResults/*.trx \
-            /d:sonar.cs.opencover.reportsPaths=../TestResults/coverage.net8.0.opencover.xml
+            /d:sonar.cs.opencover.reportsPaths=../TestResults/coverage.net10.0.opencover.xml
       - name: Build
         run: dotnet build --no-incremental
       - name: SonarCloud End

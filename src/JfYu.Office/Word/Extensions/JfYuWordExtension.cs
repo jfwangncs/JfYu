@@ -1,4 +1,4 @@
-﻿using JfYu.Office.Word.Constant;
+using JfYu.Office.Word.Constant;
 using NPOI.Util;
 using NPOI.XWPF.UserModel;
 using System;
@@ -26,11 +26,16 @@ namespace JfYu.Office.Word.Extensions
         /// </remarks>
         public static void CreatePicture(XWPFRun run, JfYuWordReplacement replacement)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNull(run);
+            ArgumentNullExceptionExtension.ThrowIfNull(replacement);
+#else
             ArgumentNullException.ThrowIfNull(run);
             ArgumentNullException.ThrowIfNull(replacement);
+#endif
             var placeholder = $"{{{replacement.Key}}}";
             var text = run.Text;
-            var texts = text.Split(placeholder);
+            var texts = text.Split([placeholder], StringSplitOptions.None);
             var beforeText = texts[0];
             var afterText = "";
             if (texts.Length > 1)

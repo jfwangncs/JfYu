@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Redis.Extensions;
 using JfYu.Redis.Interface;
 using JfYu.UnitTests.Models;
@@ -364,7 +363,7 @@ namespace JfYu.UnitTests.Redis
             var value = "testValue";
 
             var v1 = new TestModelFaker().Generate();
-            var v2 = new TestModelSubFaker().Generate();
+            var v2 = new TestSubModelFaker().Generate();
             await _redisService.ListAddAsync(key, value + "0");
             await _redisService.ListAddAsync(key, value + "1");
             await _redisService.ListAddAsync(key, value + "2");
@@ -390,7 +389,7 @@ namespace JfYu.UnitTests.Redis
             var value = "testValue";
 
             var v1 = new TestModelFaker().Generate();
-            var v2 = new TestModelSubFaker().Generate();
+            var v2 = new TestSubModelFaker().Generate();
             await _redisService.ListAddAsync(key, value + "0");
             await _redisService.ListAddAsync(key, value + "1");
             await _redisService.ListAddAsync(key, value + "2");
@@ -406,4 +405,3 @@ namespace JfYu.UnitTests.Redis
         #endregion ListGetRangeAsync
     }
 }
-#endif

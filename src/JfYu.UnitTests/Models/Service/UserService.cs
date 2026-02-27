@@ -1,4 +1,4 @@
-﻿#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using JfYu.Data.Context;
 using JfYu.Data.Service;
 using JfYu.UnitTests.Models.Entity;
@@ -11,7 +11,7 @@ namespace JfYu.UnitTests.Models.Service
     {
         public async Task<User?> GetByNickNameAsync(string nickName)
         {
-            return await Context.Set<User>().FirstOrDefaultAsync(u => u.NickName == nickName).ConfigureAwait(true);
+            return await _context.Set<User>().FirstOrDefaultAsync(u => u.NickName == nickName).ConfigureAwait(true);
         }
     }
 }

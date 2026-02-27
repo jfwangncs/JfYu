@@ -689,6 +689,236 @@ namespace JfYu.UnitTests.Request
         }
 
         #endregion
+
+        #region CookieContainer DI Resolution Tests (UseSharedCookieContainer=false)
+
+        [Fact]
+        public void Resolve_IJfYuRequest_WithoutSharedCookie_ShouldNotThrow()
+        {
+            // Arrange: Default registration (UseSharedCookieContainer=false)
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient();
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act & Assert: Should resolve without InvalidOperationException
+            var request = serviceProvider.GetRequiredService<IJfYuRequest>();
+            Assert.NotNull(request);
+        }
+
+        [Fact]
+        public void Resolve_IJfYuRequestFactory_WithoutSharedCookie_ShouldNotThrow()
+        {
+            // Arrange: Default registration (UseSharedCookieContainer=false)
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient();
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act & Assert: Should resolve without InvalidOperationException
+            var factory = serviceProvider.GetRequiredService<IJfYuRequestFactory>();
+            Assert.NotNull(factory);
+        }
+
+        [Fact]
+        public void Resolve_IJfYuRequest_WithExplicitFalse_ShouldNotThrow()
+        {
+            // Arrange: Explicitly set UseSharedCookieContainer=false
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = false;
+            });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act & Assert: Should resolve without InvalidOperationException
+            var request = serviceProvider.GetRequiredService<IJfYuRequest>();
+            Assert.NotNull(request);
+        }
+
+        [Fact]
+        public void Resolve_IJfYuRequestFactory_WithExplicitFalse_ShouldNotThrow()
+        {
+            // Arrange: Explicitly set UseSharedCookieContainer=false
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = false;
+            });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act & Assert: Should resolve without InvalidOperationException
+            var factory = serviceProvider.GetRequiredService<IJfYuRequestFactory>();
+            Assert.NotNull(factory);
+            var request = factory.CreateRequest();
+            Assert.NotNull(request);
+        }
+
+        [Fact]
+        public async Task Request_WithoutSharedCookie_SendAsync_Success()
+        {
+            // Arrange: No shared cookie container
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = false;
+            });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act
+            var request = serviceProvider.GetRequiredService<IJfYuRequest>();
+            request.Url = $"{_url.Url}/get?test=nocookie";
+            request.Method = HttpMethod.Get;
+            var response = await request.SendAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, request.StatusCode);
+            Assert.Contains("nocookie", response);
+        }
+
+        [Fact]
+        public async Task Factory_WithoutSharedCookie_SendAsync_Success()
+        {
+            // Arrange: No shared cookie container
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = false;
+            });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act
+            var factory = serviceProvider.GetRequiredService<IJfYuRequestFactory>();
+            var request = factory.CreateRequest();
+            request.Url = $"{_url.Url}/get?test=nocookie";
+            request.Method = HttpMethod.Get;
+            var response = await request.SendAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, request.StatusCode);
+            Assert.Contains("nocookie", response);
+        }
+
+        [Fact]
+        public async Task Request_WithoutSharedCookie_CookiesShouldNotPersistAcrossScopes()
+        {
+            // Arrange: No shared cookie container - cookies should be isolated per request
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = false;
+            });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act: First request sets cookies
+            using (var scope1 = serviceProvider.CreateScope())
+            {
+                var request1 = scope1.ServiceProvider.GetRequiredService<IJfYuRequest>();
+                request1.Url = $"{_url.Url}/cookies/set?session=abc123";
+                request1.Method = HttpMethod.Get;
+                await request1.SendAsync();
+                Assert.Equal(HttpStatusCode.OK, request1.StatusCode);
+            }
+
+            // Act: Second request should NOT have the cookies from first request
+            using (var scope2 = serviceProvider.CreateScope())
+            {
+                var request2 = scope2.ServiceProvider.GetRequiredService<IJfYuRequest>();
+                request2.Url = $"{_url.Url}/cookies";
+                request2.Method = HttpMethod.Get;
+                await request2.SendAsync();
+
+                // Assert: ResponseCookies should be empty since no shared CookieContainer
+                Assert.Empty(request2.ResponseCookies);
+            }
+        }
+
+        [Fact]
+        public void Resolve_WithSharedCookie_CookieContainerIsSingleton()
+        {
+            // Arrange: Enable shared cookie container
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = true;
+            });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act & Assert: CookieContainer should be registered and resolvable
+            var container = serviceProvider.GetService<CookieContainer>();
+            Assert.NotNull(container);
+
+            // Verify it's a singleton
+            var container2 = serviceProvider.GetService<CookieContainer>();
+            Assert.Same(container, container2);
+        }
+
+        [Fact]
+        public void Resolve_WithoutSharedCookie_CookieContainerNotRegistered()
+        {
+            // Arrange: Disable shared cookie container
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = false;
+            });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act & Assert: CookieContainer should NOT be registered
+            var container = serviceProvider.GetService<CookieContainer>();
+            Assert.Null(container);
+        }
+
+        [Fact]
+        public async Task Scoped_WithoutSharedCookie_MultipleScopes_ShouldNotThrow()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = false;
+            });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act: Create multiple scopes (simulating multiple HTTP requests in ASP.NET Core)
+            for (int i = 0; i < 5; i++)
+            {
+                using var scope = serviceProvider.CreateScope();
+                var request = scope.ServiceProvider.GetRequiredService<IJfYuRequest>();
+                request.Url = $"{_url.Url}/get?scope={i}";
+                request.Method = HttpMethod.Get;
+                var response = await request.SendAsync();
+
+                Assert.Equal(HttpStatusCode.OK, request.StatusCode);
+                Assert.Contains(i.ToString(), response);
+            }
+        }
+
+        [Fact]
+        public async Task Factory_WithoutSharedCookie_MultipleScopes_ShouldNotThrow()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = false;
+            });
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Act: Create multiple scoped factory instances
+            for (int i = 0; i < 5; i++)
+            {
+                using var scope = serviceProvider.CreateScope();
+                var factory = scope.ServiceProvider.GetRequiredService<IJfYuRequestFactory>();
+                var request = factory.CreateRequest();
+                request.Url = $"{_url.Url}/get?scope={i}";
+                request.Method = HttpMethod.Get;
+                var response = await request.SendAsync();
+
+                Assert.Equal(HttpStatusCode.OK, request.StatusCode);
+                Assert.Contains(i.ToString(), response);
+            }
+        }
+
+        #endregion
     }
 }
 #endif

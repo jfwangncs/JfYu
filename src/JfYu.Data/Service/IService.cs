@@ -23,25 +23,12 @@ namespace JfYu.Data.Service
         where TContext : DbContext
     {
         /// <summary>
-        /// Gets the master database context for write operations.
-        /// All Add, Update, and Remove operations use this context.
-        /// </summary>
-        public TContext Context { get; }
-
-        /// <summary>
-        /// Gets the readonly database context for read operations.
-        /// Randomly selects from configured read replicas or falls back to master if none configured.
-        /// All query operations use this context for load balancing.
-        /// </summary>
-        public TContext ReadonlyContext { get; }
-
-        /// <summary>
         /// Adds a single entity asynchronously to the master database.
         /// </summary>
         /// <param name="entity">The entity to add.</param>
         /// <param name="cancellationToken">Cancellation token for the async operation.</param>
         /// <returns>The number of state entries written to the database (typically 1 on success).</returns>
-        Task<int> AddAsync(T entity, CancellationToken cancellationToken= default);
+        Task<int> AddAsync(T entity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds multiple entities asynchronously to the master database in a single transaction.

@@ -400,7 +400,7 @@ catch (Exception ex)
 
 ## Multi-Targeting
 
-- **Targets**: `net8.0`
+- **Targets**: `netstandard2.0;net8.0;net9.0;net10.0`
 - **Dependencies**: NPOI for Office file manipulation
 
 ## License

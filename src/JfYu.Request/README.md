@@ -90,8 +90,10 @@ services.AddJfYuHttpClient(options =>
         client.DefaultRequestHeaders.Add("User-Agent", "MyApp/1.0");
     };
 
-    // Cookie container sharing (default: true)
+    // Cookie container sharing (default: false for thread safety)
     options.UseSharedCookieContainer = false; // Each request gets isolated cookies
+    // WARNING: Setting to true enables a shared CookieContainer that is NOT thread-safe.
+    // Concurrent requests may lead to race conditions. Use with caution in multi-threaded scenarios.
 
 }, filter =>
 {
@@ -260,6 +262,11 @@ client.Authorization = "test-token"; // sends: Authorization: Bearer test-token
 ```
 
 ## Cookies
+
+> **⚠️ WARNING: Thread Safety**
+> When `UseSharedCookieContainer = true`, the shared CookieContainer is NOT thread-safe.
+> Concurrent requests in multi-threaded environments may lead to race conditions and unpredictable behavior.
+> Use `UseSharedCookieContainer = false` (default) for thread-safe, isolated cookie management per request.
 
 ```csharp
 // No cookies
@@ -515,8 +522,8 @@ var request = provider.GetRequiredService<IJfYuRequest>();
 
 ## Performance
 
-- �?Uses `HttpClientFactory` for proper connection pooling
-- �?Handlers are reused across requests
-- �?Supports HTTP/2 and HTTP/3
-- �?Proper DNS refresh and connection lifecycle
-- �?No socket exhaustion issues
+- Uses `HttpClientFactory` for proper connection pooling
+- Handlers are reused across requests
+- Supports HTTP/2 and HTTP/3
+- Proper DNS refresh and connection lifecycle
+- No socket exhaustion issues

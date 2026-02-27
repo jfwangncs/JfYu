@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Office;
 using JfYu.Office.Excel;
 using JfYu.Office.Excel.Constant;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System.Data;
 using System.Globalization;
-using System.IO;
 
 namespace JfYu.UnitTests.Office.Excel
 {
@@ -512,4 +510,3 @@ namespace JfYu.UnitTests.Office.Excel
         #endregion Tuple
     }
 }
-#endif

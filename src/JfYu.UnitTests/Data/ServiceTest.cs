@@ -1,4 +1,4 @@
-﻿#if NET8_0_OR_GREATER 
+#if NET8_0_OR_GREATER
 using JfYu.Data.Model;
 using JfYu.UnitTests.Models;
 using JfYu.UnitTests.Models.Entity;
@@ -13,14 +13,16 @@ namespace JfYu.UnitTests.Data
     [Collection("Data")]
     public class ServiceTest
     {
-        private readonly IUserService _userService;
+        private readonly UserService _userService;
+        private readonly DataContext _context;
         public ServiceTest()
         {
             var services = new ServiceCollection();
             services.AddScoped<IUserService, UserService>();
             var serviceProvider = services.AddDataContextServices().BuildServiceProvider();
-            _userService = serviceProvider.GetRequiredService<IUserService>();
-            _userService.Context.Database.EnsureCreated();
+            _userService = (UserService)serviceProvider.GetRequiredService<IUserService>();
+            _context = serviceProvider.GetRequiredService<DataContext>();
+            _context.Database.EnsureCreated();
         }
 
         [Fact]
@@ -54,7 +56,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task AddAsync_Range_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             var users = new EFUserFaker().Generate(8);
             var result = await _userService.AddAsync(users).ConfigureAwait(true);
             Assert.Equal(8, result);
@@ -65,10 +67,10 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task UpdateAsync_Id_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(1)).ConfigureAwait(true);
-            _userService.Context.Departments.Add(new Department() { Id = 213, Name = "test" });
-            await _userService.Context.SaveChangesAsync();
+            _context.Departments.Add(new Department() { Id = 213, Name = "test" });
+            await _context.SaveChangesAsync();
             var user = await _userService.GetOneAsync().ConfigureAwait(true);
             user!.Status = (int)DataStatus.Disable;
             user.DepartmentId = 213;
@@ -86,11 +88,11 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task UpdateAsync_Again_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(1)).ConfigureAwait(true);
-            _userService.Context.Departments.Add(new Department() { Id = 213, Name = "test" });
-            _userService.Context.Departments.Add(new Department() { Id = 567, Name = "test1" });
-            await _userService.Context.SaveChangesAsync();
+            _context.Departments.Add(new Department() { Id = 213, Name = "test" });
+            _context.Departments.Add(new Department() { Id = 567, Name = "test1" });
+            await _context.SaveChangesAsync();
             var user = await _userService.GetOneAsync().ConfigureAwait(true);
             user!.Status = (int)DataStatus.Disable;
             user.DepartmentId = 213;
@@ -120,19 +122,19 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task UpdateAsync_Range_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(12)).ConfigureAwait(true);
             var users = await _userService.GetListAsync().ConfigureAwait(true);
             users = [.. users.Take(7).OrderBy(q => q.Id)];
             for (int i = 0; i < users.Count; i++)
             {
-                _userService.Context.Departments.Add(new Department() { Id = i + 1, Name = "test" });               
+                _context.Departments.Add(new Department() { Id = i + 1, Name = "test" });
                 var user = users[i];
                 user!.Status = (int)DataStatus.Disable;
                 user.DepartmentId = i + 1;
                 user.UserName = $"Test{i}";
             }
-            await _userService.Context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             var result = await _userService.UpdateAsync([.. users]).ConfigureAwait(true);
             Assert.Equal(7, result);
             var data = await _userService.GetListAsync(q => users.Select(q => q.Id).Contains(q.Id)).ConfigureAwait(true);
@@ -150,7 +152,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task UpdateAsync_Predicate_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(12)).ConfigureAwait(true);
 
             var users = await _userService.GetListAsync().ConfigureAwait(true);
@@ -158,9 +160,9 @@ namespace JfYu.UnitTests.Data
 
             for (int i = 0; i < users.Count; i++)
             {
-                _userService.Context.Departments.Add(new Department() { Id = i + 1, Name = "test" });
+                _context.Departments.Add(new Department() { Id = i + 1, Name = "test" });
             }
-            await _userService.Context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             var result = await _userService.UpdateAsync(q => users.Select(q => q.Id).Contains(q.Id), (i, q) =>
             {
                 q.Status = (int)DataStatus.Disable;
@@ -183,7 +185,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task UpdateAsync_PredicateReturnEmpty_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(12)).ConfigureAwait(true);
 
             var users = new List<User>();
@@ -200,7 +202,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task UpdateAsync_PredicateOrScalarIsNull_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(12)).ConfigureAwait(true);
 
             var users = new List<User>();
@@ -220,7 +222,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task RemoveAsync_PredicateReturnEmptyOrNull_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(10)).ConfigureAwait(true);
 
             var users = new List<User>();
@@ -235,7 +237,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task RemoveAsync_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(10)).ConfigureAwait(true);
 
             var users = await _userService.GetListAsync().ConfigureAwait(true);
@@ -255,7 +257,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task HardRemoveAsync_PredicateReturnEmptyOrNull_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(10)).ConfigureAwait(true);
 
             var users = new List<User>() { new() { Id = 9999, UserName = "ex" } };
@@ -270,7 +272,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task HardRemoveAsync_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(10)).ConfigureAwait(true);
 
             var users = await _userService.GetListAsync().ConfigureAwait(true);
@@ -286,7 +288,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task GetListAsync_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(10)).ConfigureAwait(true);
 
             var result = (await _userService.GetListAsync().ConfigureAwait(true)).Select(q => new TestSubModel()
@@ -309,7 +311,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task GetListAsync_WithPredicate_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(10)).ConfigureAwait(true);
 
             var result = (await _userService.GetListAsync(q => true).ConfigureAwait(true)).Select(q => new TestSubModel() { Id = q.Id, CardNum = q.UserName, ExpiresIn = q.CreatedTime }).ToList();
@@ -327,7 +329,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task GetSelectListAsyncAsync_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(10)).ConfigureAwait(true);
 
             var result = await _userService.GetSelectListAsync(q => new TestSubModel()
@@ -349,7 +351,7 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task GetSelectListAsync_WithPredicate_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(10)).ConfigureAwait(true);
 
             var result = await _userService.GetSelectListAsync(q => new TestSubModel() { Id = q.Id, CardNum = q.UserName }, q => true).ConfigureAwait(true);
@@ -366,13 +368,13 @@ namespace JfYu.UnitTests.Data
         [Fact]
         public async Task GetSelectListAsync_ScalarIsNull_Correctly()
         {
-            _userService.Context.Clear<User>();
+            _context.Clear<User>();
             await _userService.AddAsync(new EFUserFaker().Generate(10)).ConfigureAwait(true);
 
             var result = await _userService.GetSelectListAsync<TestSubModel>(null!).ConfigureAwait(true);
 
             Assert.Empty(result);
-        }         
+        }
     }
 }
 #endif

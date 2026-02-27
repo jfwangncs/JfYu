@@ -9,7 +9,7 @@ using StackExchange.Redis.KeyspaceIsolation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
 
 namespace JfYu.Redis.Implementation
 {
@@ -57,7 +57,7 @@ namespace JfYu.Redis.Implementation
             else
                 _database = Client.GetDatabase(redisConfiguration.Value.DbIndex).WithKeyPrefix(redisConfiguration.Value.Prefix);
             _serializer = serializer;
-            _lockToken = $"{Environment.MachineName}_{Environment.ProcessId}_{Guid.NewGuid()}";
+            _lockToken = $"{Environment.MachineName}_{Guid.NewGuid()}";
         }
 
         [LoggerMessage(EventId = 1, Level = LogLevel.Trace, Message = "Redis {Method} - Key: {Key}, Value: {Value}")]
@@ -77,7 +77,11 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public Task<bool> ExistsAsync(string key, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
+#endif
             Log(nameof(ExistsAsync), key);
             return _database.KeyExistsAsync(key, flag);
         }
@@ -85,7 +89,11 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<bool> RemoveAsync(string key, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
+#endif
             Log(nameof(RemoveAsync), key);
             return await _database.KeyDeleteAsync(key, flag).ConfigureAwait(false);
         }
@@ -95,36 +103,55 @@ namespace JfYu.Redis.Implementation
         {
             ArgumentNullExceptionExtension.ThrowIfNullOrEmpty(keys);
             Log(nameof(RemoveAllAsync), string.Join(", ", keys));
-            var redisKeys = keys.Select(q => (RedisKey)q);
-            return _database.KeyDeleteAsync([.. redisKeys], flag);
+
+            var redisKeys = new RedisKey[keys.Count];
+            for (int i = 0; i < keys.Count; i++)
+            {
+                redisKeys[i] = keys[i];
+            }
+
+            return _database.KeyDeleteAsync(redisKeys, flag);
         }
 
         /// <inheritdoc/>
         public async Task<T?> GetAsync<T>(string key, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            Log(nameof(GetAsync), key);
+#endif           
             var valueBytes = await _database.StringGetAsync(key, flag).ConfigureAwait(false);
-            return !valueBytes.HasValue ? default : Serializer.Deserialize<T>(valueBytes!);
+            var result = !valueBytes.HasValue ? default : Serializer.Deserialize<T>(valueBytes!);
+            Log(nameof(GetAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
         public async Task<T?> GetAsync<T>(string key, TimeSpan expiresIn, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
+#endif
             var result = await GetAsync<T>(key, flag).ConfigureAwait(false);
-            Log(nameof(GetAsync), key);
             if (!EqualityComparer<T?>.Default.Equals(result, default))
                 await _database.KeyExpireAsync(key, expiresIn).ConfigureAwait(false);
-
+            Log(nameof(GetAsync), key, result);
             return result;
         }
 
         /// <inheritdoc/>
         public async Task<bool> AddAsync<T>(string key, T value, TimeSpan expiresIn, When when = When.Always, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+            ArgumentNullExceptionExtension.ThrowIfNull(value);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullException.ThrowIfNull(value);
+#endif
             Log(nameof(AddAsync), key);
             var entryBytes = _serializer.Serialize(value);
             return await _database.StringSetAsync(key, entryBytes, expiresIn, when, flag).ConfigureAwait(false);
@@ -133,8 +160,13 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<bool> AddAsync<T>(string key, T value, When when = When.Always, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+            ArgumentNullExceptionExtension.ThrowIfNull(value);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
             ArgumentNullException.ThrowIfNull(value);
+#endif
             Log(nameof(AddAsync), key);
             var entryBytes = _serializer.Serialize(value);
             return await _database.StringSetAsync(key, entryBytes, null, when, flag).ConfigureAwait(false);
@@ -143,7 +175,11 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<bool> ExpireAsync(string key, TimeSpan expiresIn)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
+#endif
             Log(nameof(ExpireAsync), key);
             return await _database.KeyExpireAsync(key, expiresIn).ConfigureAwait(false);
         }
@@ -151,39 +187,63 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<long> IncrementAsync(string key, long value = 1, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            Log(nameof(IncrementAsync), key);
-            return await _database.StringIncrementAsync(key, value, flag).ConfigureAwait(false);
+#endif 
+            var result = await _database.StringIncrementAsync(key, value, flag).ConfigureAwait(false);
+            Log(nameof(IncrementAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
         public async Task<double> IncrementAsync(string key, double value, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            Log(nameof(IncrementAsync), key);
-            return await _database.StringIncrementAsync(key, value, flag).ConfigureAwait(false);
+#endif 
+            var result = await _database.StringIncrementAsync(key, value, flag).ConfigureAwait(false);
+            Log(nameof(IncrementAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
         public async Task<long> DecrementAsync(string key, long value = 1, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            Log(nameof(DecrementAsync), key);
-            return await _database.StringDecrementAsync(key, value, flag).ConfigureAwait(false);
+#endif 
+            var result = await _database.StringDecrementAsync(key, value, flag).ConfigureAwait(false);
+            Log(nameof(DecrementAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
         public async Task<double> DecrementAsync(string key, double value, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            Log(nameof(DecrementAsync), key);
-            return await _database.StringDecrementAsync(key, value, flag).ConfigureAwait(false);
+#endif 
+            var result = await _database.StringDecrementAsync(key, value, flag).ConfigureAwait(false);
+            Log(nameof(DecrementAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
         public async Task<bool> LockTakeAsync(string key, TimeSpan? expiresIn = null)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
+#endif
             Log(nameof(LockTakeAsync), key);
             return await _database.LockTakeAsync(key, _lockToken, expiresIn ?? TimeSpan.FromMinutes(1)).ConfigureAwait(false);
         }
@@ -191,7 +251,11 @@ namespace JfYu.Redis.Implementation
         /// <inheritdoc/>
         public async Task<bool> LockReleaseAsync(string key)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
+#endif
             Log(nameof(LockReleaseAsync), key);
             return await _database.LockReleaseAsync(key, _lockToken).ConfigureAwait(false);
         }
@@ -202,16 +266,21 @@ namespace JfYu.Redis.Implementation
             if (keys == null || keys.Count == 0)
                 throw new ArgumentException("The parameter 'keys' cannot be null or empty.", nameof(keys));
 
-            Log(nameof(GetBatchAsync), string.Join(", ", keys));
+            var redisKeys = new RedisKey[keys.Count];
+            for (int i = 0; i < keys.Count; i++)
+            {
+                redisKeys[i] = keys[i];
+            }
 
-            var redisKeys = keys.Select(k => (RedisKey)k).ToArray();
             var values = await _database.StringGetAsync(redisKeys, flag).ConfigureAwait(false);
 
-            var result = new Dictionary<string, T?>();
+            var result = new Dictionary<string, T?>(keys.Count);
             for (int i = 0; i < keys.Count; i++)
             {
                 result[keys[i]] = values[i].HasValue ? Serializer.Deserialize<T>(values[i]!) : default;
             }
+
+            Log(nameof(GetBatchAsync), string.Join(", ", keys), result);
 
             return result;
         }
@@ -224,38 +293,51 @@ namespace JfYu.Redis.Implementation
 
             Log(nameof(AddBatchAsync), string.Join(", ", keyValues.Keys));
 
-            var tasks = keyValues.Select(async kv =>
+            var tasks = new Task<bool>[keyValues.Count];
+            int index = 0;
+            foreach (var kv in keyValues)
             {
                 var serializedValue = _serializer.Serialize(kv.Value);
-                return await _database.StringSetAsync(kv.Key, serializedValue, expiresIn, When.Always, flag).ConfigureAwait(false);
-            });
+                tasks[index++] = _database.StringSetAsync(kv.Key, serializedValue, expiresIn, When.Always, flag);
+            }
 
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            return results.All(r => r);
+            return Array.TrueForAll(results, r => r);
         }
 
         /// <inheritdoc/>
         public async Task<TimeSpan?> GetTimeToLiveAsync(string key, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            Log(nameof(GetTimeToLiveAsync), key);
-            return await _database.KeyTimeToLiveAsync(key, flag).ConfigureAwait(false);
+#endif
+            var result = await _database.KeyTimeToLiveAsync(key, flag).ConfigureAwait(false);
+            Log(nameof(GetTimeToLiveAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
         public async Task<bool> PersistAsync(string key, CommandFlags flag = CommandFlags.None)
         {
+#if NETSTANDARD2_0
+            ArgumentNullExceptionExtension.ThrowIfNullOrWhiteSpace(key);
+#else
             ArgumentException.ThrowIfNullOrWhiteSpace(key);
-            Log(nameof(PersistAsync), key);
-            return await _database.KeyPersistAsync(key, flag).ConfigureAwait(false);
+#endif            
+            var result = await _database.KeyPersistAsync(key, flag).ConfigureAwait(false);
+            Log(nameof(PersistAsync), key, result);
+            return result;
         }
 
         /// <inheritdoc/>
         public async Task<TimeSpan> PingAsync()
         {
-            Log(nameof(PingAsync), "server");
-            return await _database.PingAsync().ConfigureAwait(false);
+            var result = await _database.PingAsync().ConfigureAwait(false);
+            Log(nameof(PingAsync), "server", result);
+            return result;
         }
     }
 }

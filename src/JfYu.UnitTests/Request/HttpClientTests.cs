@@ -532,7 +532,10 @@ namespace JfYu.UnitTests.Request
         public async Task Test_Cookies_Set()
         {
             var services = new ServiceCollection();
-            services.AddJfYuHttpClient();
+            services.AddJfYuHttpClient(options =>
+            {
+                options.UseSharedCookieContainer = true;
+            });
 
             services.AddSingleton<ILogger<JfYuHttpClient>>(q => { return null!; });
             var serviceProvider = services.BuildServiceProvider();

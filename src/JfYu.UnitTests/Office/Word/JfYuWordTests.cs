@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Office;
 using JfYu.Office.Word;
 using JfYu.Office.Word.Constant;
@@ -137,6 +136,4 @@ namespace JfYu.UnitTests.Office.Word
             Assert.True(hasImage);
         }
     }
-
-}
-#endif
+} 

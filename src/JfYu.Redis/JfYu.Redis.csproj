@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net8.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
 		<Version>8.1.5</Version>
 		<Description>A high-performance Redis client library for .NET with support for multiple serialization formats, distributed locking, and comprehensive data structure operations.</Description>
 	</PropertyGroup>

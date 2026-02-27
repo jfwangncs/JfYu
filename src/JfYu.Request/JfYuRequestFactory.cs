@@ -25,8 +25,8 @@ namespace JfYu.Request
         public JfYuRequestFactory(
             IHttpClientFactory httpClientFactory,
             JfYuHttpClientConfiguration defaultConfiguration,
-            CookieContainer? cookieContainer,
             LogFilter logFilter,
+            CookieContainer? cookieContainer = null,
             ILogger<JfYuHttpClient>? logger = null)
         {
             _httpClientFactory = httpClientFactory;
@@ -39,14 +39,14 @@ namespace JfYu.Request
         /// <inheritdoc/>
         public IJfYuRequest CreateRequest()
         {
-            return new JfYuHttpClient(_httpClientFactory, _defaultConfiguration, _cookieContainer, _logFilter, _logger);
+            return new JfYuHttpClient(_httpClientFactory, _defaultConfiguration, _logFilter, _cookieContainer, _logger);
         }
 
         /// <inheritdoc/>
         public IJfYuRequest CreateRequest(string httpClientName)
         {
             var config = new JfYuHttpClientConfiguration { HttpClientName = httpClientName };
-            return new JfYuHttpClient(_httpClientFactory, config, _cookieContainer, _logFilter, _logger);
+            return new JfYuHttpClient(_httpClientFactory, config, _logFilter, _cookieContainer, _logger);
         }
     }
 }

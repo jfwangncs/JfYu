@@ -7,7 +7,7 @@ A .NET library for WeChat Mini Program (小程序) API integration, providing si
 - **User Authentication**: Login with WeChat authorization code
 - **Phone Number Retrieval**: Get user's phone number with authorization
 - **Access Token Management**: Automatic token retrieval for server API calls
-- **Multi-Target Support**: Compatible with `netstandard2.0` and `net8.0`
+- **Multi-Target Support**: Compatible with `netstandard2.0`, `net8.0`, `net9.0`, and `net10.0`
 - **Dependency Injection**: Easy service registration with ASP.NET Core
 
 ## Installation

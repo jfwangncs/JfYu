@@ -1,4 +1,3 @@
-#if NET8_0_OR_GREATER
 using JfYu.Office;
 using JfYu.Office.Excel; 
 using Microsoft.Extensions.DependencyInjection; 
@@ -742,4 +741,3 @@ namespace JfYu.UnitTests.Office.Excel
         #endregion
     }
 }
-#endif

@@ -122,7 +122,7 @@ namespace JfYu.Redis.Interface
         /// Increments the numeric value of a key by the specified value only support Serializer=NewtonsoftSerializer
         /// </summary>
         /// <param name="key">The Redis key.</param>
-        /// <param name="value">The value by which to increment the key's value. Default is 1.</param>
+        /// <param name="value">The value by which to increment the key's value.</param>
         /// <param name="flag">Optional command flags. Default is CommandFlags.None.</param>
         /// <returns>The new numeric value..</returns>
         Task<double> IncrementAsync(string key, double value, CommandFlags flag = CommandFlags.None);
@@ -140,7 +140,7 @@ namespace JfYu.Redis.Interface
         /// Decrements the numeric value of a key by the specified value only support Serializer=NewtonsoftSerializer
         /// </summary>
         /// <param name="key">The Redis key.</param>
-        /// <param name="value">The value by which to increment the key's value. Default is 1.</param>
+        /// <param name="value">The value by which to increment the key's value.</param>
         /// <param name="flag">Optional command flags. Default is CommandFlags.None.</param>
         /// <returns>The new numeric value.</returns>
         Task<double> DecrementAsync(string key, double value, CommandFlags flag = CommandFlags.None);

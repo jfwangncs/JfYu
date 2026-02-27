@@ -13,7 +13,7 @@ A high-performance Redis client library for .NET with support for multiple seria
 - ✅ Key prefix support for multi-tenant scenarios
 - ✅ High-performance logging with LoggerMessage source generators
 - ✅ Custom value filtering for sensitive data
-- ✅ Multi-targeting: .NET Standard 2.0 and .NET 8.0
+- ✅ Multi-targeting: .NET Standard 2.0, .NET 8.0, .NET 9.0, and .NET 10.0
 
 ## Installation
 
