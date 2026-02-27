@@ -90,8 +90,8 @@ services.AddJfYuWord();
 
 Service classes (`IService<T, TContext>`) automatically provide:
 
-- `Context`: Master database for writes
-- `ReadonlyContext`: Randomly selected slave for reads
+- `_context`: Master database for writes
+- `_readonlyContext`: Randomly selected slave for reads
 - If no read replicas configured, falls back to master
 
 ### Configuration Binding
@@ -158,7 +158,7 @@ JfYu.Request provides `LogFilter` with:
 - **Don't** reference JfYu.Data in net481 projects - it's net8.0+ only
 - **Don't** forget `CopyToOutputDirectory` for test assets (appsettings, test files)
 - **Remember** xUnit collections share fixture state - use isolation techniques
-- **Use** `ReadonlyContext` for queries to leverage read replicas
+- **Use** `_readonlyContext` for queries to leverage read replicas
 - **Set** `NoWarn` for SYSLIB0014 in JfYu.Request (intentional use of obsolete APIs for netstandard2.0 compat)
 
 ## Project Files Reference

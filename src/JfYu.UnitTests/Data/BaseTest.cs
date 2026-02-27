@@ -1,11 +1,11 @@
-﻿#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using JfYu.Data.Constant;
 using JfYu.Data.Extension;
 using JfYu.Data.Service;
 using JfYu.UnitTests.Models.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Data.Entity;
+using System.Reflection;
 
 namespace JfYu.UnitTests.Data
 {
@@ -101,8 +101,15 @@ namespace JfYu.UnitTests.Data
 
             Assert.NotNull(dbContext);
             Assert.NotNull(useService);
-            Assert.Contains("127.0.0.1", useService.Context.Database.GetConnectionString());
-            Assert.Contains("127.0.0.1", useService.ReadonlyContext.Database.GetConnectionString());
+            var service = (Service<User, DataContext>)useService; 
+            var contextField =typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_context"));
+            var readonlyContextField = typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_readonlyContext"));
+
+            var context = contextField!.GetValue(service) as DataContext;
+            var readonlyContext = readonlyContextField!.GetValue(service) as DataContext;
+
+            Assert.Contains("127.0.0.1", context!.Database.GetConnectionString());
+            Assert.Contains("127.0.0.1", readonlyContext!.Database.GetConnectionString());
         }
 
         [Fact]
@@ -124,8 +131,15 @@ namespace JfYu.UnitTests.Data
             Assert.NotNull(dbContextReadOnly0);
             Assert.Contains("127.0.0.2", dbContextReadOnly0.Database.GetConnectionString());
 
-            Assert.Contains("127.0.0.1", useService.Context.Database.GetConnectionString());
-            Assert.Contains("127.0.0.2", useService.ReadonlyContext.Database.GetConnectionString());
+            var service = (Service<User, DataContext>)useService;
+            var contextField = typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_context"));
+            var readonlyContextField = typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_readonlyContext"));
+
+            var context = contextField!.GetValue(service) as DataContext;
+            var readonlyContext = readonlyContextField!.GetValue(service) as DataContext;
+
+            Assert.Contains("127.0.0.1", context!.Database.GetConnectionString());
+            Assert.Contains("127.0.0.2", readonlyContext!.Database.GetConnectionString());
         }
 
         [Fact]
@@ -152,8 +166,14 @@ namespace JfYu.UnitTests.Data
             Assert.NotNull(dbContextReadOnly1);
             Assert.Contains("127.0.0.3", dbContextReadOnly1.Database.GetConnectionString());
 
-            Assert.Contains("127.0.0.1", useService.Context.Database.GetConnectionString());
-            Assert.True(useService.ReadonlyContext.Database.GetConnectionString()!.Contains("127.0.0.2") || useService.ReadonlyContext.Database.GetConnectionString()!.Contains("127.0.0.3"));
+            var service = (Service<User, DataContext>)useService;
+            var contextField = typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_context"));
+            var readonlyContextField = typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_readonlyContext"));
+
+            var context = contextField!.GetValue(service) as DataContext;
+            var readonlyContext = readonlyContextField!.GetValue(service) as DataContext;
+            Assert.Contains("127.0.0.1", context!.Database.GetConnectionString());
+            Assert.True(readonlyContext!.Database.GetConnectionString()!.Contains("127.0.0.2") || readonlyContext!.Database.GetConnectionString()!.Contains("127.0.0.3"));
         }
 
         [Fact]
@@ -184,8 +204,14 @@ namespace JfYu.UnitTests.Data
             Assert.NotNull(dbContextReadOnly2);
             Assert.Contains("127.0.0.4", dbContextReadOnly2.Database.GetConnectionString());
 
-            Assert.Contains("127.0.0.1", useService.Context.Database.GetConnectionString());
-            Assert.True(useService.ReadonlyContext.Database.GetConnectionString()!.Contains("127.0.0.2") || useService.ReadonlyContext.Database.GetConnectionString()!.Contains("127.0.0.3") || useService.ReadonlyContext.Database.GetConnectionString()!.Contains("127.0.0.4"));
+            var service = (Service<User, DataContext>)useService;
+            var contextField = typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_context"));
+            var readonlyContextField = typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_readonlyContext"));
+
+            var context = contextField!.GetValue(service) as DataContext;
+            var readonlyContext = readonlyContextField!.GetValue(service) as DataContext;
+            Assert.Contains("127.0.0.1", context!.Database.GetConnectionString());
+            Assert.True(readonlyContext!.Database.GetConnectionString()!.Contains("127.0.0.2") || readonlyContext.Database.GetConnectionString()!.Contains("127.0.0.3") || readonlyContext.Database.GetConnectionString()!.Contains("127.0.0.4"));
         }
 
         [Fact]
@@ -229,7 +255,7 @@ namespace JfYu.UnitTests.Data
         {
             // Arrange & Act
             var services = new ServiceCollection();
-            
+
             // This will trigger ServerVersion.AutoDetect(config.ConnectionString)
             // because Version is not provided (null/empty)
             services.AddJfYuDbContext<DataContext>(q =>
@@ -238,9 +264,9 @@ namespace JfYu.UnitTests.Data
                 q.ConnectionString = "Server=localhost;Database=test;Uid=root;Pwd=password;";
                 // Version is intentionally not set to trigger AutoDetect branch
             });
-            
+
             var serviceProvider = services.BuildServiceProvider();
-            
+
             // Assert
             // This will fail to connect to actual MySQL, but it will execute
             // the ServerVersion.AutoDetect code path, increasing coverage
@@ -250,7 +276,7 @@ namespace JfYu.UnitTests.Data
                 // Accessing the database will trigger connection attempt
                 _ = dbContext.Database;
             });
-            
+
             // The exception is expected since we don't have a real MySQL server
             Assert.NotNull(exception);
         }
@@ -260,7 +286,7 @@ namespace JfYu.UnitTests.Data
         {
             // Arrange & Act
             var services = new ServiceCollection();
-            
+
             // This will trigger ServerVersion.AutoDetect(config.ConnectionString)
             // for MariaDB because Version is not provided (null/empty)
             services.AddJfYuDbContext<DataContext>(q =>
@@ -269,9 +295,9 @@ namespace JfYu.UnitTests.Data
                 q.ConnectionString = "Server=localhost;Database=test;Uid=root;Pwd=password;";
                 // Version is intentionally not set to trigger AutoDetect branch
             });
-            
+
             var serviceProvider = services.BuildServiceProvider();
-            
+
             // Assert
             // This will fail to connect to actual MariaDB, but it will execute
             // the ServerVersion.AutoDetect code path, increasing coverage
@@ -281,7 +307,7 @@ namespace JfYu.UnitTests.Data
                 // Accessing the database will trigger connection attempt
                 _ = dbContext.Database;
             });
-            
+
             // The exception is expected since we don't have a real MariaDB server
             Assert.NotNull(exception);
         }

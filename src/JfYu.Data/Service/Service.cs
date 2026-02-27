@@ -18,18 +18,25 @@ namespace JfYu.Data.Service
     public class Service<T, TContext>(TContext context, ReadonlyDBContext<TContext> readonlyDBContext) : IService<T, TContext> where T : BaseEntity
             where TContext : DbContext
     {
-        /// <inheritdoc/>
-        public TContext Context { get; } = context;
+        /// <summary>
+        /// Gets the master database context for write operations.
+        /// All Add, Update, and Remove operations use this context.
+        /// </summary>
+        protected TContext _context { get; } = context;
 
-        /// <inheritdoc/>
-        public TContext ReadonlyContext { get; } = readonlyDBContext.Current;
+        /// <summary>
+        /// Gets the readonly database context for read operations.
+        /// Randomly selects from configured read replicas or falls back to master if none configured.
+        /// All query operations use this context for load balancing.
+        /// </summary>
+        protected TContext _readonlyContext { get; } = readonlyDBContext.Current;
 
         /// <inheritdoc/>
         public virtual async Task<int> AddAsync(T entity, CancellationToken cancellationToken = default)
         {
             entity.CreatedTime = entity.UpdatedTime = DateTime.UtcNow;
-            await Context.AddAsync(entity,cancellationToken).ConfigureAwait(false);
-            return await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _context.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            return await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -40,16 +47,16 @@ namespace JfYu.Data.Service
             {
                 list[i].CreatedTime = list[i].UpdatedTime = now;
             }
-            await Context.AddRangeAsync(list, cancellationToken).ConfigureAwait(false);
-            return await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _context.AddRangeAsync(list, cancellationToken).ConfigureAwait(false);
+            return await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-        public virtual async Task<int> UpdateAsync(T entity , CancellationToken cancellationToken = default)
+        public virtual async Task<int> UpdateAsync(T entity, CancellationToken cancellationToken = default)
         {
             entity.UpdatedTime = DateTime.UtcNow;
-            Context.Update(entity);
-            int saveChanges = await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            _context.Update(entity);
+            int saveChanges = await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return saveChanges;
         }
 
@@ -61,8 +68,8 @@ namespace JfYu.Data.Service
             {
                 list[i].UpdatedTime = now;
             }
-            Context.UpdateRange(list);
-            int saveChanges = await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            _context.UpdateRange(list);
+            int saveChanges = await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return saveChanges;
         }
 
@@ -71,7 +78,7 @@ namespace JfYu.Data.Service
         {
             if (predicate == null || selector == null)
                 return 0;
-            var data = await Context.Set<T>().Where(predicate).ToListAsync(cancellationToken).ConfigureAwait(false);
+            var data = await _context.Set<T>().Where(predicate).ToListAsync(cancellationToken).ConfigureAwait(false);
             var now = DateTime.UtcNow;
             for (int i = 0; i < data.Count; i++)
             {
@@ -79,7 +86,7 @@ namespace JfYu.Data.Service
                 data[i].UpdatedTime = now;
             }
 
-            return await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -93,9 +100,9 @@ namespace JfYu.Data.Service
             {
                 list[i].UpdatedTime = now;
                 list[i].Status = (int)DataStatus.Disable;
-                Context.Update(list[i]);
+                _context.Update(list[i]);
             }
-            return await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -107,9 +114,9 @@ namespace JfYu.Data.Service
             var lists = await GetListAsync(predicate, cancellationToken).ConfigureAwait(false);
             for (int i = 0; i < lists.Count; i++)
             {
-                Context.Remove(lists[i]);
+                _context.Remove(lists[i]);
             }
-            return await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -117,8 +124,8 @@ namespace JfYu.Data.Service
         {
             return predicate switch
             {
-                null => await ReadonlyContext.Set<T>().FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false),
-                _ => await ReadonlyContext.Set<T>().FirstOrDefaultAsync(predicate, cancellationToken).ConfigureAwait(false)
+                null => await _readonlyContext.Set<T>().FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false),
+                _ => await _readonlyContext.Set<T>().FirstOrDefaultAsync(predicate, cancellationToken).ConfigureAwait(false)
             };
         }
 
@@ -127,8 +134,8 @@ namespace JfYu.Data.Service
         {
             return predicate switch
             {
-                null => await ReadonlyContext.Set<T>().ToListAsync(cancellationToken).ConfigureAwait(false),
-                _ => await ReadonlyContext.Set<T>().Where(predicate).ToListAsync(cancellationToken).ConfigureAwait(false)
+                null => await _readonlyContext.Set<T>().ToListAsync(cancellationToken).ConfigureAwait(false),
+                _ => await _readonlyContext.Set<T>().Where(predicate).ToListAsync(cancellationToken).ConfigureAwait(false)
             };
         }
 
@@ -139,8 +146,8 @@ namespace JfYu.Data.Service
                 return [];
             return predicate switch
             {
-                null => await ReadonlyContext.Set<T>().Select(selector).ToListAsync(cancellationToken).ConfigureAwait(false),
-                _ => await ReadonlyContext.Set<T>().Where(predicate).Select(selector).ToListAsync(cancellationToken).ConfigureAwait(false)
+                null => await _readonlyContext.Set<T>().Select(selector).ToListAsync(cancellationToken).ConfigureAwait(false),
+                _ => await _readonlyContext.Set<T>().Where(predicate).Select(selector).ToListAsync(cancellationToken).ConfigureAwait(false)
             };
         }
     }
