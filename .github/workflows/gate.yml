@@ -52,7 +52,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Test (8.0)
-        run: dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover --logger "trx;LogFileName=results8.trx"
+        run: dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results8.trx"
       - name: Upload test results (8.0)
         uses: actions/upload-artifact@v4
         with:
@@ -68,7 +68,7 @@ jobs:
           path: src/JfYu.UnitTests/TestResults/results9.trx
 
       - name: Test (10.0)
-        run: dotnet test --no-restore --verbosity normal -f net10.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results10.trx"
+        run: dotnet test --no-restore --verbosity normal -f net10.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover --logger "trx;LogFileName=results10.trx"
       - name: Upload test results (10.0)
         uses: actions/upload-artifact@v4
         with:
@@ -151,21 +151,6 @@ jobs:
         with:
           name: test-results-win10
           path: src/JfYu.UnitTests/TestResults/results10.trx
-
-      - name: Upload coverage results (10.0)
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-win-coverage10
-          path: src/JfYu.UnitTests/TestResults/coverage.net10.0.info
-
-      - name: Publish coverage report to coveralls.io (10.0)
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: src/JfYu.UnitTests/TestResults/coverage.net10.0.info
-          flag-name: win10
-          parallel: true
-
   mac:
     runs-on: macos-latest
     permissions:
@@ -242,16 +227,6 @@ jobs:
         with:
           name: test-results-mac10
           path: src/JfYu.UnitTests/TestResults/results10.trx
-
-  coverage:
-    needs: [win, ubuntu, mac]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
 
   sonarcloud:
     needs: [win, ubuntu, mac]
