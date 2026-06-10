@@ -34,7 +34,7 @@ public class UpdateBenchmark
         _service = new Service<BenchmarkUser, BenchmarkDbContext>(
             _serviceContext, new ReadonlyDBContext<BenchmarkDbContext>(_serviceContext));
 
-        _serviceUsers = _serviceContext.BenchmarkUsers.ToList();
+        _serviceUsers = [.. _serviceContext.BenchmarkUsers];
         for (int i = 0; i < _serviceUsers.Count; i++)
         {
             _serviceUsers[i].UserName = $"Updated_{i}";
@@ -48,7 +48,7 @@ public class UpdateBenchmark
         _efCoreContext.BenchmarkUsers.AddRange(faker.Generate(Count));
         _efCoreContext.SaveChanges();
 
-        _efCoreUsers = _efCoreContext.BenchmarkUsers.ToList();
+        _efCoreUsers = [.. _efCoreContext.BenchmarkUsers];
         for (int i = 0; i < _efCoreUsers.Count; i++)
         {
             _efCoreUsers[i].UserName = $"Updated_{i}";
