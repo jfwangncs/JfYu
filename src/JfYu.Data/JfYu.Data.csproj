@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net9.0;net10.0</TargetFrameworks>	
 		<Version>10.0.2</Version>
-		<Description>EF Core read-write separation with multi-database support (SqlServer, MySql, Sqlite, InMemory)</Description>
+		<Description>EF Core read-write separation with multi-database support (SqlServer, MySql, Sqlite, PostgreSQL, InMemory)</Description>
 	</PropertyGroup>
 	
 	<ItemGroup>
@@ -15,5 +15,6 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
 		<PackageReference Include="Microting.EntityFrameworkCore.MySql" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
 	</ItemGroup>
 </Project>

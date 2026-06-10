@@ -115,6 +115,10 @@ namespace JfYu.Data.Extension
                     optionsBuilder.UseSqlite(config.ConnectionString);
                     break;
 
+                case DatabaseType.PostgreSQL:
+                    optionsBuilder.UseNpgsql(config.ConnectionString);
+                    break;
+
                 case DatabaseType.Memory:
                     optionsBuilder.UseInMemoryDatabase(config.ConnectionString);
                     break;

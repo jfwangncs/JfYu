@@ -26,6 +26,11 @@
         Sqlite,
 
         /// <summary>
+        /// PostgreSQL.
+        /// </summary>
+        PostgreSQL,
+
+        /// <summary>
         /// Memory for test.
         /// </summary>
         Memory
