@@ -14,19 +14,19 @@ Multi-targeted .NET toolkit library providing reusable components for data acces
 - **JfYu.Redis**: High-performance Redis client with Pub/Sub messaging, distributed locking, multiple serialization formats, and comprehensive data structure operations
 - **JfYu.Office**: Excel and Word document manipulation library supporting multiple data sources, template-based generation, and high-performance streaming
 - **JfYu.WeChat**: WeChat Mini Program integration with typed APIs for authentication, access token management, and phone number retrieval
-- **JfYu.UnitTests**: Multi-framework tests (net481, net8.0, net9.0, net10.0) with xUnit
+- **JfYu.UnitTests**: Multi-framework tests (net481, net9.0, net10.0) with xUnit
 - **JfYu.Benchmark**: BenchmarkDotNet performance benchmarks comparing JfYu.Data Service layer vs raw EF Core
 
 ### Multi-Targeting Strategy
 
-- **JfYu.Request**: `netstandard2.0;net8.0;net9.0;net10.0` for broad compatibility
-- **JfYu.RabbitMQ**: `netstandard2.0;net8.0;net9.0;net10.0` for broad compatibility
-- **JfYu.Redis**: `netstandard2.0;net8.0;net9.0;net10.0` for broad compatibility
-- **JfYu.Office**: `netstandard2.0;net8.0;net9.0;net10.0` for broad compatibility
-- **JfYu.WeChat**: `netstandard2.0;net8.0;net9.0;net10.0` for broad compatibility
-- **JfYu.Data**: `net8.0;net9.0;net10.0` (requires modern EF Core features)
-- **JfYu.UnitTests**: `net481;net8.0;net9.0;net10.0` for comprehensive testing
-- **JfYu.Benchmark**: `net8.0` for performance benchmarking
+- **JfYu.Request**: `netstandard2.0;net9.0;net10.0` for broad compatibility
+- **JfYu.RabbitMQ**: `netstandard2.0;net9.0;net10.0` for broad compatibility
+- **JfYu.Redis**: `netstandard2.0;net9.0;net10.0` for broad compatibility
+- **JfYu.Office**: `netstandard2.0;net9.0;net10.0` for broad compatibility
+- **JfYu.WeChat**: `netstandard2.0;net9.0;net10.0` for broad compatibility
+- **JfYu.Data**: `net9.0;net10.0` (requires modern EF Core features)
+- **JfYu.UnitTests**: `net481;net9.0;net10.0` for comprehensive testing
+- **JfYu.Benchmark**: `net10.0` for performance benchmarking
 - Use `#if NET8_0_OR_GREATER` preprocessor directives to conditionally compile Data-dependent code
 
 ## Key Patterns
@@ -106,14 +106,14 @@ Tests use layered JSON configuration with `appsettings.local.json` overriding `a
 cd src
 dotnet restore
 dotnet build --configuration Release
-dotnet test -f net8.0  # Or net481, net9.0
+dotnet test -f net9.0  # Or net481, net10.0
 ```
 
 ### Running Tests with Coverage
 
 ```cmd
-# Generate OpenCover format (net8.0)
-dotnet test -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover
+# Generate OpenCover format (net10.0)
+dotnet test -f net10.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover
 
 # Generate LCOV format (net9.0)
 dotnet test -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
@@ -121,9 +121,9 @@ dotnet test -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:
 
 ### CI/CD Pipeline (gate.yml)
 
-- **ubuntu**: Tests net8.0/9.0, generates coverage for SonarCloud
-- **win**: Tests net481/8.0/9.0, uploads to Coveralls
-- **mac**: Tests net8.0/9.0
+- **ubuntu**: Tests net9.0/10.0, generates coverage for SonarCloud
+- **win**: Tests net481/9.0/10.0, uploads to Coveralls
+- **mac**: Tests net9.0/10.0
 - **sonarcloud**: Aggregates test results and coverage analysis
 - **Secrets injection**: Before tests run, RabbitMQ credentials are injected into `appsettings.json` using platform-specific sed/PowerShell commands
 
@@ -155,7 +155,7 @@ JfYu.Request provides `LogFilter` with:
 
 ## Common Pitfalls
 
-- **Don't** reference JfYu.Data in net481 projects - it's net8.0+ only
+- **Don't** reference JfYu.Data in net481 projects - it's net9.0+ only
 - **Don't** forget `CopyToOutputDirectory` for test assets (appsettings, test files)
 - **Remember** xUnit collections share fixture state - use isolation techniques
 - **Use** `_readonlyContext` for queries to leverage read replicas
