@@ -27,7 +27,8 @@
 		<PackageReference Include="System.Data.SQLite" />
 		<PackageReference Include="System.Data.SQLite.Linq" />
 		<PackageReference Include="System.Data.SQLite.EF6" />
-	</ItemGroup> 
+		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\JfYu.Data\JfYu.Data.csproj" Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'" />

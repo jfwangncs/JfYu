@@ -52,12 +52,15 @@
 		<PackageVersion Include="EntityFramework" Version="6.5.2" />
 		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.6.0" />
 		<PackageVersion Include="NPOI" Version="2.8.0" />
+		<PackageVersion Include="SkiaSharp" Version="3.119.2" />
 		<PackageVersion Include="MessagePack" Version="3.1.7" />
 		<PackageVersion Include="StackExchange.Redis" Version="2.13.17" />
 		<PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageVersion Include="System.Data.SQLite.Linq" Version="1.0.119" />
 		<PackageVersion Include="System.Data.SQLite" Version="2.0.3" />
 		<PackageVersion Include="System.Data.SQLite.EF6" Version="2.0.3" />
+		<!-- System.Data.SQLite 2.0.3 P/Invokes the e_sqlite3 native directly; this package supplies it for the net481 build. -->
+		<PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.6" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="xunit" PrivateAssets="all" />

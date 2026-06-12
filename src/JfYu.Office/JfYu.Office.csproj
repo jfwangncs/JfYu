@@ -8,6 +8,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Options" />
 		<PackageReference Include="NPOI" />
-		<PackageReference Include="Microsoft.CSharp" /> 
+		<PackageReference Include="SkiaSharp" />
+		<PackageReference Include="Microsoft.CSharp" />
 	</ItemGroup>
 </Project>
