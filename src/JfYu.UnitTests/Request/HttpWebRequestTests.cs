@@ -458,11 +458,11 @@ namespace JfYu.UnitTests.Request
                 File.Delete(path);
 
             await client.DownloadFileAsync(path);
-            
+
             Assert.Equal(HttpStatusCode.OK, client.StatusCode);
             Assert.Empty(client.ResponseCookies);
             Assert.True(File.Exists(path));
-            
+
             if (File.Exists(path))
                 File.Delete(path);
         }
@@ -478,7 +478,7 @@ namespace JfYu.UnitTests.Request
             };
 
             using var stream = await client.DownloadFileAsync();
-            
+
             Assert.Equal(HttpStatusCode.OK, client.StatusCode);
             Assert.Empty(client.ResponseCookies);
             Assert.NotNull(stream);
@@ -726,7 +726,7 @@ namespace JfYu.UnitTests.Request
             var path = nameof(Test_DownloadFile_ContentLengthNull);
             if (File.Exists(path))
                 File.Delete(path);
-            client.Url = "http://httpbin.org/status/204";
+            client.Url = $"{_url.Url}/status/204";
 
             using var stream = await client.DownloadFileAsync();
             var flag = await client.DownloadFileAsync(path);
@@ -746,7 +746,7 @@ namespace JfYu.UnitTests.Request
         public async Task Test_DownloadFile_Get500()
         {
             var client = new JfYuHttpRequest();
-            var path = nameof(Test_DownloadFile_ContentLengthNull);
+            var path = nameof(Test_DownloadFile_Get500);
             client.Url = $"{_url.Url}/status/500";
             var ex = await Record.ExceptionAsync(() => client.DownloadFileAsync());
             Assert.IsType<Exception>(ex, exactMatch: false);
@@ -841,7 +841,7 @@ namespace JfYu.UnitTests.Request
             };
 
             var ex = await Assert.ThrowsAsync<WebException>(() => client.SendAsync());
-            Assert.Contains("example", ex.Message); 
+            Assert.Contains("example", ex.Message);
         }
 
         #endregion Logger
@@ -858,7 +858,7 @@ namespace JfYu.UnitTests.Request
             };
 
             var ex = await Record.ExceptionAsync(() => client.SendAsync());
-            Assert.IsType<Exception>(ex, exactMatch: false); 
+            Assert.IsType<Exception>(ex, exactMatch: false);
         }
 
         [Fact]
@@ -877,7 +877,7 @@ namespace JfYu.UnitTests.Request
                         }
             };
 
-            await Assert.ThrowsAsync<DivideByZeroException>(() => client.SendAsync()); 
+            await Assert.ThrowsAsync<DivideByZeroException>(() => client.SendAsync());
         }
 
         [Fact]
@@ -891,7 +891,7 @@ namespace JfYu.UnitTests.Request
             var ex = await Record.ExceptionAsync(() => client.DownloadFileAsync(path, (q, w, e) => { int.Parse("x"); }));
             var ex1 = await Record.ExceptionAsync(() => client.DownloadFileAsync((q, w, e) => { int.Parse("x"); }));
             Assert.IsType<Exception>(ex, exactMatch: false);
-            Assert.IsType<Exception>(ex1, exactMatch: false); 
+            Assert.IsType<Exception>(ex1, exactMatch: false);
         }
 
         #endregion Exception With Logger

@@ -887,7 +887,7 @@ namespace JfYu.UnitTests.Request
             services.AddSingleton<ILogger<JfYuHttpClient>>(q => { return null!; });
             var serviceProvider = services.BuildServiceProvider();
             var client = serviceProvider.GetRequiredService<IJfYuRequest>();
-            var path = nameof(Test_DownloadFile_ContentLengthNull);
+            var path = nameof(Test_DownloadFile_Get500);
             client.Url = $"{_url.Url}/status/500";
             var response = await client.DownloadFileAsync();
             var flag = await client.DownloadFileAsync(path);
