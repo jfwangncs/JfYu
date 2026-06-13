@@ -174,7 +174,7 @@ jobs:
 
           python3 -m venv venv
           source venv/bin/activate
-          python3 -m pip install pip=26.1.2
+          python3 -m pip install pip==26.1.2
           python3 -m pip install httpbin==0.10.2 uvicorn==0.49.0 asgiref==3.11.1
 
           cat << 'EOF' > asgi_httpbin.py
