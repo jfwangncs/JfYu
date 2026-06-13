@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net9.0;net10.0</TargetFrameworks>	
 		<Version>10.0.2</Version>
-		<Description>EF Core read-write separation with multi-database support (SqlServer, MySql, Sqlite, PostgreSQL, InMemory)</Description>
+		<Description>EF Core read-write separation with multi-database support (SqlServer, MySql, MariaDB,Sqlite, PostgreSQL, InMemory)</Description>
 	</PropertyGroup>
 	
 	<ItemGroup>
