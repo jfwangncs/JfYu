@@ -251,6 +251,24 @@ namespace JfYu.UnitTests.Data
         }
 
         [Fact]
+        public void AddService_UsePostgreSQL_Branch()
+        {
+            // Act
+            var services = new ServiceCollection();
+            services.AddJfYuDbContext<DataContext>(q =>
+            {
+                q.DatabaseType = DatabaseType.PostgreSQL;
+                q.ConnectionString = "Host=test.com;Database=Fake;Username=postgres;Password=Pwd;";
+            });
+            var serviceProvider = services.BuildServiceProvider();
+            // Assert
+            var dbContext = serviceProvider.GetService<DataContext>();
+
+            Assert.NotNull(dbContext);
+            Assert.Contains("test.com", dbContext.Database.GetConnectionString());
+        }
+
+        [Fact]
         public void AddService_UseMySql_WithoutVersion_AutoDetect()
         {
             // Arrange & Act

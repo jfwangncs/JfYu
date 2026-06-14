@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net481;net8.0;net9.0;net10.0</TargetFrameworks>
+		<TargetFrameworks>net481;net9.0;net10.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
@@ -27,10 +27,11 @@
 		<PackageReference Include="System.Data.SQLite" />
 		<PackageReference Include="System.Data.SQLite.Linq" />
 		<PackageReference Include="System.Data.SQLite.EF6" />
-	</ItemGroup> 
+		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" />
+	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\JfYu.Data\JfYu.Data.csproj" Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'" />
+		<ProjectReference Include="..\JfYu.Data\JfYu.Data.csproj" Condition="'$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'" />
 		<ProjectReference Include="..\JfYu.Office\JfYu.Office.csproj" />
 		<ProjectReference Include="..\JfYu.RabbitMQ\JfYu.RabbitMQ.csproj" />
 		<ProjectReference Include="..\JfYu.Redis\JfYu.Redis.csproj" />

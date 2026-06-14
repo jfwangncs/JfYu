@@ -862,7 +862,7 @@ namespace JfYu.UnitTests.Request
             var path = nameof(Test_DownloadFile_ContentLengthNull);
             if (File.Exists(path))
                 File.Delete(path);
-            client.Url = "http://httpbin.org/status/204";
+            client.Url = $"{_url.Url}/status/204";
 
             using var stream = await client.DownloadFileAsync();
             var flag = await client.DownloadFileAsync(path);
@@ -887,7 +887,7 @@ namespace JfYu.UnitTests.Request
             services.AddSingleton<ILogger<JfYuHttpClient>>(q => { return null!; });
             var serviceProvider = services.BuildServiceProvider();
             var client = serviceProvider.GetRequiredService<IJfYuRequest>();
-            var path = nameof(Test_DownloadFile_ContentLengthNull);
+            var path = nameof(Test_DownloadFile_Get500);
             client.Url = $"{_url.Url}/status/500";
             var response = await client.DownloadFileAsync();
             var flag = await client.DownloadFileAsync(path);
@@ -1001,7 +1001,7 @@ namespace JfYu.UnitTests.Request
             client.Url = $"{_url.Url}/get";
 
             var ex = await Record.ExceptionAsync(() => client.SendAsync());
-            Assert.IsType<Exception>(ex, exactMatch: false); 
+            Assert.IsType<Exception>(ex, exactMatch: false);
         }
 
         [Fact]
@@ -1023,7 +1023,7 @@ namespace JfYu.UnitTests.Request
                     };
 
 
-            await Assert.ThrowsAsync<DivideByZeroException>(() => client.SendAsync()); 
+            await Assert.ThrowsAsync<DivideByZeroException>(() => client.SendAsync());
         }
 
         [Fact]
@@ -1042,7 +1042,7 @@ namespace JfYu.UnitTests.Request
             var ex = await Record.ExceptionAsync(() => client.DownloadFileAsync(path, (q, w, e) => { int.Parse("x"); }));
             var ex1 = await Record.ExceptionAsync(() => client.DownloadFileAsync((q, w, e) => { int.Parse("x"); }));
             Assert.IsType<Exception>(ex, exactMatch: false);
-            Assert.IsType<Exception>(ex1, exactMatch: false);            
+            Assert.IsType<Exception>(ex1, exactMatch: false);
         }
 
         #endregion Exception With Logger

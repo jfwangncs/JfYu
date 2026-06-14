@@ -1,4 +1,4 @@
-﻿name: Build
+name: Build
 on:
   pull_request:
     branches: [master]
@@ -7,6 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       checks: write
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [net9.0, net10.0]
+        include:
+          - framework: net9.0
+            coverage-format: lcov
+          - framework: net10.0
+            coverage-format: opencover
     defaults:
       run:
         working-directory: src
@@ -30,85 +39,75 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install fonts
         run: |
-          sudo apt-get update && sudo apt-get install -y fonts-noto fonts-dejavu-core 
+          sudo apt-get update && sudo apt-get install -y fonts-noto fonts-dejavu-core
           if [ ! -f "/usr/lib/x86_64-linux-gnu/libdl.so" ]; then
             sudo ln -s /usr/lib/x86_64-linux-gnu/libdl.so.2 /usr/lib/x86_64-linux-gnu/libdl.so
           fi
           export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
           echo "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> $GITHUB_ENV
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: |
-            8.0.x
             9.0.x
             10.0.x
       - name: Install dependencies
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
-
-      - name: Test (8.0)
-        run: dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results8.trx"
-      - name: Upload test results (8.0)
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal -f ${{ matrix.framework }} /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=${{ matrix.coverage-format }} --logger "trx;LogFileName=results.trx"
+      - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-linux8
-          path: src/JfYu.UnitTests/TestResults/results8.trx
-
-      - name: Test (9.0)
-        run: dotnet test --no-restore --verbosity normal -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results9.trx"
-      - name: Upload test results (9.0)
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-linux9
-          path: src/JfYu.UnitTests/TestResults/results9.trx
-
-      - name: Test (10.0)
-        run: dotnet test --no-restore --verbosity normal -f net10.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover --logger "trx;LogFileName=results10.trx"
-      - name: Upload test results (10.0)
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-linux10
-          path: src/JfYu.UnitTests/TestResults/results10.trx
-
-      - name: Upload coverage results (10.0)
+          name: test-results-linux-${{ matrix.framework }}
+          path: src/JfYu.UnitTests/TestResults/results.trx
+      - name: Upload coverage results
+        if: matrix.framework == 'net10.0'
         uses: actions/upload-artifact@v4
         with:
           name: test-results-linux-coverage10
           path: src/JfYu.UnitTests/TestResults/coverage.net10.0.opencover.xml
+
   win:
     runs-on: windows-latest
     permissions:
       checks: write
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [net481, net9.0, net10.0]
+        include:
+          - framework: net481
+            coverage-args: ""
+          - framework: net9.0
+            coverage-args: "/p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov"
+          - framework: net10.0
+            coverage-args: "/p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov"
     defaults:
       run:
         working-directory: src
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: |
-            8.0.x
             9.0.x
             10.0.x
       - name: Install dependencies
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
-
       - name: Setup services
         shell: cmd
         run: |
           choco install redis-64 rabbitmq python -y
-          python -m pip install httpbin uvicorn asgiref
-
+          python -m pip install httpbin==0.10.2 uvicorn==0.49.0 asgiref==3.11.1
       - name: Start httpbin and test
-        id: start-httpbin
         shell: pwsh
         run: |
           $pyFile = "asgi_httpbin.py"
@@ -121,57 +120,38 @@ jobs:
 
           $proc = Start-Process -FilePath "python" -ArgumentList @("-m","uvicorn","asgi_httpbin:app","--host","127.0.0.1","--port","8080") -NoNewWindow -PassThru
           echo "HTTPBIN_PID=$($proc.Id)" >> $env:GITHUB_ENV
-          Write-Host "uvicorn httpbin  started, PID: $($proc.Id)"  
+          Write-Host "uvicorn httpbin started, PID: $($proc.Id)"
 
-          dotnet test --no-restore --verbosity normal -f net481 --logger "trx;LogFileName=results4.trx"
-          dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results8.trx"
-          dotnet test --no-restore --verbosity normal -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results9.trx"
-          dotnet test --no-restore --verbosity normal -f net10.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results10.trx"
-
-      - name: Upload test results (4.81)
+          dotnet test --no-restore --verbosity normal -f ${{ matrix.framework }} ${{ matrix.coverage-args }} --logger "trx;LogFileName=results.trx"
+      - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-win48
-          path: src/JfYu.UnitTests/TestResults/results4.trx
+          name: test-results-win-${{ matrix.framework }}
+          path: src/JfYu.UnitTests/TestResults/results.trx
 
-      - name: Upload test results (8.0)
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-win8
-          path: src/JfYu.UnitTests/TestResults/results8.trx
-
-      - name: Upload test results (9.0)
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-win9
-          path: src/JfYu.UnitTests/TestResults/results9.trx
-
-      - name: Upload test results (10.0)
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-win10
-          path: src/JfYu.UnitTests/TestResults/results10.trx
   mac:
     runs-on: macos-latest
     permissions:
       checks: write
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [net9.0, net10.0]
     defaults:
       run:
         working-directory: src
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: |
-            8.0.x
             9.0.x
             10.0.x
       - name: Install dependencies
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
-
       - name: Setup services
         shell: bash
         run: |
@@ -192,8 +172,8 @@ jobs:
 
           python3 -m venv venv
           source venv/bin/activate
-          python3 -m pip install --upgrade pip
-          python3 -m pip install httpbin uvicorn asgiref
+          python3 -m pip install pip==26.1.2
+          python3 -m pip install httpbin==0.10.2 uvicorn==0.49.0 asgiref==3.11.1
 
           cat << 'EOF' > asgi_httpbin.py
           from httpbin import app as wsgi_app
@@ -206,27 +186,13 @@ jobs:
           HTTPBIN_PID=$!
           echo "HTTPBIN_PID=$HTTPBIN_PID" >> $GITHUB_ENV
           echo "uvicorn httpbin started, PID=$HTTPBIN_PID"
-
-          dotnet test --no-restore --verbosity normal -f net8.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results8.trx"
-          dotnet test --no-restore --verbosity normal -f net9.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results9.trx"
-          dotnet test --no-restore --verbosity normal -f net10.0 /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results10.trx"
-      - name: Upload test results (8.0)
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal -f ${{ matrix.framework }} /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov --logger "trx;LogFileName=results.trx"
+      - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-mac8
-          path: src/JfYu.UnitTests/TestResults/results8.trx
-
-      - name: Upload test results (9.0)
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-mac9
-          path: src/JfYu.UnitTests/TestResults/results9.trx
-
-      - name: Upload test results (10.0)
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-mac10
-          path: src/JfYu.UnitTests/TestResults/results10.trx
+          name: test-results-mac-${{ matrix.framework }}
+          path: src/JfYu.UnitTests/TestResults/results.trx
 
   sonarcloud:
     needs: [win, ubuntu, mac]
@@ -235,21 +201,21 @@ jobs:
       run:
         working-directory: src
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Download test results (win48)
+      - name: Download test results (win-net481)
         uses: dawidd6/action-download-artifact@v9
         with:
-          name: test-results-win48
+          name: test-results-win-net481
           path: TestResults
           run_id: ${{ github.run_id }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download test results (win10)
+      - name: Download test results (win-net10.0)
         uses: dawidd6/action-download-artifact@v9
         with:
-          name: test-results-win10
+          name: test-results-win-net10.0
           path: TestResults
           run_id: ${{ github.run_id }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -263,7 +229,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "10.0.x"
       - name: Install SonarScanner for .NET

@@ -2,7 +2,7 @@
 
 EF Core read-write separation with multi-database support and simple CRUD services.
 
-Supported databases: SqlServer, MySql, MariaDB, Sqlite, InMemory
+Supported databases: SqlServer, MySql, MariaDB, Sqlite, PostgreSQL, InMemory
 
 ## Install
 
@@ -16,7 +16,7 @@ Unit tests bind configuration from section `JfYuConnectionStrings`:
 
 ```json
 "JfYuConnectionStrings": {
- "DatabaseType": "SqlServer", // SqlServer | MySql | MariaDB | Sqlite | Memory
+ "DatabaseType": "SqlServer", // SqlServer | MySql | MariaDB | Sqlite | PostgreSQL | Memory
  "ConnectionString": "Data Source=127.0.0.1,9004;database=dbtest;User Id=sa;Password=123456;Encrypt=True;TrustServerCertificate=True;",
  "JfYuReadOnly": "JfYuReadOnly", // IOC key prefix for readonly contexts
  "ReadOnlyDatabases": [

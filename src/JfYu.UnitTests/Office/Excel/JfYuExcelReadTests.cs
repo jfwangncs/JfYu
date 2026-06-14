@@ -192,7 +192,7 @@ namespace JfYu.UnitTests.Office.Excel
         }
         [Theory]
         [InlineData(CellType.Error)]
-        [InlineData(CellType.Unknown)]
+        [InlineData(CellType._None)]
         public void Read_WithWrongCellType_ThrowException(CellType type)
         {
             // Arrange 
