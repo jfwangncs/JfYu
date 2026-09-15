@@ -45,7 +45,7 @@
 		<PackageVersion Include="EntityFramework" Version="6.5.2" />
 		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
 		<PackageVersion Include="NPOI" Version="2.8.0" />
-		<PackageVersion Include="SkiaSharp" Version="4.152.0" />
+		<PackageVersion Include="SkiaSharp" Version="3.119.4" />
 		<PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.12" />
 		<PackageVersion Include="MessagePack" Version="3.1.8" />
 		<PackageVersion Include="StackExchange.Redis" Version="3.2.1" />
