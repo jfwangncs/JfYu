@@ -35,6 +35,7 @@ namespace JfYu.UnitTests.Request
             var serviceProvider = services.BuildServiceProvider();
             var options = serviceProvider.GetRequiredService<IOptions<HttpTestOption>>();
             _url = options.Value;
+            RequestThrottle.Wait();
         }
 
         [Fact]
