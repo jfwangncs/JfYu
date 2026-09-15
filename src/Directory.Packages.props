@@ -4,58 +4,57 @@
 	</PropertyGroup>	
 	<!--net9.0-->
 	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.17"  />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.17"  />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.17"  />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.17"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.20"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.20"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.20"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.20"  />
 		<PackageVersion Include="Microting.EntityFrameworkCore.MySql" Version="9.0.8"  />
-		<PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4"  />
+		<PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4"  /> 
 	</ItemGroup>
 
 	<!--net10.0-->
 	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.9"  />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.9"  />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9"  />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9"  />
-		<PackageVersion Include="Microting.EntityFrameworkCore.MySql" Version="10.0.8"  />
-		<PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.12"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12"  />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12"  />
+		<PackageVersion Include="Microting.EntityFrameworkCore.MySql" Version="10.0.11"  />
+		<PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3"  /> 
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
-		<PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.9" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.12" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.12" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
+		<PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.12" />
+		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
+		<PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
 		<PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageVersion Include="RabbitMQ.Client" Version="7.2.1" />
+		<PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
 		<PackageVersion Include="Brotli.NET" Version="2.1.1" />
 		<PackageVersion Include="SharpZipLib" Version="1.4.2" />
 		<PackageVersion Include="Bogus" Version="35.6.5" />
 		<PackageVersion Include="xunit" Version="2.9.3" />
-		<PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+		<PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
 		<PackageVersion Include="Moq" Version="4.20.72" />
 		<PackageVersion Include="coverlet.collector" Version="10.0.1" />
 		<PackageVersion Include="coverlet.msbuild" Version="10.0.1" />
 		<PackageVersion Include="EntityFramework" Version="6.5.2" />
-		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.6.0" />
+		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
 		<PackageVersion Include="NPOI" Version="2.8.0" />
-		<PackageVersion Include="System.Security.Cryptography.Xml" Version="8.0.4" />
-		<PackageVersion Include="SkiaSharp" Version="3.119.2" />
-		<PackageVersion Include="MessagePack" Version="3.1.7" />
-		<PackageVersion Include="StackExchange.Redis" Version="2.13.17" />
+		<PackageVersion Include="SkiaSharp" Version="4.152.0" />
+		<PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.12" />
+		<PackageVersion Include="MessagePack" Version="3.1.8" />
+		<PackageVersion Include="StackExchange.Redis" Version="3.2.1" />
 		<PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageVersion Include="System.Data.SQLite.Linq" Version="1.0.119" />
-		<PackageVersion Include="System.Data.SQLite" Version="2.0.3" />
+		<PackageVersion Include="System.Data.SQLite" Version="2.0.4" />
 		<PackageVersion Include="System.Data.SQLite.EF6" Version="2.0.3" />
-		<!-- System.Data.SQLite 2.0.3 P/Invokes the e_sqlite3 native directly; this package supplies it for the net481 build. -->
-		<PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.6" />
+		<PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
+		<PackageVersion Include="Microsoft.Build.Tasks.Git" Version="10.0.401"/>
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="xunit" PrivateAssets="all" />
@@ -66,8 +65,6 @@
 		<PackageReference Update="EntityFramework" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.Extensions.Configuration.FileExtensions" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.Extensions.Configuration.Json" PrivateAssets="all" />
-		<PackageReference Update="Microsoft.Extensions.Logging" PrivateAssets="all" />
-		<PackageReference Update="Microsoft.Extensions.Logging.Console" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.NET.Test.Sdk" PrivateAssets="all" />
 		<PackageReference Update="BenchmarkDotNet" PrivateAssets="all" />
 		<PackageReference Update="System.Data.SQLite.Linq" PrivateAssets="all" />
