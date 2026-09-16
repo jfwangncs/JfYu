@@ -338,7 +338,9 @@ namespace JfYu.UnitTests.Request
             request3.Method = HttpMethod.Get;
 
             var response1 = await request1.SendAsync();
+            await Task.Delay(RequestThrottle.DelayMilliseconds);
             var response2 = await request2.SendAsync();
+            await Task.Delay(RequestThrottle.DelayMilliseconds);
             var response3 = await request3.SendAsync();
 
             // Assert
@@ -886,6 +888,7 @@ namespace JfYu.UnitTests.Request
                 var request = scope.ServiceProvider.GetRequiredService<IJfYuRequest>();
                 request.Url = $"{_url.Url}/get?scope={i}";
                 request.Method = HttpMethod.Get;
+                await Task.Delay(RequestThrottle.DelayMilliseconds);
                 var response = await request.SendAsync();
 
                 Assert.Equal(HttpStatusCode.OK, request.StatusCode);
