@@ -1,20 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>net9.0;net10.0</TargetFrameworks>	
-		<Version>10.0.2</Version>
-		<Description>EF Core read-write separation with multi-database support (SqlServer, MySql, MariaDB,Sqlite, PostgreSQL, InMemory)</Description>
+		<Version>10.1.0</Version>
+		<Description>EF Core read-write separation core with pluggable database provider support.</Description>
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
-		<PackageReference Include="Microting.EntityFrameworkCore.MySql" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
 	</ItemGroup>
 </Project>

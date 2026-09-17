@@ -239,10 +239,10 @@ jobs:
           dotnet sonarscanner begin \
             /k:"jfwangncs_JfYu" \
             /o:"jfwang" \
-            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.cs.vstest.reportsPaths=../TestResults/*.trx \
             /d:sonar.cs.opencover.reportsPaths=../TestResults/coverage.net10.0.opencover.xml
       - name: Build
         run: dotnet build --no-incremental
       - name: SonarCloud End
-        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"

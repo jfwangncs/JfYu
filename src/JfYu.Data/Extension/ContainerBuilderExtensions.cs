@@ -56,9 +56,9 @@ namespace JfYu.Data.Extension
             if (options.ReadOnlyDatabases.Any(db => string.IsNullOrWhiteSpace(db.ConnectionString)))
                 throw new ArgumentNullException(nameof(setupAction), "ReadOnlyDatabases is null or dont have one valid connectionString.");
 
-            services.AddDbContext<T>(q =>
+            services.AddDbContext<T>((sp, q) =>
             {
-                GetDbContextOptions<T>(options, extraConfigure, q);
+                GetDbContextOptions<T>(sp, options, extraConfigure, q);
             });
 
             for (int i = 0; i < options.ReadOnlyDatabases.Count; i++)
@@ -66,7 +66,7 @@ namespace JfYu.Data.Extension
                 var dbConfig = options.ReadOnlyDatabases[i];
                 services.AddKeyedScoped($"{options.JfYuReadOnly}{i}", (provider, t) =>
                 {
-                    var dbContextOptions = GetDbContextOptions<T>(dbConfig, extraConfigure);
+                    var dbContextOptions = GetDbContextOptions<T>(provider, dbConfig, extraConfigure);
                     return (T)Activator.CreateInstance(typeof(T), dbContextOptions)!;
                 });
             }
@@ -85,48 +85,17 @@ namespace JfYu.Data.Extension
             return services;
         }
 
-        private static DbContextOptions GetDbContextOptions<T>(DatabaseConfig config, Action<DbContextOptionsBuilder>? extraConfigure = null, DbContextOptionsBuilder? opt = null) where T : DbContext
+        private static DbContextOptions GetDbContextOptions<T>(IServiceProvider provider, DatabaseConfig config, Action<DbContextOptionsBuilder>? extraConfigure = null, DbContextOptionsBuilder? opt = null) where T : DbContext
         {
             var optionsBuilder = opt ?? new DbContextOptionsBuilder<T>();
 
-            ServerVersion? serverVersion = null;
+            var dbProvider = provider.GetServices<IJfYuDbProvider>()
+                .FirstOrDefault(p => p.DatabaseType == config.DatabaseType)
+                ?? throw new InvalidOperationException(
+                    $"No IJfYuDbProvider is registered for database type '{config.DatabaseType}'. " +
+                    "Install the matching JfYu.Data provider package and register it before calling AddJfYuDbContext.");
 
-            if (config.DatabaseType == DatabaseType.MySql || config.DatabaseType == DatabaseType.MariaDB)
-            {
-                if (!string.IsNullOrEmpty(config.Version))
-                {
-                    var version = new Version(config.Version);
-                    serverVersion = config.DatabaseType == DatabaseType.MySql
-                        ? new MySqlServerVersion(version)
-                        : new MariaDbServerVersion(version);
-                }
-                else
-                    serverVersion = ServerVersion.AutoDetect(config.ConnectionString);
-            }
-
-            switch (config.DatabaseType)
-            {
-                case DatabaseType.MySql:
-                case DatabaseType.MariaDB:
-                    optionsBuilder.UseMySql(config.ConnectionString, serverVersion);
-                    break;
-
-                case DatabaseType.Sqlite:
-                    optionsBuilder.UseSqlite(config.ConnectionString);
-                    break;
-
-                case DatabaseType.PostgreSQL:
-                    optionsBuilder.UseNpgsql(config.ConnectionString);
-                    break;
-
-                case DatabaseType.Memory:
-                    optionsBuilder.UseInMemoryDatabase(config.ConnectionString);
-                    break;
-
-                default:
-                    optionsBuilder.UseSqlServer(config.ConnectionString).EnableDetailedErrors().EnableSensitiveDataLogging();
-                    break;
-            }
+            dbProvider.Configure(config, optionsBuilder);
             extraConfigure?.Invoke(optionsBuilder);
             return optionsBuilder.Options;
         }

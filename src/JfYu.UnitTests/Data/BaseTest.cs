@@ -1,6 +1,9 @@
 #if NET8_0_OR_GREATER
 using JfYu.Data.Constant;
 using JfYu.Data.Extension;
+using JfYu.Data.MySql;
+using JfYu.Data.PostgreSQL;
+using JfYu.Data.SqlServer;
 using JfYu.Data.Service;
 using JfYu.UnitTests.Models.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -52,9 +55,27 @@ namespace JfYu.UnitTests.Data
         }
 
         [Fact]
+        public void AddService_NoProviderRegistered_ThrowsInvalidOperationException()
+        {
+            var services = new ServiceCollection();
+            services.AddJfYuDbContext<DataContext>(q =>
+            {
+                q.ConnectionString = "server=127.0.0.1;Database=Test;uid=Test;pwd=test;";
+            });
+            var serviceProvider = services.BuildServiceProvider();
+
+            var exception = Assert.Throws<InvalidOperationException>(() => serviceProvider.GetService<DataContext>());
+
+            Assert.Contains(
+                "No IJfYuDbProvider is registered for database type 'SqlServer'. Install the matching JfYu.Data provider package and register it before calling AddJfYuDbContext.",
+                exception.Message);
+        }
+
+        [Fact]
         public void AddService_WithExtraConfigure_Correctly()
         {
             var services = new ServiceCollection();
+            services.AddJfYuSqlServer();
             services.AddJfYuDbContext<DataContext>(q =>
             {
                 q.ConnectionString = "server=127.0.0.1;Database=Test;uid=Test;pwd=test;";
@@ -72,6 +93,7 @@ namespace JfYu.UnitTests.Data
         public void AddService_MainDatabase_Correctly()
         {
             var services = new ServiceCollection();
+            services.AddJfYuSqlServer();
             services.AddJfYuDbContext<DataContext>(q =>
             {
                 q.ConnectionString = "server=127.0.0.1;Database=Test;uid=Test;pwd=test;";
@@ -89,6 +111,7 @@ namespace JfYu.UnitTests.Data
         public void AddService_MainDatabase1_Correctly()
         {
             var services = new ServiceCollection();
+            services.AddJfYuSqlServer();
             services.AddJfYuDbContext<DataContext>(q =>
             {
                 q.ConnectionString = "server=127.0.0.1;Database=Test;uid=Test;pwd=test;";
@@ -101,8 +124,8 @@ namespace JfYu.UnitTests.Data
 
             Assert.NotNull(dbContext);
             Assert.NotNull(useService);
-            var service = (Service<User, DataContext>)useService; 
-            var contextField =typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_context"));
+            var service = (Service<User, DataContext>)useService;
+            var contextField = typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_context"));
             var readonlyContextField = typeof(Service<User, DataContext>).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(q => q.Name.Contains("_readonlyContext"));
 
             var context = contextField!.GetValue(service) as DataContext;
@@ -116,6 +139,7 @@ namespace JfYu.UnitTests.Data
         public void AddService_MainDatabaseWithReadOnly1_Correctly()
         {
             var services = new ServiceCollection();
+            services.AddJfYuSqlServer();
             services.AddJfYuDbContext<DataContext>(q =>
             {
                 q.ConnectionString = "server=127.0.0.1;Database=Test;uid=Test;pwd=test;";
@@ -146,6 +170,7 @@ namespace JfYu.UnitTests.Data
         public void AddService_MainDatabaseWithReadOnly2_Correctly()
         {
             var services = new ServiceCollection();
+            services.AddJfYuSqlServer();
             services.AddJfYuDbContext<DataContext>(q =>
             {
                 q.ConnectionString = "server=127.0.0.1;Database=Test;uid=Test;pwd=test;";
@@ -180,13 +205,14 @@ namespace JfYu.UnitTests.Data
         public void AddService_MainDatabaseWithReadOnly3_Correctly()
         {
             var services = new ServiceCollection();
+            services.AddJfYuSqlServer();
             services.AddJfYuDbContext<DataContext>(q =>
             {
                 q.ConnectionString = "server=127.0.0.1;Database=Test;uid=Test;pwd=test;";
                 q.ReadOnlyDatabases = [
                     new () { DatabaseType = DatabaseType.SqlServer, ConnectionString = "server=127.0.0.2;Database=Test;uid=Test;pwd=test;" },
                     new () { DatabaseType = DatabaseType.SqlServer, ConnectionString = "server=127.0.0.3;Database=Test;uid=Test;pwd=test;" },
-                    new () { DatabaseType = DatabaseType.Sqlite, ConnectionString = "server=127.0.0.4;Database=Test;uid=Test;pwd=test;" }];
+                    new () { DatabaseType = DatabaseType.SqlServer, ConnectionString = "server=127.0.0.4;Database=Test;uid=Test;pwd=test;" }];
             });
             var serviceProvider = services.BuildServiceProvider();
 
@@ -219,6 +245,7 @@ namespace JfYu.UnitTests.Data
         {
             // Act
             var services = new ServiceCollection();
+            services.AddJfYuMySql();
             services.AddJfYuDbContext<DataContext>(q =>
             {
                 q.DatabaseType = DatabaseType.MySql;
@@ -237,6 +264,7 @@ namespace JfYu.UnitTests.Data
         {
             // Act
             var services = new ServiceCollection();
+            services.AddJfYuMySql();
             services.AddJfYuDbContext<DataContext>(q =>
             {
                 q.DatabaseType = DatabaseType.MariaDB;
@@ -255,6 +283,7 @@ namespace JfYu.UnitTests.Data
         {
             // Act
             var services = new ServiceCollection();
+            services.AddJfYuPostgreSql();
             services.AddJfYuDbContext<DataContext>(q =>
             {
                 q.DatabaseType = DatabaseType.PostgreSQL;
@@ -273,6 +302,7 @@ namespace JfYu.UnitTests.Data
         {
             // Arrange & Act
             var services = new ServiceCollection();
+            services.AddJfYuMySql();
 
             // This will trigger ServerVersion.AutoDetect(config.ConnectionString)
             // because Version is not provided (null/empty)
@@ -304,6 +334,7 @@ namespace JfYu.UnitTests.Data
         {
             // Arrange & Act
             var services = new ServiceCollection();
+            services.AddJfYuMySql();
 
             // This will trigger ServerVersion.AutoDetect(config.ConnectionString)
             // for MariaDB because Version is not provided (null/empty)

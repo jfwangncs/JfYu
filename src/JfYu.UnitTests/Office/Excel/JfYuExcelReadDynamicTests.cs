@@ -1,6 +1,6 @@
 using JfYu.Office;
-using JfYu.Office.Excel; 
-using Microsoft.Extensions.DependencyInjection; 
+using JfYu.Office.Excel;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace JfYu.UnitTests.Office.Excel
 {
@@ -31,24 +31,24 @@ namespace JfYu.UnitTests.Office.Excel
 
             var wb = _jfYuExcel.CreateExcel();
             var sheet = wb.CreateSheet("Sheet1");
-            
+
             // Create header (English)
             var headerRow = sheet.CreateRow(0);
             headerRow.CreateCell(0).SetCellValue("Name");
             headerRow.CreateCell(1).SetCellValue("Age");
             headerRow.CreateCell(2).SetCellValue("City");
-            
+
             // Create data rows (English values)
             var dataRow1 = sheet.CreateRow(1);
             dataRow1.CreateCell(0).SetCellValue("John");
             dataRow1.CreateCell(1).SetCellValue(25);
             dataRow1.CreateCell(2).SetCellValue("Beijing");
-            
+
             var dataRow2 = sheet.CreateRow(2);
             dataRow2.CreateCell(0).SetCellValue("Mary");
             dataRow2.CreateCell(1).SetCellValue(30);
             dataRow2.CreateCell(2).SetCellValue("Shanghai");
-            
+
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
                 wb.Write(savefs);
             wb.Close();
@@ -59,7 +59,7 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
-            
+
             var record1 = result[0] as IDictionary<string, object>;
             Assert.NotNull(record1);
             Assert.True(record1.ContainsKey("Name"));
@@ -78,21 +78,21 @@ namespace JfYu.UnitTests.Office.Excel
 
             var wb = _jfYuExcel.CreateExcel();
             var sheet = wb.CreateSheet("Sheet1");
-            
+
             // Headers in English
             var headerRow = sheet.CreateRow(0);
             headerRow.CreateCell(0).SetCellValue("ProductName");
             headerRow.CreateCell(1).SetCellValue("Price");
             headerRow.CreateCell(2).SetCellValue("InStock");
             headerRow.CreateCell(3).SetCellValue("ReleaseDate");
-            
+
             // Data row
             var dataRow = sheet.CreateRow(1);
             dataRow.CreateCell(0).SetCellValue("Laptop");
             dataRow.CreateCell(1).SetCellValue(5999.99);
             dataRow.CreateCell(2).SetCellValue(true);
             dataRow.CreateCell(3).SetCellValue(DateTime.Now);
-            
+
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
                 wb.Write(savefs);
             wb.Close();
@@ -103,7 +103,7 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.NotNull(result);
             Assert.Single(result);
-            
+
             var record = result[0] as IDictionary<string, object>;
             Assert.NotNull(record);
             Assert.True(record.ContainsKey("ProductName"));
@@ -124,13 +124,13 @@ namespace JfYu.UnitTests.Office.Excel
 
             var wb = _jfYuExcel.CreateExcel();
             var sheet = wb.CreateSheet("Sheet1");
-            
+
             // Header (English)
             var headerRow = sheet.CreateRow(0);
             headerRow.CreateCell(0).SetCellValue("ID");
             headerRow.CreateCell(1).SetCellValue("Title");
             headerRow.CreateCell(2).SetCellValue("Content");
-            
+
             // Data rows
             for (int i = 1; i <= 5; i++)
             {
@@ -139,7 +139,7 @@ namespace JfYu.UnitTests.Office.Excel
                 dataRow.CreateCell(1).SetCellValue($"Title{i}");
                 dataRow.CreateCell(2).SetCellValue($"Content{i}");
             }
-            
+
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
                 wb.Write(savefs);
             wb.Close();
@@ -151,7 +151,7 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.NotNull(result);
             Assert.Equal(5, result.Count);
-            
+
             for (int i = 0; i < 5; i++)
             {
                 var record = result[i] as IDictionary<string, object>;
@@ -245,7 +245,7 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
-            
+
             var record1 = result[0] as IDictionary<string, object>;
             Assert.NotNull(record1);
             Assert.True(record1.ContainsKey("Name"));
@@ -285,7 +285,7 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.NotNull(result);
             Assert.Single(result);
-            
+
             var record = result[0] as IDictionary<string, object>;
             Assert.NotNull(record);
             Assert.True(record.ContainsKey("FirstSheet"));
@@ -327,7 +327,7 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.NotNull(result);
             Assert.Single(result);
-            
+
             var record = result[0] as IDictionary<string, object>;
             Assert.NotNull(record);
             Assert.True(record.ContainsKey("Warehouse"));
@@ -383,6 +383,102 @@ namespace JfYu.UnitTests.Office.Excel
 
             File.Delete(filePath);
         }
+
+        [Fact]
+        public void ReadDynamic_RegexEdgeCaseHeaders_ReturnCorrectly()
+        {
+            // Arrange
+            var filePath = $"{nameof(ReadDynamic_RegexEdgeCaseHeaders_ReturnCorrectly)}.xlsx";
+            if (File.Exists(filePath)) File.Delete(filePath);
+
+            var wb = _jfYuExcel.CreateExcel();
+            var sheet = wb.CreateSheet("Sheet1");
+
+            // Headers exercising the generated regex edge cases:
+            // - underscore runs at the start / end / middle, and of various lengths (_{2,})
+            // - surrogate pairs (emoji) and non-ASCII word characters ([^\w\u4e00-\u9fa5])
+            var headerRow = sheet.CreateRow(0);
+            headerRow.CreateCell(0).SetCellValue("a__b");   // exactly two underscores -> a_b
+            headerRow.CreateCell(1).SetCellValue("x___y");  // three underscores (loop) -> x_y
+            headerRow.CreateCell(2).SetCellValue("___");    // only underscores -> _
+            headerRow.CreateCell(3).SetCellValue("a__");    // trailing underscores -> a
+            headerRow.CreateCell(4).SetCellValue("__b");    // leading underscores -> b
+            headerRow.CreateCell(5).SetCellValue("c_d");    // single underscore (no collapse) -> c_d
+            headerRow.CreateCell(6).SetCellValue("e_f__g"); // single + double underscores -> e_f_g
+            headerRow.CreateCell(7).SetCellValue("😀测试");   // surrogate pair + Chinese -> 测试
+            headerRow.CreateCell(8).SetCellValue("café");   // non-ASCII word char -> café
+            headerRow.CreateCell(9).SetCellValue("naïve");  // non-ASCII word char -> naïve
+
+            var dataRow = sheet.CreateRow(1);
+            for (int i = 0; i < 10; i++)
+                dataRow.CreateCell(i).SetCellValue($"v{i}");
+
+            using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
+            wb.Close();
+
+            // Act
+            var result = _jfYuExcel.Read<dynamic>(filePath);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result);
+
+            var record = result[0] as IDictionary<string, object>;
+            Assert.NotNull(record);
+            Assert.Equal("v0", record["a_b"]);
+            Assert.Equal("v1", record["x_y"]);
+            Assert.Equal("v2", record["_"]);
+            Assert.Equal("v3", record["a"]);
+            Assert.Equal("v4", record["b"]);
+            Assert.Equal("v5", record["c_d"]);
+            Assert.Equal("v6", record["e_f_g"]);
+            Assert.Equal("v7", record["测试"]);
+            Assert.Equal("v8", record["café"]);
+            Assert.Equal("v9", record["naïve"]);
+
+            File.Delete(filePath);
+        }
+
+        [Fact]
+        public void ReadDynamic_RegexUnicodeAndBoundaryHeaders_ReturnCorrectly()
+        {
+            // Arrange
+            var filePath = $"{nameof(ReadDynamic_RegexUnicodeAndBoundaryHeaders_ReturnCorrectly)}.xlsx";
+            if (File.Exists(filePath)) File.Delete(filePath);
+
+            var wb = _jfYuExcel.CreateExcel();
+            var sheet = wb.CreateSheet("Sheet1");
+
+            // More generated-regex edge cases:
+            // - a single trailing underscore (loop fails at end of string)
+            // - connector punctuation (Pc), part of \w
+            var headerRow = sheet.CreateRow(0);
+            headerRow.CreateCell(0).SetCellValue("p!");         // single trailing underscore -> p
+            headerRow.CreateCell(1).SetCellValue("s!!");        // two trailing underscores collapsed -> s
+            headerRow.CreateCell(2).SetCellValue("a\u203Fb");   // connector punctuation (word char) -> a‿b
+
+            var dataRow = sheet.CreateRow(1);
+            for (int i = 0; i < 3; i++)
+                dataRow.CreateCell(i).SetCellValue($"v{i}");
+
+            using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
+            wb.Close();
+
+            // Act
+            var result = _jfYuExcel.Read<dynamic>(filePath);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result);
+
+            var record = result[0] as IDictionary<string, object>;
+            Assert.NotNull(record);
+            Assert.Equal("v0", record["p"]);
+            Assert.Equal("v1", record["s"]);
+            Assert.Equal("v2", record["a\u203Fb"]);
+
+            File.Delete(filePath);
+        }
         #endregion
         #region Special characters and Chinese headers tests
 
@@ -395,18 +491,18 @@ namespace JfYu.UnitTests.Office.Excel
 
             var wb = _jfYuExcel.CreateExcel();
             var sheet = wb.CreateSheet("Sheet1");
-            
+
             // Chinese headers
             var headerRow = sheet.CreateRow(0);
             headerRow.CreateCell(0).SetCellValue("员工姓名");
             headerRow.CreateCell(1).SetCellValue("部门名称");
             headerRow.CreateCell(2).SetCellValue("月度工资");
-            
+
             var dataRow = sheet.CreateRow(1);
             dataRow.CreateCell(0).SetCellValue("王小明");
             dataRow.CreateCell(1).SetCellValue("研发部");
             dataRow.CreateCell(2).SetCellValue(15000.50);
-            
+
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
             wb.Close();
 
@@ -416,7 +512,7 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.NotNull(result);
             Assert.Single(result);
-            
+
             var record = result[0] as IDictionary<string, object>;
             Assert.NotNull(record);
             Assert.True(record.ContainsKey("员工姓名"));
@@ -435,18 +531,18 @@ namespace JfYu.UnitTests.Office.Excel
 
             var wb = _jfYuExcel.CreateExcel();
             var sheet = wb.CreateSheet("Sheet1");
-            
+
             // Headers with special characters
             var headerRow = sheet.CreateRow(0);
             headerRow.CreateCell(0).SetCellValue("Name (姓名)");
             headerRow.CreateCell(1).SetCellValue("Age-年龄");
             headerRow.CreateCell(2).SetCellValue("Email@Address");
-            
+
             var dataRow = sheet.CreateRow(1);
             dataRow.CreateCell(0).SetCellValue("TestUser");
             dataRow.CreateCell(1).SetCellValue(30);
             dataRow.CreateCell(2).SetCellValue("test@example.com");
-            
+
             using (var savefs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) wb.Write(savefs);
             wb.Close();
 
@@ -498,10 +594,10 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.NotNull(result);
             Assert.Equal(1000, result.Count);
-            
+
             var firstRecord = result[0] as IDictionary<string, object>;
             Assert.NotNull(firstRecord);
-            
+
             var lastRecord = result[999] as IDictionary<string, object>;
             Assert.NotNull(lastRecord);
 
@@ -701,7 +797,7 @@ namespace JfYu.UnitTests.Office.Excel
             // Assert
             Assert.NotNull(result);
             Assert.Single(result);
-            
+
             var record = result[0] as IDictionary<string, object>;
             Assert.NotNull(record);
             Assert.Equal(50, record.Count);

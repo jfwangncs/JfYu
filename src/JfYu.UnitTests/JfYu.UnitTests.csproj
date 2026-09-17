@@ -8,17 +8,25 @@
 		<NoWarn>$(NoWarn);CA1873</NoWarn>
 	</PropertyGroup>
 
+	<!-- CVE-2025-6965 (GHSA-2m69-gcr7-jv3q): SQLitePCLRaw.lib.e_sqlite3 2.1.6 is required for the net481 build (3.x does not support AnyCPU on .NET Framework). Test-only, not shipped. -->
+	<ItemGroup>
+		<NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Bogus" />
 		<PackageReference Include="coverlet.collector" />
 		<PackageReference Include="coverlet.msbuild" />
 		<PackageReference Include="EntityFramework" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Condition="'$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'" />
+		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Condition="'$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" /> 
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" />
 		<PackageReference Include="Moq" />
-		<PackageReference Include="SharpZipLib" />
 		<PackageReference Include="xunit" />
 		<PackageReference Include="xunit.runner.visualstudio" />	
 	</ItemGroup>
@@ -32,6 +40,9 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\JfYu.Data\JfYu.Data.csproj" Condition="'$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'" />
+		<ProjectReference Include="..\JfYu.Data.SqlServer\JfYu.Data.SqlServer.csproj" Condition="'$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'" />
+		<ProjectReference Include="..\JfYu.Data.MySql\JfYu.Data.MySql.csproj" Condition="'$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'" />
+		<ProjectReference Include="..\JfYu.Data.PostgreSQL\JfYu.Data.PostgreSQL.csproj" Condition="'$(TargetFramework)' == 'net9.0' Or '$(TargetFramework)' == 'net10.0'" />
 		<ProjectReference Include="..\JfYu.Office\JfYu.Office.csproj" />
 		<ProjectReference Include="..\JfYu.RabbitMQ\JfYu.RabbitMQ.csproj" />
 		<ProjectReference Include="..\JfYu.Redis\JfYu.Redis.csproj" />

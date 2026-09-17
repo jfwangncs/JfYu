@@ -6,7 +6,7 @@
     public class DatabaseConfig
     {
         /// <summary>
-        /// SqlServer/MySql/MariaDB/Sqlite/PostgreSQL/Memory default:SqlServer.
+        /// SqlServer/MySql/MariaDB/PostgreSQL default:SqlServer.
         /// </summary>
         public DatabaseType DatabaseType { get; set; } = DatabaseType.SqlServer;
 

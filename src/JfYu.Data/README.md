@@ -2,12 +2,22 @@
 
 EF Core read-write separation with multi-database support and simple CRUD services.
 
-Supported databases: SqlServer, MySql, MariaDB, Sqlite, PostgreSQL, InMemory
+Supported databases: SqlServer, MySql, MariaDB, PostgreSQL
 
 ## Install
 
+Core package
+
 ```powershell
 Install-Package JfYu.Data
+```
+
+Plus one provider package per database you use:
+
+```powershell
+Install-Package JfYu.Data.SqlServer      # Microsoft SQL Server
+Install-Package JfYu.Data.MySql          # MySQL and MariaDB
+Install-Package JfYu.Data.PostgreSQL     # PostgreSQL
 ```
 
 ## Configuration (appsettings.json)
@@ -16,7 +26,7 @@ Unit tests bind configuration from section `JfYuConnectionStrings`:
 
 ```json
 "JfYuConnectionStrings": {
- "DatabaseType": "SqlServer", // SqlServer | MySql | MariaDB | Sqlite | PostgreSQL | Memory
+ "DatabaseType": "SqlServer", // SqlServer | MySql | MariaDB | PostgreSQL
  "ConnectionString": "Data Source=127.0.0.1,9004;database=dbtest;User Id=sa;Password=123456;Encrypt=True;TrustServerCertificate=True;",
  "JfYuReadOnly": "JfYuReadOnly", // IOC key prefix for readonly contexts
  "ReadOnlyDatabases": [
@@ -24,20 +34,13 @@ Unit tests bind configuration from section `JfYuConnectionStrings`:
  "DatabaseType": "MySql",
  "ConnectionString": "server=127.0.0.1;userid=root;pwd=123456;port=9001;database=dbtest;",
  "Version": "8.0.36" // optional for MySql/MariaDB; if missing uses AutoDetect
- },
- {
- "DatabaseType": "Sqlite",
- "ConnectionString": "Data Source=data/m2.db;Password=123456;"
- },
- {
- "DatabaseType": "Memory",
- "ConnectionString": "MemoryDbName"
  }
  ]
 }
 ```
 
 Tips
+
 - When no `ReadOnlyDatabases` configured, read operations fall back to master.
 
 ## Dependency Injection
@@ -45,6 +48,7 @@ Tips
 Minimal
 
 ```csharp
+services.AddJfYuSqlServer();
 services.AddJfYuDbContext<DataContext>(o =>
 {
  o.ConnectionString = "server=127.0.0.1;Database=Test;uid=Test;pwd=test;";
@@ -54,6 +58,7 @@ services.AddJfYuDbContext<DataContext>(o =>
 With readonly replicas and extra EF options
 
 ```csharp
+services.AddJfYuSqlServer();
 services.AddJfYuDbContext<DataContext>(o =>
 {
  o.ConnectionString = "server=127.0.0.1;Database=Test;uid=Test;pwd=test;";
@@ -68,11 +73,11 @@ services.AddJfYuDbContext<DataContext>(o =>
 Bind from configuration
 
 ```csharp
+// Register the provider(s) matching your DatabaseType values first.
+services.AddJfYuSqlServer(); // or AddJfYuMySql / AddJfYuPostgreSql
 services.AddJfYuDbContext<DataContext>(options =>
 {
  configuration.GetSection("JfYuConnectionStrings").Bind(options);
- // In tests we set an in-memory database name here when needed
- // options.ConnectionString = "TestDb_...";
 });
 ```
 
@@ -160,6 +165,7 @@ var converted = await db.Users.ToPagedAsync(src => src.Select(x => new TestSubMo
 ```
 
 Validation behavior from tests
+
 - Null source throws `ArgumentNullException`.
 - Negative `pageIndex` or `pageSize` throws `ArgumentOutOfRangeException`.
 
@@ -207,3 +213,4 @@ If tooling is missing
 
 ```powershell
 Install-Package Microsoft.EntityFrameworkCore.Tools
+```
