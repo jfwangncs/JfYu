@@ -37,6 +37,8 @@ Install-Package JfYu.Redis
     "Password": "YourPassword",
     "DbIndex": 0,
     "Timeout": 5000,
+    "AsyncTimeout": 5000,
+    "SyncTimeout": 5000,
     "Ssl": false,
     "Prefix": "MyApp:",
     "EnableLogs": true

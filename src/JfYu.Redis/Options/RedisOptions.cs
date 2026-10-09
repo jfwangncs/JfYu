@@ -34,12 +34,12 @@ namespace JfYu.Redis.Options
         /// <summary>
         /// Redis server async operation timeout, default:5000 Milliseconds
         /// </summary>
-        public int AsyncTimeoutTimeout { get; set; } = 5000;
+        public int AsyncTimeout { get; set; } = 5000;
 
         /// <summary>
         /// Redis server sync operation timeout, default:5000 Milliseconds
         /// </summary>
-        public int SyncTimeoutTimeout { get; set; } = 5000;
+        public int SyncTimeout { get; set; } = 5000;
 
         /// <summary>
         /// SSL
