@@ -42,6 +42,8 @@ namespace JfYu.Redis.Extensions
             {
                 Password = options.Password,
                 ConnectTimeout = options.Timeout,
+                AsyncTimeout = options.AsyncTimeoutTimeout,
+                SyncTimeout = options.SyncTimeoutTimeout,
                 KeepAlive = 60,
                 AbortOnConnectFail = false,
                 Ssl = options.SSL,

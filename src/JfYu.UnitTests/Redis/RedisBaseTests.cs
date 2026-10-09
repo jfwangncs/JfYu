@@ -162,6 +162,42 @@ namespace JfYu.UnitTests.Redis
             Assert.IsType<RedisService>(redisService);
         }
 
+        [Fact]
+        public void AddRedisService_WhenAsyncAndSyncTimeoutNotConfigured_UsesDefaultValues()
+        {
+            var services = new ServiceCollection();
+            services.AddRedisService(options =>
+            {
+                options.EndPoints.Add(new RedisEndPoint { Host = "localhost" });
+            });
+
+            var serviceProvider = services.BuildServiceProvider();
+            var connectionMultiplexer = serviceProvider.GetService<IConnectionMultiplexer>();
+            var configurationOptions = ConfigurationOptions.Parse(connectionMultiplexer!.Configuration);
+
+            Assert.Equal(5000, configurationOptions.AsyncTimeout);
+            Assert.Equal(5000, configurationOptions.SyncTimeout);
+        }
+
+        [Fact]
+        public void AddRedisService_WhenAsyncAndSyncTimeoutConfigured_UsesConfiguredValues()
+        {
+            var services = new ServiceCollection();
+            services.AddRedisService(options =>
+            {
+                options.EndPoints.Add(new RedisEndPoint { Host = "localhost" });
+                options.AsyncTimeoutTimeout = 3000;
+                options.SyncTimeoutTimeout = 4000;
+            });
+
+            var serviceProvider = services.BuildServiceProvider();
+            var connectionMultiplexer = serviceProvider.GetService<IConnectionMultiplexer>();
+            var configurationOptions = ConfigurationOptions.Parse(connectionMultiplexer!.Configuration);
+
+            Assert.Equal(3000, configurationOptions.AsyncTimeout);
+            Assert.Equal(4000, configurationOptions.SyncTimeout);
+        }
+
         #endregion AddRedisService
 
         #region UsingNewtonsoft
