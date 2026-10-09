@@ -186,8 +186,8 @@ namespace JfYu.UnitTests.Redis
             services.AddRedisService(options =>
             {
                 options.EndPoints.Add(new RedisEndPoint { Host = "localhost" });
-                options.AsyncTimeoutTimeout = 3000;
-                options.SyncTimeoutTimeout = 4000;
+                options.AsyncTimeout = 3000;
+                options.SyncTimeout = 4000;
             });
 
             var serviceProvider = services.BuildServiceProvider();
